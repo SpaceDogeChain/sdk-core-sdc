@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package catalyst
 
@@ -24,34 +24,34 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/beacon"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/beacon"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 var (
 	// testKey is a private key to use for funding a tester account.
 	testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 
-	// testAddr is the Ethereum address of the tester account.
+	// testAddr is the sdcereum address of the tester account.
 	testAddr = crypto.PubkeyToAddress(testKey.PublicKey)
 
 	testBalance = big.NewInt(2e18)
 )
 
 func generatePreMergeChain(n int) (*core.Genesis, []*types.Block) {
-	config := *params.AllEthashProtocolChanges
+	config := *params.AllsdcashProtocolChanges
 	genesis := &core.Genesis{
 		Config:     &config,
 		Alloc:      core.GenesisAlloc{testAddr: {Balance: testBalance}},
@@ -68,7 +68,7 @@ func generatePreMergeChain(n int) (*core.Genesis, []*types.Block) {
 		g.AddTx(tx)
 		testNonce++
 	}
-	_, blocks, _ := core.GenerateChainWithGenesis(genesis, ethash.NewFaker(), n, generate)
+	_, blocks, _ := core.GenerateChainWithGenesis(genesis, sdcash.NewFaker(), n, generate)
 	totalDifficulty := big.NewInt(0)
 	for _, b := range blocks {
 		totalDifficulty.Add(totalDifficulty, b.Difficulty())
@@ -77,18 +77,18 @@ func generatePreMergeChain(n int) (*core.Genesis, []*types.Block) {
 	return genesis, blocks
 }
 
-func TestEth2AssembleBlock(t *testing.T) {
+func Testsdc2AssembleBlock(t *testing.T) {
 	genesis, blocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, blocks)
+	n, sdcservice := startsdcService(t, genesis, blocks)
 	defer n.Close()
 
-	api := NewConsensusAPI(ethservice)
-	signer := types.NewEIP155Signer(ethservice.BlockChain().Config().ChainID)
+	api := NewConsensusAPI(sdcservice)
+	signer := types.NewEIP155Signer(sdcservice.BlockChain().Config().ChainID)
 	tx, err := types.SignTx(types.NewTransaction(uint64(10), blocks[9].Coinbase(), big.NewInt(1000), params.TxGas, big.NewInt(params.InitialBaseFee), nil), signer, testKey)
 	if err != nil {
 		t.Fatalf("error signing transaction, err=%v", err)
 	}
-	ethservice.TxPool().AddLocal(tx)
+	sdcservice.TxPool().AddLocal(tx)
 	blockParams := beacon.PayloadAttributesV1{
 		Timestamp: blocks[9].Time() + 5,
 	}
@@ -110,15 +110,15 @@ func TestEth2AssembleBlock(t *testing.T) {
 	}
 }
 
-func TestEth2AssembleBlockWithAnotherBlocksTxs(t *testing.T) {
+func Testsdc2AssembleBlockWithAnotherBlocksTxs(t *testing.T) {
 	genesis, blocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, blocks[:9])
+	n, sdcservice := startsdcService(t, genesis, blocks[:9])
 	defer n.Close()
 
-	api := NewConsensusAPI(ethservice)
+	api := NewConsensusAPI(sdcservice)
 
 	// Put the 10th block's tx in the pool and produce a new block
-	api.eth.TxPool().AddRemotesSync(blocks[9].Transactions())
+	api.sdc.TxPool().AddRemotesSync(blocks[9].Transactions())
 	blockParams := beacon.PayloadAttributesV1{
 		Timestamp: blocks[8].Time() + 5,
 	}
@@ -140,12 +140,12 @@ func TestEth2AssembleBlockWithAnotherBlocksTxs(t *testing.T) {
 	}
 }
 
-func TestSetHeadBeforeTotalDifficulty(t *testing.T) {
+func TestSsdceadBeforeTotalDifficulty(t *testing.T) {
 	genesis, blocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, blocks)
+	n, sdcservice := startsdcService(t, genesis, blocks)
 	defer n.Close()
 
-	api := NewConsensusAPI(ethservice)
+	api := NewConsensusAPI(sdcservice)
 	fcState := beacon.ForkchoiceStateV1{
 		HeadBlockHash:      blocks[5].Hash(),
 		SafeBlockHash:      common.Hash{},
@@ -158,17 +158,17 @@ func TestSetHeadBeforeTotalDifficulty(t *testing.T) {
 	}
 }
 
-func TestEth2PrepareAndGetPayload(t *testing.T) {
+func Testsdc2PrepareAndGetPayload(t *testing.T) {
 	genesis, blocks := generatePreMergeChain(10)
 	// We need to properly set the terminal total difficulty
 	genesis.Config.TerminalTotalDifficulty.Sub(genesis.Config.TerminalTotalDifficulty, blocks[9].Difficulty())
-	n, ethservice := startEthService(t, genesis, blocks[:9])
+	n, sdcservice := startsdcService(t, genesis, blocks[:9])
 	defer n.Close()
 
-	api := NewConsensusAPI(ethservice)
+	api := NewConsensusAPI(sdcservice)
 
 	// Put the 10th block's tx in the pool and produce a new block
-	ethservice.TxPool().AddLocals(blocks[9].Transactions())
+	sdcservice.TxPool().AddLocals(blocks[9].Transactions())
 	blockParams := beacon.PayloadAttributesV1{
 		Timestamp: blocks[8].Time() + 5,
 	}
@@ -219,11 +219,11 @@ func checkLogEvents(t *testing.T, logsCh <-chan []*types.Log, rmLogsCh <-chan co
 
 func TestInvalidPayloadTimestamp(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 	var (
-		api    = NewConsensusAPI(ethservice)
-		parent = ethservice.BlockChain().CurrentBlock()
+		api    = NewConsensusAPI(sdcservice)
+		parent = sdcservice.BlockChain().CurrentBlock()
 	)
 	tests := []struct {
 		time      uint64
@@ -261,13 +261,13 @@ func TestInvalidPayloadTimestamp(t *testing.T) {
 	}
 }
 
-func TestEth2NewBlock(t *testing.T) {
+func Testsdc2NewBlock(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 
 	var (
-		api    = NewConsensusAPI(ethservice)
+		api    = NewConsensusAPI(sdcservice)
 		parent = preMergeBlocks[len(preMergeBlocks)-1]
 
 		// This EVM code generates a log when the contract is created.
@@ -276,14 +276,14 @@ func TestEth2NewBlock(t *testing.T) {
 	// The event channels.
 	newLogCh := make(chan []*types.Log, 10)
 	rmLogsCh := make(chan core.RemovedLogsEvent, 10)
-	ethservice.BlockChain().SubscribeLogsEvent(newLogCh)
-	ethservice.BlockChain().SubscribeRemovedLogsEvent(rmLogsCh)
+	sdcservice.BlockChain().SubscribeLogsEvent(newLogCh)
+	sdcservice.BlockChain().SubscribeRemovedLogsEvent(rmLogsCh)
 
 	for i := 0; i < 10; i++ {
-		statedb, _ := ethservice.BlockChain().StateAt(parent.Root())
+		statedb, _ := sdcservice.BlockChain().StateAt(parent.Root())
 		nonce := statedb.GetNonce(testAddr)
-		tx, _ := types.SignTx(types.NewContractCreation(nonce, new(big.Int), 1000000, big.NewInt(2*params.InitialBaseFee), logCode), types.LatestSigner(ethservice.BlockChain().Config()), testKey)
-		ethservice.TxPool().AddLocal(tx)
+		tx, _ := types.SignTx(types.NewContractCreation(nonce, new(big.Int), 1000000, big.NewInt(2*params.InitialBaseFee), logCode), types.LatestSigner(sdcservice.BlockChain().Config()), testKey)
+		sdcservice.TxPool().AddLocal(tx)
 
 		execData, err := assembleBlock(api, parent.Hash(), &beacon.PayloadAttributesV1{
 			Timestamp: parent.Time() + 5,
@@ -301,7 +301,7 @@ func TestEth2NewBlock(t *testing.T) {
 			t.Fatalf("Failed to insert block: %v", err)
 		case newResp.Status != "VALID":
 			t.Fatalf("Failed to insert block: %v", newResp.Status)
-		case ethservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64()-1:
+		case sdcservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64()-1:
 			t.Fatalf("Chain head shouldn't be updated")
 		}
 		checkLogEvents(t, newLogCh, rmLogsCh, 0, 0)
@@ -313,7 +313,7 @@ func TestEth2NewBlock(t *testing.T) {
 		if _, err := api.ForkchoiceUpdatedV1(fcState, nil); err != nil {
 			t.Fatalf("Failed to insert block: %v", err)
 		}
-		if have, want := ethservice.BlockChain().CurrentBlock().NumberU64(), block.NumberU64(); have != want {
+		if have, want := sdcservice.BlockChain().CurrentBlock().NumberU64(), block.NumberU64(); have != want {
 			t.Fatalf("Chain head should be updated, have %d want %d", have, want)
 		}
 		checkLogEvents(t, newLogCh, rmLogsCh, 1, 0)
@@ -323,7 +323,7 @@ func TestEth2NewBlock(t *testing.T) {
 
 	// Introduce fork chain
 	var (
-		head = ethservice.BlockChain().CurrentBlock().NumberU64()
+		head = sdcservice.BlockChain().CurrentBlock().NumberU64()
 	)
 	parent = preMergeBlocks[len(preMergeBlocks)-1]
 	for i := 0; i < 10; i++ {
@@ -341,7 +341,7 @@ func TestEth2NewBlock(t *testing.T) {
 		if err != nil || newResp.Status != "VALID" {
 			t.Fatalf("Failed to insert block: %v", err)
 		}
-		if ethservice.BlockChain().CurrentBlock().NumberU64() != head {
+		if sdcservice.BlockChain().CurrentBlock().NumberU64() != head {
 			t.Fatalf("Chain head shouldn't be updated")
 		}
 
@@ -353,27 +353,27 @@ func TestEth2NewBlock(t *testing.T) {
 		if _, err := api.ForkchoiceUpdatedV1(fcState, nil); err != nil {
 			t.Fatalf("Failed to insert block: %v", err)
 		}
-		if ethservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64() {
+		if sdcservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64() {
 			t.Fatalf("Chain head should be updated")
 		}
 		parent, head = block, block.NumberU64()
 	}
 }
 
-func TestEth2DeepReorg(t *testing.T) {
-	// TODO (MariusVanDerWijden) TestEth2DeepReorg is currently broken, because it tries to reorg
+func Testsdc2DeepReorg(t *testing.T) {
+	// TODO (MariusVanDerWijden) Testsdc2DeepReorg is currently broken, because it tries to reorg
 	// before the totalTerminalDifficulty threshold
 	/*
 		genesis, preMergeBlocks := generatePreMergeChain(core.TriesInMemory * 2)
-		n, ethservice := startEthService(t, genesis, preMergeBlocks)
+		n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 		defer n.Close()
 
 		var (
-			api    = NewConsensusAPI(ethservice, nil)
+			api    = NewConsensusAPI(sdcservice, nil)
 			parent = preMergeBlocks[len(preMergeBlocks)-core.TriesInMemory-1]
-			head   = ethservice.BlockChain().CurrentBlock().NumberU64()
+			head   = sdcservice.BlockChain().CurrentBlock().NumberU64()
 		)
-		if ethservice.BlockChain().HasBlockAndState(parent.Hash(), parent.NumberU64()) {
+		if sdcservice.BlockChain().HasBlockAndState(parent.Hash(), parent.NumberU64()) {
 			t.Errorf("Block %d not pruned", parent.NumberU64())
 		}
 		for i := 0; i < 10; i++ {
@@ -384,7 +384,7 @@ func TestEth2DeepReorg(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to create the executable data %v", err)
 			}
-			block, err := ExecutableDataToBlock(ethservice.BlockChain().Config(), parent.Header(), *execData)
+			block, err := ExecutableDataToBlock(sdcservice.BlockChain().Config(), parent.Header(), *execData)
 			if err != nil {
 				t.Fatalf("Failed to convert executable data to block %v", err)
 			}
@@ -392,13 +392,13 @@ func TestEth2DeepReorg(t *testing.T) {
 			if err != nil || newResp.Status != "VALID" {
 				t.Fatalf("Failed to insert block: %v", err)
 			}
-			if ethservice.BlockChain().CurrentBlock().NumberU64() != head {
+			if sdcservice.BlockChain().CurrentBlock().NumberU64() != head {
 				t.Fatalf("Chain head shouldn't be updated")
 			}
-			if err := api.setHead(block.Hash()); err != nil {
+			if err := api.ssdcead(block.Hash()); err != nil {
 				t.Fatalf("Failed to set head: %v", err)
 			}
-			if ethservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64() {
+			if sdcservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64() {
 				t.Fatalf("Chain head should be updated")
 			}
 			parent, head = block, block.NumberU64()
@@ -406,8 +406,8 @@ func TestEth2DeepReorg(t *testing.T) {
 	*/
 }
 
-// startEthService creates a full node instance for testing.
-func startEthService(t *testing.T, genesis *core.Genesis, blocks []*types.Block) (*node.Node, *eth.Ethereum) {
+// startsdcService creates a full node instance for testing.
+func startsdcService(t *testing.T, genesis *core.Genesis, blocks []*types.Block) (*node.Node, *sdc.sdcereum) {
 	t.Helper()
 
 	n, err := node.New(&node.Config{
@@ -420,46 +420,46 @@ func startEthService(t *testing.T, genesis *core.Genesis, blocks []*types.Block)
 		t.Fatal("can't create node:", err)
 	}
 
-	ethcfg := &ethconfig.Config{Genesis: genesis, Ethash: ethash.Config{PowMode: ethash.ModeFake}, SyncMode: downloader.FullSync, TrieTimeout: time.Minute, TrieDirtyCache: 256, TrieCleanCache: 256}
-	ethservice, err := eth.New(n, ethcfg)
+	sdccfg := &sdcconfig.Config{Genesis: genesis, sdcash: sdcash.Config{PowMode: sdcash.ModeFake}, SyncMode: downloader.FullSync, TrieTimeout: time.Minute, TrieDirtyCache: 256, TrieCleanCache: 256}
+	sdcservice, err := sdc.New(n, sdccfg)
 	if err != nil {
-		t.Fatal("can't create eth service:", err)
+		t.Fatal("can't create sdc service:", err)
 	}
 	if err := n.Start(); err != nil {
 		t.Fatal("can't start node:", err)
 	}
-	if _, err := ethservice.BlockChain().InsertChain(blocks); err != nil {
+	if _, err := sdcservice.BlockChain().InsertChain(blocks); err != nil {
 		n.Close()
 		t.Fatal("can't import test blocks:", err)
 	}
 
-	ethservice.SetEtherbase(testAddr)
-	ethservice.SetSynced()
-	return n, ethservice
+	sdcservice.Setsdcerbase(testAddr)
+	sdcservice.SetSynced()
+	return n, sdcservice
 }
 
 func TestFullAPI(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 	var (
-		parent = ethservice.BlockChain().CurrentBlock()
+		parent = sdcservice.BlockChain().CurrentBlock()
 		// This EVM code generates a log when the contract is created.
 		logCode = common.Hex2Bytes("60606040525b7f24ec1d3ff24c2f6ff210738839dbc339cd45a5294d85c79361016243157aae7b60405180905060405180910390a15b600a8060416000396000f360606040526008565b00")
 	)
 
 	callback := func(parent *types.Block) {
-		statedb, _ := ethservice.BlockChain().StateAt(parent.Root())
+		statedb, _ := sdcservice.BlockChain().StateAt(parent.Root())
 		nonce := statedb.GetNonce(testAddr)
-		tx, _ := types.SignTx(types.NewContractCreation(nonce, new(big.Int), 1000000, big.NewInt(2*params.InitialBaseFee), logCode), types.LatestSigner(ethservice.BlockChain().Config()), testKey)
-		ethservice.TxPool().AddLocal(tx)
+		tx, _ := types.SignTx(types.NewContractCreation(nonce, new(big.Int), 1000000, big.NewInt(2*params.InitialBaseFee), logCode), types.LatestSigner(sdcservice.BlockChain().Config()), testKey)
+		sdcservice.TxPool().AddLocal(tx)
 	}
 
-	setupBlocks(t, ethservice, 10, parent, callback)
+	setupBlocks(t, sdcservice, 10, parent, callback)
 }
 
-func setupBlocks(t *testing.T, ethservice *eth.Ethereum, n int, parent *types.Block, callback func(parent *types.Block)) {
-	api := NewConsensusAPI(ethservice)
+func setupBlocks(t *testing.T, sdcservice *sdc.sdcereum, n int, parent *types.Block, callback func(parent *types.Block)) {
+	api := NewConsensusAPI(sdcservice)
 	for i := 0; i < n; i++ {
 		callback(parent)
 
@@ -480,23 +480,23 @@ func setupBlocks(t *testing.T, ethservice *eth.Ethereum, n int, parent *types.Bl
 		if _, err := api.ForkchoiceUpdatedV1(fcState, nil); err != nil {
 			t.Fatalf("Failed to insert block: %v", err)
 		}
-		if ethservice.BlockChain().CurrentBlock().NumberU64() != payload.Number {
+		if sdcservice.BlockChain().CurrentBlock().NumberU64() != payload.Number {
 			t.Fatal("Chain head should be updated")
 		}
-		if ethservice.BlockChain().CurrentFinalizedBlock().NumberU64() != payload.Number-1 {
+		if sdcservice.BlockChain().CurrentFinalizedBlock().NumberU64() != payload.Number-1 {
 			t.Fatal("Finalized block should be updated")
 		}
-		parent = ethservice.BlockChain().CurrentBlock()
+		parent = sdcservice.BlockChain().CurrentBlock()
 	}
 }
 
 func TestExchangeTransitionConfig(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 
 	// invalid ttd
-	api := NewConsensusAPI(ethservice)
+	api := NewConsensusAPI(sdcservice)
 	config := beacon.TransitionConfigurationV1{
 		TerminalTotalDifficulty: (*hexutil.Big)(big.NewInt(0)),
 		TerminalBlockHash:       common.Hash{},
@@ -553,20 +553,20 @@ We expect
 */
 func TestNewPayloadOnInvalidChain(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 
 	var (
-		api    = NewConsensusAPI(ethservice)
-		parent = ethservice.BlockChain().CurrentBlock()
+		api    = NewConsensusAPI(sdcservice)
+		parent = sdcservice.BlockChain().CurrentBlock()
 		// This EVM code generates a log when the contract is created.
 		logCode = common.Hex2Bytes("60606040525b7f24ec1d3ff24c2f6ff210738839dbc339cd45a5294d85c79361016243157aae7b60405180905060405180910390a15b600a8060416000396000f360606040526008565b00")
 	)
 	for i := 0; i < 10; i++ {
-		statedb, _ := ethservice.BlockChain().StateAt(parent.Root())
+		statedb, _ := sdcservice.BlockChain().StateAt(parent.Root())
 		nonce := statedb.GetNonce(testAddr)
-		tx, _ := types.SignTx(types.NewContractCreation(nonce, new(big.Int), 1000000, big.NewInt(2*params.InitialBaseFee), logCode), types.LatestSigner(ethservice.BlockChain().Config()), testKey)
-		ethservice.TxPool().AddLocal(tx)
+		tx, _ := types.SignTx(types.NewContractCreation(nonce, new(big.Int), 1000000, big.NewInt(2*params.InitialBaseFee), logCode), types.LatestSigner(sdcservice.BlockChain().Config()), testKey)
+		sdcservice.TxPool().AddLocal(tx)
 
 		params := beacon.PayloadAttributesV1{
 			Timestamp:             parent.Time() + 1,
@@ -610,15 +610,15 @@ func TestNewPayloadOnInvalidChain(t *testing.T) {
 		if _, err := api.ForkchoiceUpdatedV1(fcState, nil); err != nil {
 			t.Fatalf("Failed to insert block: %v", err)
 		}
-		if ethservice.BlockChain().CurrentBlock().NumberU64() != payload.Number {
+		if sdcservice.BlockChain().CurrentBlock().NumberU64() != payload.Number {
 			t.Fatalf("Chain head should be updated")
 		}
-		parent = ethservice.BlockChain().CurrentBlock()
+		parent = sdcservice.BlockChain().CurrentBlock()
 	}
 }
 
 func assembleBlock(api *ConsensusAPI, parentHash common.Hash, params *beacon.PayloadAttributesV1) (*beacon.ExecutableDataV1, error) {
-	block, err := api.eth.Miner().GetSealingBlockSync(parentHash, params.Timestamp, params.SuggestedFeeRecipient, params.Random, false)
+	block, err := api.sdc.Miner().GetSealingBlockSync(parentHash, params.Timestamp, params.SuggestedFeeRecipient, params.Random, false)
 	if err != nil {
 		return nil, err
 	}
@@ -627,14 +627,14 @@ func assembleBlock(api *ConsensusAPI, parentHash common.Hash, params *beacon.Pay
 
 func TestEmptyBlocks(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 
-	commonAncestor := ethservice.BlockChain().CurrentBlock()
-	api := NewConsensusAPI(ethservice)
+	commonAncestor := sdcservice.BlockChain().CurrentBlock()
+	api := NewConsensusAPI(sdcservice)
 
 	// Setup 10 blocks on the canonical chain
-	setupBlocks(t, ethservice, 10, commonAncestor, func(parent *types.Block) {})
+	setupBlocks(t, sdcservice, 10, commonAncestor, func(parent *types.Block) {})
 
 	// (1) check LatestValidHash by sending a normal payload (P1'')
 	payload := getNewPayload(t, api, commonAncestor)
@@ -742,8 +742,8 @@ func decodeTransactions(enc [][]byte) ([]*types.Transaction, error) {
 func TestTrickRemoteBlockCache(t *testing.T) {
 	// Setup two nodes
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	nodeA, ethserviceA := startEthService(t, genesis, preMergeBlocks)
-	nodeB, ethserviceB := startEthService(t, genesis, preMergeBlocks)
+	nodeA, sdcserviceA := startsdcService(t, genesis, preMergeBlocks)
+	nodeB, sdcserviceB := startsdcService(t, genesis, preMergeBlocks)
 	defer nodeA.Close()
 	defer nodeB.Close()
 	for nodeB.Server().NodeInfo().Ports.Listener == 0 {
@@ -751,14 +751,14 @@ func TestTrickRemoteBlockCache(t *testing.T) {
 	}
 	nodeA.Server().AddPeer(nodeB.Server().Self())
 	nodeB.Server().AddPeer(nodeA.Server().Self())
-	apiA := NewConsensusAPI(ethserviceA)
-	apiB := NewConsensusAPI(ethserviceB)
+	apiA := NewConsensusAPI(sdcserviceA)
+	apiB := NewConsensusAPI(sdcserviceB)
 
-	commonAncestor := ethserviceA.BlockChain().CurrentBlock()
+	commonAncestor := sdcserviceA.BlockChain().CurrentBlock()
 
 	// Setup 10 blocks on the canonical chain
-	setupBlocks(t, ethserviceA, 10, commonAncestor, func(parent *types.Block) {})
-	commonAncestor = ethserviceA.BlockChain().CurrentBlock()
+	setupBlocks(t, sdcserviceA, 10, commonAncestor, func(parent *types.Block) {})
+	commonAncestor = sdcserviceA.BlockChain().CurrentBlock()
 
 	var invalidChain []*beacon.ExecutableDataV1
 	// create a valid payload (P1)
@@ -805,15 +805,15 @@ func TestTrickRemoteBlockCache(t *testing.T) {
 
 func TestInvalidBloom(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
-	ethservice.Merger().ReachTTD()
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
+	sdcservice.Merger().ReachTTD()
 	defer n.Close()
 
-	commonAncestor := ethservice.BlockChain().CurrentBlock()
-	api := NewConsensusAPI(ethservice)
+	commonAncestor := sdcservice.BlockChain().CurrentBlock()
+	api := NewConsensusAPI(sdcservice)
 
 	// Setup 10 blocks on the canonical chain
-	setupBlocks(t, ethservice, 10, commonAncestor, func(parent *types.Block) {})
+	setupBlocks(t, sdcservice, 10, commonAncestor, func(parent *types.Block) {})
 
 	// (1) check LatestValidHash by sending a normal payload (P1'')
 	payload := getNewPayload(t, api, commonAncestor)
@@ -831,11 +831,11 @@ func TestNewPayloadOnInvalidTerminalBlock(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(100)
 	genesis.Config.TerminalTotalDifficulty = preMergeBlocks[0].Difficulty() //.Sub(genesis.Config.TerminalTotalDifficulty, preMergeBlocks[len(preMergeBlocks)-1].Difficulty())
 
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 
 	var (
-		api    = NewConsensusAPI(ethservice)
+		api    = NewConsensusAPI(sdcservice)
 		parent = preMergeBlocks[len(preMergeBlocks)-1]
 	)
 
@@ -859,7 +859,7 @@ func TestNewPayloadOnInvalidTerminalBlock(t *testing.T) {
 		Random:                crypto.Keccak256Hash([]byte{byte(1)}),
 		SuggestedFeeRecipient: parent.Coinbase(),
 	}
-	empty, err := api.eth.Miner().GetSealingBlockSync(parent.Hash(), params.Timestamp, params.SuggestedFeeRecipient, params.Random, true)
+	empty, err := api.sdc.Miner().GetSealingBlockSync(parent.Hash(), params.Timestamp, params.SuggestedFeeRecipient, params.Random, true)
 	if err != nil {
 		t.Fatalf("error preparing payload, err=%v", err)
 	}
@@ -878,16 +878,16 @@ func TestNewPayloadOnInvalidTerminalBlock(t *testing.T) {
 // well even of the caller is not being 'serial'.
 func TestSimultaneousNewBlock(t *testing.T) {
 	genesis, preMergeBlocks := generatePreMergeChain(10)
-	n, ethservice := startEthService(t, genesis, preMergeBlocks)
+	n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 	defer n.Close()
 
 	var (
-		api    = NewConsensusAPI(ethservice)
+		api    = NewConsensusAPI(sdcservice)
 		parent = preMergeBlocks[len(preMergeBlocks)-1]
 	)
 	for i := 0; i < 10; i++ {
-		statedb, _ := ethservice.BlockChain().StateAt(parent.Root())
-		ethservice.TxPool().AddLocal(types.MustSignNewTx(testKey, types.LatestSigner(ethservice.BlockChain().Config()),
+		statedb, _ := sdcservice.BlockChain().StateAt(parent.Root())
+		sdcservice.TxPool().AddLocal(types.MustSignNewTx(testKey, types.LatestSigner(sdcservice.BlockChain().Config()),
 			&types.DynamicFeeTx{
 				Nonce:     statedb.GetNonce(testAddr),
 				Value:     big.NewInt(0),
@@ -934,7 +934,7 @@ func TestSimultaneousNewBlock(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to convert executable data to block %v", err)
 		}
-		if ethservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64()-1 {
+		if sdcservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64()-1 {
 			t.Fatalf("Chain head shouldn't be updated")
 		}
 		fcState := beacon.ForkchoiceStateV1{
@@ -965,7 +965,7 @@ func TestSimultaneousNewBlock(t *testing.T) {
 				t.Fatal(testErr)
 			}
 		}
-		if have, want := ethservice.BlockChain().CurrentBlock().NumberU64(), block.NumberU64(); have != want {
+		if have, want := sdcservice.BlockChain().CurrentBlock().NumberU64(), block.NumberU64(); have != want {
 			t.Fatalf("Chain head should be updated, have %d want %d", have, want)
 		}
 		parent = block

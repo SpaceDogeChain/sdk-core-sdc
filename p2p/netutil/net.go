@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package netutil contains extensions to the net package.
 package netutil
@@ -122,7 +122,7 @@ func (l *Netlist) Add(cidr string) {
 	*l = append(*l, *n)
 }
 
-// Contains reports whether the given IP is contained in the list.
+// Contains reports whsdcer the given IP is contained in the list.
 func (l *Netlist) Contains(ip net.IP) bool {
 	if l == nil {
 		return false
@@ -135,7 +135,7 @@ func (l *Netlist) Contains(ip net.IP) bool {
 	return false
 }
 
-// IsLAN reports whether an IP is a local network address.
+// IsLAN reports whsdcer an IP is a local network address.
 func IsLAN(ip net.IP) bool {
 	if ip.IsLoopback() {
 		return true
@@ -146,7 +146,7 @@ func IsLAN(ip net.IP) bool {
 	return lan6.Contains(ip)
 }
 
-// IsSpecialNetwork reports whether an IP is located in a special-use network range
+// IsSpecialNetwork reports whsdcer an IP is located in a special-use network range
 // This includes broadcast, multicast and documentation addresses.
 func IsSpecialNetwork(ip net.IP) bool {
 	if ip.IsMulticast() {
@@ -166,7 +166,7 @@ var (
 	errLAN         = errors.New("LAN address from WAN host")
 )
 
-// CheckRelayIP reports whether an IP relayed from the given sender IP
+// CheckRelayIP reports whsdcer an IP relayed from the given sender IP
 // is a valid connection target.
 //
 // There are four rules:
@@ -193,7 +193,7 @@ func CheckRelayIP(sender, addr net.IP) error {
 	return nil
 }
 
-// SameNet reports whether two IP addresses have an equal prefix of the given bit length.
+// SameNet reports whsdcer two IP addresses have an equal prefix of the given bit length.
 func SameNet(bits uint, ip, other net.IP) bool {
 	ip4, other4 := ip.To4(), other.To4()
 	switch {
@@ -249,7 +249,7 @@ func (s *DistinctNetSet) Remove(ip net.IP) {
 	}
 }
 
-// Contains whether the given IP is contained in the set.
+// Contains whsdcer the given IP is contained in the set.
 func (s DistinctNetSet) Contains(ip net.IP) bool {
 	key := s.key(ip)
 	_, ok := s.members[string(key)]

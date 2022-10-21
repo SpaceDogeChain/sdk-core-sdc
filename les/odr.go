@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -22,15 +22,15 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/light"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/light"
 )
 
 // LesOdr implements light.OdrBackend
 type LesOdr struct {
-	db                                         ethdb.Database
+	db                                         sdcdb.Database
 	indexerConfig                              *light.IndexerConfig
 	chtIndexer, bloomTrieIndexer, bloomIndexer *core.ChainIndexer
 	peers                                      *serverPeerSet
@@ -38,7 +38,7 @@ type LesOdr struct {
 	stop                                       chan struct{}
 }
 
-func NewLesOdr(db ethdb.Database, config *light.IndexerConfig, peers *serverPeerSet, retriever *retrieveManager) *LesOdr {
+func NewLesOdr(db sdcdb.Database, config *light.IndexerConfig, peers *serverPeerSet, retriever *retrieveManager) *LesOdr {
 	return &LesOdr{
 		db:            db,
 		indexerConfig: config,
@@ -54,7 +54,7 @@ func (odr *LesOdr) Stop() {
 }
 
 // Database returns the backing database
-func (odr *LesOdr) Database() ethdb.Database {
+func (odr *LesOdr) Database() sdcdb.Database {
 	return odr.db
 }
 

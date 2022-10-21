@@ -1,21 +1,21 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package ethconfig contains the configuration of the ETH and LES protocols.
-package ethconfig
+// Package sdcconfig contains the configuration of the sdc and LES protocols.
+package sdcconfig
 
 import (
 	"math/big"
@@ -25,19 +25,19 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/beacon"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/gasprice"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/miner"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/beacon"
+	"github.com/sdcereum/go-sdcereum/consensus/clique"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/gasprice"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/miner"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // FullNodeGPO contains default gasprice oracle settings for full node.
@@ -60,11 +60,11 @@ var LightClientGPO = gasprice.Config{
 	IgnorePrice:      gasprice.DefaultIgnorePrice,
 }
 
-// Defaults contains default settings for use on the Ethereum main net.
+// Defaults contains default settings for use on the sdcereum main net.
 var Defaults = Config{
 	SyncMode: downloader.SnapSync,
-	Ethash: ethash.Config{
-		CacheDir:         "ethash",
+	sdcash: sdcash.Config{
+		CacheDir:         "sdcash",
 		CachesInMem:      2,
 		CachesOnDisk:     3,
 		CachesLockMmap:   false,
@@ -89,7 +89,7 @@ var Defaults = Config{
 	RPCGasCap:               50000000,
 	RPCEVMTimeout:           5 * time.Second,
 	GPO:                     FullNodeGPO,
-	RPCTxFeeCap:             1, // 1 ether
+	RPCTxFeeCap:             1, // 1 sdcer
 }
 
 func init() {
@@ -100,25 +100,25 @@ func init() {
 		}
 	}
 	if runtime.GOOS == "darwin" {
-		Defaults.Ethash.DatasetDir = filepath.Join(home, "Library", "Ethash")
+		Defaults.sdcash.DatasetDir = filepath.Join(home, "Library", "sdcash")
 	} else if runtime.GOOS == "windows" {
 		localappdata := os.Getenv("LOCALAPPDATA")
 		if localappdata != "" {
-			Defaults.Ethash.DatasetDir = filepath.Join(localappdata, "Ethash")
+			Defaults.sdcash.DatasetDir = filepath.Join(localappdata, "sdcash")
 		} else {
-			Defaults.Ethash.DatasetDir = filepath.Join(home, "AppData", "Local", "Ethash")
+			Defaults.sdcash.DatasetDir = filepath.Join(home, "AppData", "Local", "sdcash")
 		}
 	} else {
-		Defaults.Ethash.DatasetDir = filepath.Join(home, ".ethash")
+		Defaults.sdcash.DatasetDir = filepath.Join(home, ".sdcash")
 	}
 }
 
 //go:generate go run github.com/fjl/gencodec -type Config -formats toml -out gen_config.go
 
-// Config contains configuration options for of the ETH and LES protocols.
+// Config contains configuration options for of the sdc and LES protocols.
 type Config struct {
 	// The genesis block, which is inserted if the database is empty.
-	// If nil, the Ethereum main net block is used.
+	// If nil, the sdcereum main net block is used.
 	Genesis *core.Genesis `toml:",omitempty"`
 
 	// Protocol options
@@ -127,16 +127,16 @@ type Config struct {
 
 	// This can be set to list of enrtree:// URLs which will be queried for
 	// for nodes to connect to.
-	EthDiscoveryURLs  []string
+	sdcDiscoveryURLs  []string
 	SnapDiscoveryURLs []string
 
-	NoPruning  bool // Whether to disable pruning and flush everything to disk
-	NoPrefetch bool // Whether to disable prefetching and only load state on demand
+	NoPruning  bool // Whsdcer to disable pruning and flush everything to disk
+	NoPrefetch bool // Whsdcer to disable prefetching and only load state on demand
 
 	TxLookupLimit uint64 `toml:",omitempty"` // The maximum number of blocks from head whose tx indices are reserved.
 
 	// RequiredBlocks is a set of block number -> hash mappings which must be in the
-	// canonical chain of all remote peers. Setting the option makes geth verify the
+	// canonical chain of all remote peers. Setting the option makes gsdc verify the
 	// presence of these blocks for every new peer connection.
 	RequiredBlocks map[uint64]common.Hash `toml:"-"`
 
@@ -145,14 +145,14 @@ type Config struct {
 	LightIngress       int  `toml:",omitempty"` // Incoming bandwidth limit for light servers
 	LightEgress        int  `toml:",omitempty"` // Outgoing bandwidth limit for light servers
 	LightPeers         int  `toml:",omitempty"` // Maximum number of LES client peers
-	LightNoPrune       bool `toml:",omitempty"` // Whether to disable light chain pruning
-	LightNoSyncServe   bool `toml:",omitempty"` // Whether to serve light clients before syncing
-	SyncFromCheckpoint bool `toml:",omitempty"` // Whether to sync the header chain from the configured checkpoint
+	LightNoPrune       bool `toml:",omitempty"` // Whsdcer to disable light chain pruning
+	LightNoSyncServe   bool `toml:",omitempty"` // Whsdcer to serve light clients before syncing
+	SyncFromCheckpoint bool `toml:",omitempty"` // Whsdcer to sync the header chain from the configured checkpoint
 
 	// Ultra Light client options
 	UltraLightServers      []string `toml:",omitempty"` // List of trusted ultra light servers
 	UltraLightFraction     int      `toml:",omitempty"` // Percentage of trusted servers to accept an announcement
-	UltraLightOnlyAnnounce bool     `toml:",omitempty"` // Whether to only announce headers, or also serve them
+	UltraLightOnlyAnnounce bool     `toml:",omitempty"` // Whsdcer to only announce headers, or also serve them
 
 	// Database options
 	SkipBcVersionCheck bool `toml:"-"`
@@ -174,8 +174,8 @@ type Config struct {
 	// Mining options
 	Miner miner.Config
 
-	// Ethash options
-	Ethash ethash.Config
+	// sdcash options
+	sdcash sdcash.Config
 
 	// Transaction pool options
 	TxPool core.TxPoolConfig
@@ -189,14 +189,14 @@ type Config struct {
 	// Miscellaneous options
 	DocRoot string `toml:"-"`
 
-	// RPCGasCap is the global gas cap for eth-call variants.
+	// RPCGasCap is the global gas cap for sdc-call variants.
 	RPCGasCap uint64
 
-	// RPCEVMTimeout is the global timeout for eth-call.
+	// RPCEVMTimeout is the global timeout for sdc-call.
 	RPCEVMTimeout time.Duration
 
 	// RPCTxFeeCap is the global transaction fee(price * gaslimit) cap for
-	// send-transaction variants. The unit is ether.
+	// send-transaction variants. The unit is sdcer.
 	RPCTxFeeCap float64
 
 	// Checkpoint is a hardcoded checkpoint which can be nil.
@@ -213,33 +213,33 @@ type Config struct {
 }
 
 // CreateConsensusEngine creates a consensus engine for the given chain configuration.
-func CreateConsensusEngine(stack *node.Node, ethashConfig *ethash.Config, cliqueConfig *params.CliqueConfig, notify []string, noverify bool, db ethdb.Database) consensus.Engine {
+func CreateConsensusEngine(stack *node.Node, sdcashConfig *sdcash.Config, cliqueConfig *params.CliqueConfig, notify []string, noverify bool, db sdcdb.Database) consensus.Engine {
 	// If proof-of-authority is requested, set it up
 	var engine consensus.Engine
 	if cliqueConfig != nil {
 		engine = clique.New(cliqueConfig, db)
 	} else {
-		switch ethashConfig.PowMode {
-		case ethash.ModeFake:
-			log.Warn("Ethash used in fake mode")
-		case ethash.ModeTest:
-			log.Warn("Ethash used in test mode")
-		case ethash.ModeShared:
-			log.Warn("Ethash used in shared mode")
+		switch sdcashConfig.PowMode {
+		case sdcash.ModeFake:
+			log.Warn("sdcash used in fake mode")
+		case sdcash.ModeTest:
+			log.Warn("sdcash used in test mode")
+		case sdcash.ModeShared:
+			log.Warn("sdcash used in shared mode")
 		}
-		engine = ethash.New(ethash.Config{
-			PowMode:          ethashConfig.PowMode,
-			CacheDir:         stack.ResolvePath(ethashConfig.CacheDir),
-			CachesInMem:      ethashConfig.CachesInMem,
-			CachesOnDisk:     ethashConfig.CachesOnDisk,
-			CachesLockMmap:   ethashConfig.CachesLockMmap,
-			DatasetDir:       ethashConfig.DatasetDir,
-			DatasetsInMem:    ethashConfig.DatasetsInMem,
-			DatasetsOnDisk:   ethashConfig.DatasetsOnDisk,
-			DatasetsLockMmap: ethashConfig.DatasetsLockMmap,
-			NotifyFull:       ethashConfig.NotifyFull,
+		engine = sdcash.New(sdcash.Config{
+			PowMode:          sdcashConfig.PowMode,
+			CacheDir:         stack.ResolvePath(sdcashConfig.CacheDir),
+			CachesInMem:      sdcashConfig.CachesInMem,
+			CachesOnDisk:     sdcashConfig.CachesOnDisk,
+			CachesLockMmap:   sdcashConfig.CachesLockMmap,
+			DatasetDir:       sdcashConfig.DatasetDir,
+			DatasetsInMem:    sdcashConfig.DatasetsInMem,
+			DatasetsOnDisk:   sdcashConfig.DatasetsOnDisk,
+			DatasetsLockMmap: sdcashConfig.DatasetsLockMmap,
+			NotifyFull:       sdcashConfig.NotifyFull,
 		}, notify, noverify)
-		engine.(*ethash.Ethash).SetThreads(-1) // Disable CPU mining
+		engine.(*sdcash.sdcash).SetThreads(-1) // Disable CPU mining
 	}
 	return beacon.New(engine)
 }

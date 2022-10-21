@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -128,17 +128,17 @@ func (s *testService) Panic() string {
 	panic("service panic")
 }
 
-func (s *testService) CallMeBack(ctx context.Context, method string, args []interface{}) (interface{}, error) {
+func (s *testService) CallMeBack(ctx context.Context, msdcod string, args []interface{}) (interface{}, error) {
 	c, ok := ClientFromContext(ctx)
 	if !ok {
 		return nil, errors.New("no client")
 	}
 	var result interface{}
-	err := c.Call(&result, method, args...)
+	err := c.Call(&result, msdcod, args...)
 	return result, err
 }
 
-func (s *testService) CallMeBackLater(ctx context.Context, method string, args []interface{}) error {
+func (s *testService) CallMeBackLater(ctx context.Context, msdcod string, args []interface{}) error {
 	c, ok := ClientFromContext(ctx)
 	if !ok {
 		return errors.New("no client")
@@ -146,7 +146,7 @@ func (s *testService) CallMeBackLater(ctx context.Context, method string, args [
 	go func() {
 		<-ctx.Done()
 		var result interface{}
-		c.Call(&result, method, args...)
+		c.Call(&result, msdcod, args...)
 	}()
 	return nil
 }
@@ -179,7 +179,7 @@ func (s *notificationTestService) SomeSubscription(ctx context.Context, n, val i
 
 	// By explicitly creating an subscription we make sure that the subscription id is send
 	// back to the client before the first subscription.Notify is called. Otherwise the
-	// events might be send before the response for the *_subscribe method.
+	// events might be send before the response for the *_subscribe msdcod.
 	subscription := notifier.CreateSubscription()
 	go func() {
 		for i := 0; i < n; i++ {

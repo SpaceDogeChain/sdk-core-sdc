@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package downloader
 
@@ -21,7 +21,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/types"
 )
 
 // resultStore implements a structure for maintaining fetchResults, tracking their
@@ -35,12 +35,12 @@ type resultStore struct {
 	// *important* : is not safe to use for indexing without checking against length
 	indexIncomplete int32 // atomic access
 
-	// throttleThreshold is the limit up to which we _want_ to fill the
+	// throttlsdcreshold is the limit up to which we _want_ to fill the
 	// results. If blocks are large, we want to limit the results to less
 	// than the number of available slots, and maybe only fill 1024 out of
 	// 8192 possible places. The queue will, at certain times, recalibrate
 	// this index.
-	throttleThreshold uint64
+	throttlsdcreshold uint64
 
 	lock sync.RWMutex
 }
@@ -49,13 +49,13 @@ func newResultStore(size int) *resultStore {
 	return &resultStore{
 		resultOffset:      0,
 		items:             make([]*fetchResult, size),
-		throttleThreshold: uint64(size),
+		throttlsdcreshold: uint64(size),
 	}
 }
 
-// SetThrottleThreshold updates the throttling threshold based on the requested
+// SetThrottlsdcreshold updates the throttling threshold based on the requested
 // limit and the total queue capacity. It returns the (possibly capped) threshold
-func (r *resultStore) SetThrottleThreshold(threshold uint64) uint64 {
+func (r *resultStore) SetThrottlsdcreshold(threshold uint64) uint64 {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -63,8 +63,8 @@ func (r *resultStore) SetThrottleThreshold(threshold uint64) uint64 {
 	if threshold >= limit {
 		threshold = limit
 	}
-	r.throttleThreshold = threshold
-	return r.throttleThreshold
+	r.throttlsdcreshold = threshold
+	return r.throttlsdcreshold
 }
 
 // AddFetch adds a header for body/receipt fetching. This is used when the queue
@@ -93,7 +93,7 @@ func (r *resultStore) AddFetch(header *types.Header, fastSync bool) (stale, thro
 }
 
 // GetDeliverySlot returns the fetchResult for the given header. If the 'stale' flag
-// is true, that means the header has already been delivered 'upstream'. This method
+// is true, that means the header has already been delivered 'upstream'. This msdcod
 // does not bubble up the 'throttle' flag, since it's moot at the point in time when
 // the item is downloaded and ready for delivery
 func (r *resultStore) GetDeliverySlot(headerNumber uint64) (*fetchResult, bool, error) {
@@ -108,7 +108,7 @@ func (r *resultStore) GetDeliverySlot(headerNumber uint64) (*fetchResult, bool, 
 // the index where the result is stored.
 func (r *resultStore) getFetchResult(headerNumber uint64) (item *fetchResult, index int, stale, throttle bool, err error) {
 	index = int(int64(headerNumber) - int64(r.resultOffset))
-	throttle = index >= int(r.throttleThreshold)
+	throttle = index >= int(r.throttlsdcreshold)
 	stale = index < 0
 
 	if index >= len(r.items) {
@@ -125,7 +125,7 @@ func (r *resultStore) getFetchResult(headerNumber uint64) (item *fetchResult, in
 }
 
 // HasCompletedItems returns true if there are processable items available
-// this method is cheaper than countCompleted
+// this msdcod is cheaper than countCompleted
 func (r *resultStore) HasCompletedItems() bool {
 	r.lock.RLock()
 	defer r.lock.RUnlock()

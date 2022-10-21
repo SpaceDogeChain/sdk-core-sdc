@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -21,17 +21,17 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/consensus/misc"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/trie"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -54,7 +54,7 @@ func TestStateProcessorErrors(t *testing.T) {
 			MuirGlacierBlock:    big.NewInt(0),
 			BerlinBlock:         big.NewInt(0),
 			LondonBlock:         big.NewInt(0),
-			Ethash:              new(params.EthashConfig),
+			sdcash:              new(params.sdcashConfig),
 		}
 		signer  = types.LatestSigner(config)
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
@@ -82,16 +82,16 @@ func TestStateProcessorErrors(t *testing.T) {
 				Config: config,
 				Alloc: GenesisAlloc{
 					common.HexToAddress("0x71562b71999873DB5b286dF957af199Ec94617F7"): GenesisAccount{
-						Balance: big.NewInt(1000000000000000000), // 1 ether
+						Balance: big.NewInt(1000000000000000000), // 1 sdcer
 						Nonce:   0,
 					},
 					common.HexToAddress("0xfd0810DD14796680f72adf1a371963d0745BCc64"): GenesisAccount{
-						Balance: big.NewInt(1000000000000000000), // 1 ether
+						Balance: big.NewInt(1000000000000000000), // 1 sdcer
 						Nonce:   math.MaxUint64,
 					},
 				},
 			}
-			blockchain, _ = NewBlockChain(db, nil, gspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+			blockchain, _ = NewBlockChain(db, nil, gspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 		)
 		defer blockchain.Stop()
 		bigNumber := new(big.Int).SetBytes(common.FromHex("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
@@ -196,7 +196,7 @@ func TestStateProcessorErrors(t *testing.T) {
 				want: "could not apply tx 0 [0xd82a0c2519acfeac9a948258c47e784acd20651d9d80f9a1c67b4137651c3a24]: insufficient funds for gas * price + value: address 0x71562b71999873DB5b286dF957af199Ec94617F7 have 1000000000000000000 want 2431633873983640103894990685182446064918669677978451844828609264166175722438635000",
 			},
 		} {
-			block := GenerateBadBlock(gspec.ToBlock(), ethash.NewFaker(), tt.txs, gspec.Config)
+			block := GenerateBadBlock(gspec.ToBlock(), sdcash.NewFaker(), tt.txs, gspec.Config)
 			_, err := blockchain.InsertChain(types.Blocks{block})
 			if err == nil {
 				t.Fatal("block imported without errors")
@@ -226,12 +226,12 @@ func TestStateProcessorErrors(t *testing.T) {
 				},
 				Alloc: GenesisAlloc{
 					common.HexToAddress("0x71562b71999873DB5b286dF957af199Ec94617F7"): GenesisAccount{
-						Balance: big.NewInt(1000000000000000000), // 1 ether
+						Balance: big.NewInt(1000000000000000000), // 1 sdcer
 						Nonce:   0,
 					},
 				},
 			}
-			blockchain, _ = NewBlockChain(db, nil, gspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+			blockchain, _ = NewBlockChain(db, nil, gspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 		)
 		defer blockchain.Stop()
 		for i, tt := range []struct {
@@ -245,7 +245,7 @@ func TestStateProcessorErrors(t *testing.T) {
 				want: "could not apply tx 0 [0x88626ac0d53cb65308f2416103c62bb1f18b805573d4f96a3640bbbfff13c14f]: transaction type not supported",
 			},
 		} {
-			block := GenerateBadBlock(gspec.ToBlock(), ethash.NewFaker(), tt.txs, gspec.Config)
+			block := GenerateBadBlock(gspec.ToBlock(), sdcash.NewFaker(), tt.txs, gspec.Config)
 			_, err := blockchain.InsertChain(types.Blocks{block})
 			if err == nil {
 				t.Fatal("block imported without errors")
@@ -264,13 +264,13 @@ func TestStateProcessorErrors(t *testing.T) {
 				Config: config,
 				Alloc: GenesisAlloc{
 					common.HexToAddress("0x71562b71999873DB5b286dF957af199Ec94617F7"): GenesisAccount{
-						Balance: big.NewInt(1000000000000000000), // 1 ether
+						Balance: big.NewInt(1000000000000000000), // 1 sdcer
 						Nonce:   0,
 						Code:    common.FromHex("0xB0B0FACE"),
 					},
 				},
 			}
-			blockchain, _ = NewBlockChain(db, nil, gspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+			blockchain, _ = NewBlockChain(db, nil, gspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 		)
 		defer blockchain.Stop()
 		for i, tt := range []struct {
@@ -284,7 +284,7 @@ func TestStateProcessorErrors(t *testing.T) {
 				want: "could not apply tx 0 [0x88626ac0d53cb65308f2416103c62bb1f18b805573d4f96a3640bbbfff13c14f]: sender not an eoa: address 0x71562b71999873DB5b286dF957af199Ec94617F7, codehash: 0x9280914443471259d4570a8661015ae4a5b80186dbc619658fb494bebc3da3d1",
 			},
 		} {
-			block := GenerateBadBlock(gspec.ToBlock(), ethash.NewFaker(), tt.txs, gspec.Config)
+			block := GenerateBadBlock(gspec.ToBlock(), sdcash.NewFaker(), tt.txs, gspec.Config)
 			_, err := blockchain.InsertChain(types.Blocks{block})
 			if err == nil {
 				t.Fatal("block imported without errors")
@@ -319,8 +319,8 @@ func GenerateBadBlock(parent *types.Block, engine consensus.Engine, txs types.Tr
 		header.BaseFee = misc.CalcBaseFee(config, parent.Header())
 	}
 	var receipts []*types.Receipt
-	// The post-state result doesn't need to be correct (this is a bad block), but we do need something there
-	// Preferably something unique. So let's use a combo of blocknum + txhash
+	// The post-state result doesn't need to be correct (this is a bad block), but we do need somsdcing there
+	// Preferably somsdcing unique. So let's use a combo of blocknum + txhash
 	hasher := sha3.NewLegacyKeccak256()
 	hasher.Write(header.Number.Bytes())
 	var cumulativeGas uint64

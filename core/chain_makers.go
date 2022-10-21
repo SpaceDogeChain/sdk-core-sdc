@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -20,15 +20,15 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/misc"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // BlockGen creates blocks for testing.
@@ -72,9 +72,9 @@ func (b *BlockGen) SetNonce(nonce types.BlockNonce) {
 	b.header.Nonce = nonce
 }
 
-// SetDifficulty sets the difficulty field of the generated block. This method is
+// SetDifficulty sets the difficulty field of the generated block. This msdcod is
 // useful for Clique tests where the difficulty does not depend on time. For the
-// ethash tests, please use OffsetTime, which implicitly recalculates the diff.
+// sdcash tests, please use OffsetTime, which implicitly recalculates the diff.
 func (b *BlockGen) SetDifficulty(diff *big.Int) {
 	b.header.Difficulty = diff
 }
@@ -218,7 +218,7 @@ func (b *BlockGen) OffsetTime(seconds int64) {
 // Blocks created by GenerateChain do not contain valid proof of work
 // values. Inserting them into BlockChain requires use of FakePow or
 // a similar non-validating proof of work implementation.
-func GenerateChain(config *params.ChainConfig, parent *types.Block, engine consensus.Engine, db ethdb.Database, n int, gen func(int, *BlockGen)) ([]*types.Block, []types.Receipts) {
+func GenerateChain(config *params.ChainConfig, parent *types.Block, engine consensus.Engine, db sdcdb.Database, n int, gen func(int, *BlockGen)) ([]*types.Block, []types.Receipts) {
 	if config == nil {
 		config = params.TestChainConfig
 	}
@@ -288,7 +288,7 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 // GenerateChainWithGenesis is a wrapper of GenerateChain which will initialize
 // genesis block to database first according to the provided genesis specification
 // then generate chain on top.
-func GenerateChainWithGenesis(genesis *Genesis, engine consensus.Engine, n int, gen func(int, *BlockGen)) (ethdb.Database, []*types.Block, []types.Receipts) {
+func GenerateChainWithGenesis(genesis *Genesis, engine consensus.Engine, n int, gen func(int, *BlockGen)) (sdcdb.Database, []*types.Block, []types.Receipts) {
 	db := rawdb.NewMemoryDatabase()
 	_, err := genesis.Commit(db)
 	if err != nil {
@@ -330,7 +330,7 @@ func makeHeader(chain consensus.ChainReader, parent *types.Block, state *state.S
 }
 
 // makeHeaderChain creates a deterministic chain of headers rooted at parent.
-func makeHeaderChain(chainConfig *params.ChainConfig, parent *types.Header, n int, engine consensus.Engine, db ethdb.Database, seed int) []*types.Header {
+func makeHeaderChain(chainConfig *params.ChainConfig, parent *types.Header, n int, engine consensus.Engine, db sdcdb.Database, seed int) []*types.Header {
 	blocks := makeBlockChain(chainConfig, types.NewBlockWithHeader(parent), n, engine, db, seed)
 	headers := make([]*types.Header, len(blocks))
 	for i, block := range blocks {
@@ -340,7 +340,7 @@ func makeHeaderChain(chainConfig *params.ChainConfig, parent *types.Header, n in
 }
 
 // makeHeaderChainWithGenesis creates a deterministic chain of headers from genesis.
-func makeHeaderChainWithGenesis(genesis *Genesis, n int, engine consensus.Engine, seed int) (ethdb.Database, []*types.Header) {
+func makeHeaderChainWithGenesis(genesis *Genesis, n int, engine consensus.Engine, seed int) (sdcdb.Database, []*types.Header) {
 	db, blocks := makeBlockChainWithGenesis(genesis, n, engine, seed)
 	headers := make([]*types.Header, len(blocks))
 	for i, block := range blocks {
@@ -350,7 +350,7 @@ func makeHeaderChainWithGenesis(genesis *Genesis, n int, engine consensus.Engine
 }
 
 // makeBlockChain creates a deterministic chain of blocks rooted at parent.
-func makeBlockChain(chainConfig *params.ChainConfig, parent *types.Block, n int, engine consensus.Engine, db ethdb.Database, seed int) []*types.Block {
+func makeBlockChain(chainConfig *params.ChainConfig, parent *types.Block, n int, engine consensus.Engine, db sdcdb.Database, seed int) []*types.Block {
 	blocks, _ := GenerateChain(chainConfig, parent, engine, db, n, func(i int, b *BlockGen) {
 		b.SetCoinbase(common.Address{0: byte(seed), 19: byte(i)})
 	})
@@ -358,7 +358,7 @@ func makeBlockChain(chainConfig *params.ChainConfig, parent *types.Block, n int,
 }
 
 // makeBlockChain creates a deterministic chain of blocks from genesis
-func makeBlockChainWithGenesis(genesis *Genesis, n int, engine consensus.Engine, seed int) (ethdb.Database, []*types.Block) {
+func makeBlockChainWithGenesis(genesis *Genesis, n int, engine consensus.Engine, seed int) (sdcdb.Database, []*types.Block) {
 	db, blocks, _ := GenerateChainWithGenesis(genesis, engine, n, func(i int, b *BlockGen) {
 		b.SetCoinbase(common.Address{0: byte(seed), 19: byte(i)})
 	})
@@ -375,8 +375,8 @@ func (cr *fakeChainReader) Config() *params.ChainConfig {
 }
 
 func (cr *fakeChainReader) CurrentHeader() *types.Header                            { return nil }
-func (cr *fakeChainReader) GetHeaderByNumber(number uint64) *types.Header           { return nil }
-func (cr *fakeChainReader) GetHeaderByHash(hash common.Hash) *types.Header          { return nil }
-func (cr *fakeChainReader) GetHeader(hash common.Hash, number uint64) *types.Header { return nil }
+func (cr *fakeChainReader) GsdceaderByNumber(number uint64) *types.Header           { return nil }
+func (cr *fakeChainReader) GsdceaderByHash(hash common.Hash) *types.Header          { return nil }
+func (cr *fakeChainReader) Gsdceader(hash common.Hash, number uint64) *types.Header { return nil }
 func (cr *fakeChainReader) GetBlock(hash common.Hash, number uint64) *types.Block   { return nil }
 func (cr *fakeChainReader) GetTd(hash common.Hash, number uint64) *big.Int          { return nil }

@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2016 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/console"
-	"github.com/ethereum/go-ethereum/internal/flags"
+	"github.com/spacedogechain/go-spacedogechain/cmd/utils"
+	"github.com/spacedogechain/go-spacedogechain/console"
+	"github.com/spacedogechain/go-spacedogechain/internal/flags"
 	"github.com/urfave/cli/v2"
 )
 
@@ -37,7 +37,7 @@ var (
 		Description: `
 The Geth console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://geth.ethereum.org/docs/interface/javascript-console.`,
+See https://geth.spacedogechain.org/docs/interface/javascript-console.`,
 	}
 
 	attachCommand = &cli.Command{
@@ -49,7 +49,7 @@ See https://geth.ethereum.org/docs/interface/javascript-console.`,
 		Description: `
 The Geth console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://geth.ethereum.org/docs/interface/javascript-console.
+See https://geth.spacedogechain.org/docs/interface/javascript-console.
 This command allows to open a console on a running geth node.`,
 	}
 
@@ -61,7 +61,7 @@ This command allows to open a console on a running geth node.`,
 		Flags:     flags.Merge(nodeFlags, consoleFlags),
 		Description: `
 The JavaScript VM exposes a node admin interface as well as the Ðapp
-JavaScript API. See https://geth.ethereum.org/docs/interface/javascript-console`,
+JavaScript API. See https://geth.spacedogechain.org/docs/interface/javascript-console`,
 	}
 )
 

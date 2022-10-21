@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package backends
 
@@ -27,14 +27,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/accounts/abi"
+	"github.com/sdcereum/go-sdcereum/accounts/abi/bind"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 func TestSimulatedBackend(t *testing.T) {
@@ -54,8 +54,8 @@ func TestSimulatedBackend(t *testing.T) {
 	if isPending {
 		t.Fatal("transaction should not be pending")
 	}
-	if err != ethereum.NotFound {
-		t.Fatalf("err should be `ethereum.NotFound` but received %v", err)
+	if err != sdcereum.NotFound {
+		t.Fatalf("err should be `sdcereum.NotFound` but received %v", err)
 	}
 
 	// generate a transaction and confirm you can retrieve it
@@ -126,12 +126,12 @@ func TestNewSimulatedBackend(t *testing.T) {
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 
-	if sim.config != params.AllEthashProtocolChanges {
-		t.Errorf("expected sim config to equal params.AllEthashProtocolChanges, got %v", sim.config)
+	if sim.config != params.AllsdcashProtocolChanges {
+		t.Errorf("expected sim config to equal params.AllsdcashProtocolChanges, got %v", sim.config)
 	}
 
-	if sim.blockchain.Config() != params.AllEthashProtocolChanges {
-		t.Errorf("expected sim blockchain config to equal params.AllEthashProtocolChanges, got %v", sim.config)
+	if sim.blockchain.Config() != params.AllsdcashProtocolChanges {
+		t.Errorf("expected sim blockchain config to equal params.AllsdcashProtocolChanges, got %v", sim.config)
 	}
 
 	stateDB, _ := sim.blockchain.State()
@@ -432,7 +432,7 @@ func TestEstimateGas(t *testing.T) {
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 	opts, _ := bind.NewKeyedTransactorWithChainID(key, big.NewInt(1337))
 
-	sim := NewSimulatedBackend(core.GenesisAlloc{addr: {Balance: big.NewInt(params.Ether)}}, 10000000)
+	sim := NewSimulatedBackend(core.GenesisAlloc{addr: {Balance: big.NewInt(params.sdcer)}}, 10000000)
 	defer sim.Close()
 
 	parsed, _ := abi.JSON(strings.NewReader(contractAbi))
@@ -441,12 +441,12 @@ func TestEstimateGas(t *testing.T) {
 
 	var cases = []struct {
 		name        string
-		message     ethereum.CallMsg
+		message     sdcereum.CallMsg
 		expect      uint64
 		expectError error
 		expectData  interface{}
 	}{
-		{"plain transfer(valid)", ethereum.CallMsg{
+		{"plain transfer(valid)", sdcereum.CallMsg{
 			From:     addr,
 			To:       &addr,
 			Gas:      0,
@@ -455,7 +455,7 @@ func TestEstimateGas(t *testing.T) {
 			Data:     nil,
 		}, params.TxGas, nil, nil},
 
-		{"plain transfer(invalid)", ethereum.CallMsg{
+		{"plain transfer(invalid)", sdcereum.CallMsg{
 			From:     addr,
 			To:       &contractAddr,
 			Gas:      0,
@@ -464,7 +464,7 @@ func TestEstimateGas(t *testing.T) {
 			Data:     nil,
 		}, 0, errors.New("execution reverted"), nil},
 
-		{"Revert", ethereum.CallMsg{
+		{"Revert", sdcereum.CallMsg{
 			From:     addr,
 			To:       &contractAddr,
 			Gas:      0,
@@ -473,7 +473,7 @@ func TestEstimateGas(t *testing.T) {
 			Data:     common.Hex2Bytes("d8b98391"),
 		}, 0, errors.New("execution reverted: revert reason"), "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d72657665727420726561736f6e00000000000000000000000000000000000000"},
 
-		{"PureRevert", ethereum.CallMsg{
+		{"PureRevert", sdcereum.CallMsg{
 			From:     addr,
 			To:       &contractAddr,
 			Gas:      0,
@@ -482,7 +482,7 @@ func TestEstimateGas(t *testing.T) {
 			Data:     common.Hex2Bytes("aa8b1d30"),
 		}, 0, errors.New("execution reverted"), nil},
 
-		{"OOG", ethereum.CallMsg{
+		{"OOG", sdcereum.CallMsg{
 			From:     addr,
 			To:       &contractAddr,
 			Gas:      100000,
@@ -491,7 +491,7 @@ func TestEstimateGas(t *testing.T) {
 			Data:     common.Hex2Bytes("50f6fe34"),
 		}, 0, errors.New("gas required exceeds allowance (100000)"), nil},
 
-		{"Assert", ethereum.CallMsg{
+		{"Assert", sdcereum.CallMsg{
 			From:     addr,
 			To:       &contractAddr,
 			Gas:      100000,
@@ -500,7 +500,7 @@ func TestEstimateGas(t *testing.T) {
 			Data:     common.Hex2Bytes("b9b046f9"),
 		}, 0, errors.New("invalid opcode: INVALID"), nil},
 
-		{"Valid", ethereum.CallMsg{
+		{"Valid", sdcereum.CallMsg{
 			From:     addr,
 			To:       &contractAddr,
 			Gas:      100000,
@@ -537,17 +537,17 @@ func TestEstimateGasWithPrice(t *testing.T) {
 	key, _ := crypto.GenerateKey()
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 
-	sim := NewSimulatedBackend(core.GenesisAlloc{addr: {Balance: big.NewInt(params.Ether*2 + 2e17)}}, 10000000)
+	sim := NewSimulatedBackend(core.GenesisAlloc{addr: {Balance: big.NewInt(params.sdcer*2 + 2e17)}}, 10000000)
 	defer sim.Close()
 
 	recipient := common.HexToAddress("deadbeef")
 	var cases = []struct {
 		name        string
-		message     ethereum.CallMsg
+		message     sdcereum.CallMsg
 		expect      uint64
 		expectError error
 	}{
-		{"EstimateWithoutPrice", ethereum.CallMsg{
+		{"EstimateWithoutPrice", sdcereum.CallMsg{
 			From:     addr,
 			To:       &recipient,
 			Gas:      0,
@@ -556,7 +556,7 @@ func TestEstimateGasWithPrice(t *testing.T) {
 			Data:     nil,
 		}, 21000, nil},
 
-		{"EstimateWithPrice", ethereum.CallMsg{
+		{"EstimateWithPrice", sdcereum.CallMsg{
 			From:     addr,
 			To:       &recipient,
 			Gas:      0,
@@ -565,43 +565,43 @@ func TestEstimateGasWithPrice(t *testing.T) {
 			Data:     nil,
 		}, 21000, nil},
 
-		{"EstimateWithVeryHighPrice", ethereum.CallMsg{
+		{"EstimateWithVeryHighPrice", sdcereum.CallMsg{
 			From:     addr,
 			To:       &recipient,
 			Gas:      0,
-			GasPrice: big.NewInt(1e14), // gascost = 2.1ether
-			Value:    big.NewInt(1e17), // the remaining balance for fee is 2.1ether
+			GasPrice: big.NewInt(1e14), // gascost = 2.1sdcer
+			Value:    big.NewInt(1e17), // the remaining balance for fee is 2.1sdcer
 			Data:     nil,
 		}, 21000, nil},
 
-		{"EstimateWithSuperhighPrice", ethereum.CallMsg{
+		{"EstimateWithSuperhighPrice", sdcereum.CallMsg{
 			From:     addr,
 			To:       &recipient,
 			Gas:      0,
-			GasPrice: big.NewInt(2e14), // gascost = 4.2ether
+			GasPrice: big.NewInt(2e14), // gascost = 4.2sdcer
 			Value:    big.NewInt(100000000000),
 			Data:     nil,
-		}, 21000, errors.New("gas required exceeds allowance (10999)")}, // 10999=(2.2ether-1000wei)/(2e14)
+		}, 21000, errors.New("gas required exceeds allowance (10999)")}, // 10999=(2.2sdcer-1000wei)/(2e14)
 
-		{"EstimateEIP1559WithHighFees", ethereum.CallMsg{
+		{"EstimateEIP1559WithHighFees", sdcereum.CallMsg{
 			From:      addr,
 			To:        &addr,
 			Gas:       0,
-			GasFeeCap: big.NewInt(1e14), // maxgascost = 2.1ether
+			GasFeeCap: big.NewInt(1e14), // maxgascost = 2.1sdcer
 			GasTipCap: big.NewInt(1),
-			Value:     big.NewInt(1e17), // the remaining balance for fee is 2.1ether
+			Value:     big.NewInt(1e17), // the remaining balance for fee is 2.1sdcer
 			Data:      nil,
 		}, params.TxGas, nil},
 
-		{"EstimateEIP1559WithSuperHighFees", ethereum.CallMsg{
+		{"EstimateEIP1559WithSuperHighFees", sdcereum.CallMsg{
 			From:      addr,
 			To:        &addr,
 			Gas:       0,
-			GasFeeCap: big.NewInt(1e14), // maxgascost = 2.1ether
+			GasFeeCap: big.NewInt(1e14), // maxgascost = 2.1sdcer
 			GasTipCap: big.NewInt(1),
-			Value:     big.NewInt(1e17 + 1), // the remaining balance for fee is 2.1ether
+			Value:     big.NewInt(1e17 + 1), // the remaining balance for fee is 2.1sdcer
 			Data:      nil,
-		}, params.TxGas, errors.New("gas required exceeds allowance (20999)")}, // 20999=(2.2ether-0.1ether-1wei)/(1e14)
+		}, params.TxGas, errors.New("gas required exceeds allowance (20999)")}, // 20999=(2.2sdcer-0.1sdcer-1wei)/(1e14)
 	}
 	for i, c := range cases {
 		got, err := sim.EstimateGas(context.Background(), c.message)
@@ -1020,13 +1020,13 @@ func TestPendingAndCallContract(t *testing.T) {
 	}
 
 	// make sure you can call the contract in pending state
-	res, err := sim.PendingCallContract(bgCtx, ethereum.CallMsg{
+	res, err := sim.PendingCallContract(bgCtx, sdcereum.CallMsg{
 		From: testAddr,
 		To:   &addr,
 		Data: input,
 	})
 	if err != nil {
-		t.Errorf("could not call receive method on contract: %v", err)
+		t.Errorf("could not call receive msdcod on contract: %v", err)
 	}
 	if len(res) == 0 {
 		t.Errorf("result of contract call was empty: %v", res)
@@ -1040,13 +1040,13 @@ func TestPendingAndCallContract(t *testing.T) {
 	sim.Commit()
 
 	// make sure you can call the contract
-	res, err = sim.CallContract(bgCtx, ethereum.CallMsg{
+	res, err = sim.CallContract(bgCtx, sdcereum.CallMsg{
 		From: testAddr,
 		To:   &addr,
 		Data: input,
 	}, nil)
 	if err != nil {
-		t.Errorf("could not call receive method on contract: %v", err)
+		t.Errorf("could not call receive msdcod on contract: %v", err)
 	}
 	if len(res) == 0 {
 		t.Errorf("result of contract call was empty: %v", res)
@@ -1073,7 +1073,7 @@ contract Reverter {
 	}
 	function noRevert() public pure {
 		assembly {
-			// Assembles something that looks like require(false, "some error") but is not reverted
+			// Assembles somsdcing that looks like require(false, "some error") but is not reverted
 			mstore(0x0, 0x08c379a000000000000000000000000000000000000000000000000000000000)
 			mstore(0x4, 0x0000000000000000000000000000000000000000000000000000000000000020)
 			mstore(0x24, 0x000000000000000000000000000000000000000000000000000000000000000a)
@@ -1108,14 +1108,14 @@ func TestCallContractRevert(t *testing.T) {
 
 	call := make([]func([]byte) ([]byte, error), 2)
 	call[0] = func(input []byte) ([]byte, error) {
-		return sim.PendingCallContract(bgCtx, ethereum.CallMsg{
+		return sim.PendingCallContract(bgCtx, sdcereum.CallMsg{
 			From: testAddr,
 			To:   &addr,
 			Data: input,
 		})
 	}
 	call[1] = func(input []byte) ([]byte, error) {
-		return sim.CallContract(bgCtx, ethereum.CallMsg{
+		return sim.CallContract(bgCtx, sdcereum.CallMsg{
 			From: testAddr,
 			To:   &addr,
 			Data: input,
@@ -1373,7 +1373,7 @@ func TestCommitReturnValue(t *testing.T) {
 	if h2 == h2fork {
 		t.Error("The block in the fork and the original block are the same block!")
 	}
-	if sim.blockchain.GetHeader(h2fork, startBlockHeight+2) == nil {
+	if sim.blockchain.Gsdceader(h2fork, startBlockHeight+2) == nil {
 		t.Error("Could not retrieve the just created block (side-chain)")
 	}
 }

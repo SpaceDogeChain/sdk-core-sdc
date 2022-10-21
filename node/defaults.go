@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package node
 
@@ -22,9 +22,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/nat"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 const (
@@ -43,7 +43,7 @@ var (
 	DefaultAuthVhosts  = []string{"localhost"} // Default virtual hosts for the authenticated apis
 	DefaultAuthOrigins = []string{"localhost"} // Default origins for the authenticated apis
 	DefaultAuthPrefix  = ""                    // Default prefix for the authenticated apis
-	DefaultAuthModules = []string{"eth", "engine"}
+	DefaultAuthModules = []string{"sdc", "engine"}
 )
 
 // DefaultConfig contains reasonable default settings.
@@ -74,19 +74,19 @@ func DefaultDataDir() string {
 	if home != "" {
 		switch runtime.GOOS {
 		case "darwin":
-			return filepath.Join(home, "Library", "Ethereum")
+			return filepath.Join(home, "Library", "sdcereum")
 		case "windows":
 			// We used to put everything in %HOME%\AppData\Roaming, but this caused
 			// problems with non-typical setups. If this fallback location exists and
 			// is non-empty, use it, otherwise DTRT and check %LOCALAPPDATA%.
-			fallback := filepath.Join(home, "AppData", "Roaming", "Ethereum")
+			fallback := filepath.Join(home, "AppData", "Roaming", "sdcereum")
 			appdata := windowsAppData()
 			if appdata == "" || isNonEmptyDir(fallback) {
 				return fallback
 			}
-			return filepath.Join(appdata, "Ethereum")
+			return filepath.Join(appdata, "sdcereum")
 		default:
-			return filepath.Join(home, ".ethereum")
+			return filepath.Join(home, ".sdcereum")
 		}
 	}
 	// As we cannot guess a stable location, return empty and handle later

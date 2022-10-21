@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package console
 
@@ -25,15 +25,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/console/prompt"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/internal/jsre"
-	"github.com/ethereum/go-ethereum/miner"
-	"github.com/ethereum/go-ethereum/node"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/console/prompt"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/sdc"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/internal/jsre"
+	"github.com/sdcereum/go-sdcereum/miner"
+	"github.com/sdcereum/go-sdcereum/node"
 )
 
 const (
@@ -68,7 +68,7 @@ func (p *hookedPrompter) PromptPassword(prompt string) (string, error) {
 func (p *hookedPrompter) PromptConfirm(prompt string) (bool, error) {
 	return false, errors.New("not implemented")
 }
-func (p *hookedPrompter) SetHistory(history []string)                     {}
+func (p *hookedPrompter) Ssdcistory(history []string)                     {}
 func (p *hookedPrompter) AppendHistory(command string)                    {}
 func (p *hookedPrompter) ClearHistory()                                   {}
 func (p *hookedPrompter) SetWordCompleter(completer prompt.WordCompleter) {}
@@ -77,7 +77,7 @@ func (p *hookedPrompter) SetWordCompleter(completer prompt.WordCompleter) {}
 type tester struct {
 	workspace string
 	stack     *node.Node
-	ethereum  *eth.Ethereum
+	sdcereum  *sdc.sdcereum
 	console   *Console
 	input     *hookedPrompter
 	output    *bytes.Buffer
@@ -85,30 +85,30 @@ type tester struct {
 
 // newTester creates a test environment based on which the console can operate.
 // Please ensure you call Close() on the returned tester to avoid leaks.
-func newTester(t *testing.T, confOverride func(*ethconfig.Config)) *tester {
+func newTester(t *testing.T, confOverride func(*sdcconfig.Config)) *tester {
 	// Create a temporary storage for the node keys and initialize it
 	workspace := t.TempDir()
 
-	// Create a networkless protocol stack and start an Ethereum service within
+	// Create a networkless protocol stack and start an sdcereum service within
 	stack, err := node.New(&node.Config{DataDir: workspace, UseLightweightKDF: true, Name: testInstance})
 	if err != nil {
 		t.Fatalf("failed to create node: %v", err)
 	}
-	ethConf := &ethconfig.Config{
+	sdcConf := &sdcconfig.Config{
 		Genesis: core.DeveloperGenesisBlock(15, 11_500_000, common.Address{}),
 		Miner: miner.Config{
-			Etherbase: common.HexToAddress(testAddress),
+			sdcerbase: common.HexToAddress(testAddress),
 		},
-		Ethash: ethash.Config{
-			PowMode: ethash.ModeTest,
+		sdcash: sdcash.Config{
+			PowMode: sdcash.ModeTest,
 		},
 	}
 	if confOverride != nil {
-		confOverride(ethConf)
+		confOverride(sdcConf)
 	}
-	ethBackend, err := eth.New(stack, ethConf)
+	sdcBackend, err := sdc.New(stack, sdcConf)
 	if err != nil {
-		t.Fatalf("failed to register Ethereum protocol: %v", err)
+		t.Fatalf("failed to register sdcereum protocol: %v", err)
 	}
 	// Start the node and assemble the JavaScript console around it
 	if err = stack.Start(); err != nil {
@@ -136,7 +136,7 @@ func newTester(t *testing.T, confOverride func(*ethconfig.Config)) *tester {
 	return &tester{
 		workspace: workspace,
 		stack:     stack,
-		ethereum:  ethBackend,
+		sdcereum:  sdcBackend,
 		console:   console,
 		input:     prompter,
 		output:    printer,

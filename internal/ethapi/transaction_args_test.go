@@ -1,20 +1,20 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ethapi
+package sdcapi
 
 import (
 	"context"
@@ -24,20 +24,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/bloombits"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/bloombits"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 // TestSetFeeDefaults tests the logic for filling in default fee values works as expected.
@@ -256,19 +256,19 @@ func (b *backendMock) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
 func (b *backendMock) CurrentHeader() *types.Header     { return b.current }
 func (b *backendMock) ChainConfig() *params.ChainConfig { return b.config }
 
-// Other methods needed to implement Backend interface.
-func (b *backendMock) SyncProgress() ethereum.SyncProgress { return ethereum.SyncProgress{} }
+// Other msdcods needed to implement Backend interface.
+func (b *backendMock) SyncProgress() sdcereum.SyncProgress { return sdcereum.SyncProgress{} }
 func (b *backendMock) FeeHistory(ctx context.Context, blockCount int, lastBlock rpc.BlockNumber, rewardPercentiles []float64) (*big.Int, [][]*big.Int, []*big.Int, []float64, error) {
 	return nil, nil, nil, nil, nil
 }
-func (b *backendMock) ChainDb() ethdb.Database           { return nil }
+func (b *backendMock) ChainDb() sdcdb.Database           { return nil }
 func (b *backendMock) AccountManager() *accounts.Manager { return nil }
 func (b *backendMock) ExtRPCEnabled() bool               { return false }
 func (b *backendMock) RPCGasCap() uint64                 { return 0 }
 func (b *backendMock) RPCEVMTimeout() time.Duration      { return time.Second }
 func (b *backendMock) RPCTxFeeCap() float64              { return 0 }
 func (b *backendMock) UnprotectedAllowed() bool          { return false }
-func (b *backendMock) SetHead(number uint64)             {}
+func (b *backendMock) Ssdcead(number uint64)             {}
 func (b *backendMock) HeaderByNumber(ctx context.Context, number rpc.BlockNumber) (*types.Header, error) {
 	return nil, nil
 }

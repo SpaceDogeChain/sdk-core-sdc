@@ -1,20 +1,20 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"errors"
@@ -22,12 +22,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 const (
@@ -36,7 +36,7 @@ const (
 )
 
 // syncTransactions starts sending all currently pending transactions to the given peer.
-func (h *handler) syncTransactions(p *eth.Peer) {
+func (h *handler) syncTransactions(p *sdc.Peer) {
 	// Assemble the set of transaction to broadcast or announce to the remote
 	// peer. Fun fact, this is quite an expensive operation as it needs to sort
 	// the transactions if the sorting is not cached yet. However, with a random
@@ -51,7 +51,7 @@ func (h *handler) syncTransactions(p *eth.Peer) {
 	if len(txs) == 0 {
 		return
 	}
-	// The eth/65 protocol introduces proper transaction announcements, so instead
+	// The sdc/65 protocol introduces proper transaction announcements, so instead
 	// of dripping transactions across multiple peers, just send the entire list as
 	// an announcement and let the remote side decide what they need (likely nothing).
 	hashes := make([]common.Hash, len(txs))
@@ -74,7 +74,7 @@ type chainSyncer struct {
 // chainSyncOp is a scheduled sync operation.
 type chainSyncOp struct {
 	mode downloader.SyncMode
-	peer *eth.Peer
+	peer *sdc.Peer
 	td   *big.Int
 	head common.Hash
 }
@@ -90,7 +90,7 @@ func newChainSyncer(handler *handler) *chainSyncer {
 // handlePeerEvent notifies the syncer about a change in the peer set.
 // This is called for new peers and every time a peer announces a new
 // chain head.
-func (cs *chainSyncer) handlePeerEvent(peer *eth.Peer) bool {
+func (cs *chainSyncer) handlePeerEvent(peer *sdc.Peer) bool {
 	select {
 	case cs.peerEventCh <- struct{}{}:
 		return true
@@ -150,7 +150,7 @@ func (cs *chainSyncer) loop() {
 	}
 }
 
-// nextSyncOp determines whether sync is required at this time.
+// nextSyncOp determines whsdcer sync is required at this time.
 func (cs *chainSyncer) nextSyncOp() *chainSyncOp {
 	if cs.doneCh != nil {
 		return nil // Sync already running
@@ -198,7 +198,7 @@ func (cs *chainSyncer) nextSyncOp() *chainSyncOp {
 	return op
 }
 
-func peerToSyncOp(mode downloader.SyncMode, p *eth.Peer) *chainSyncOp {
+func peerToSyncOp(mode downloader.SyncMode, p *sdc.Peer) *chainSyncOp {
 	peerHead, peerTD := p.Head()
 	return &chainSyncOp{mode: mode, peer: p, td: peerTD, head: peerHead}
 }
@@ -236,12 +236,12 @@ func (h *handler) doSync(op *chainSyncOp) error {
 	if op.mode == downloader.SnapSync {
 		// Before launch the snap sync, we have to ensure user uses the same
 		// txlookup limit.
-		// The main concern here is: during the snap sync Geth won't index the
+		// The main concern here is: during the snap sync Gsdc won't index the
 		// block(generate tx indices) before the HEAD-limit. But if user changes
-		// the limit in the next snap sync(e.g. user kill Geth manually and
-		// restart) then it will be hard for Geth to figure out the oldest block
+		// the limit in the next snap sync(e.g. user kill Gsdc manually and
+		// restart) then it will be hard for Gsdc to figure out the oldest block
 		// has been indexed. So here for the user-experience wise, it's non-optimal
-		// that user can't change limit during the snap sync. If changed, Geth
+		// that user can't change limit during the snap sync. If changed, Gsdc
 		// will just blindly use the original one.
 		limit := h.chain.TxLookupLimit()
 		if stored := rawdb.ReadFastTxLookupLimit(h.database); stored == nil {

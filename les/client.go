@@ -1,20 +1,20 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package les implements the Light Ethereum Subprotocol.
+// Package les implements the Light sdcereum Subprotocol.
 package les
 
 import (
@@ -22,35 +22,35 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/bloombits"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/eth/gasprice"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/internal/shutdowncheck"
-	"github.com/ethereum/go-ethereum/les/downloader"
-	"github.com/ethereum/go-ethereum/les/vflux"
-	vfc "github.com/ethereum/go-ethereum/les/vflux/client"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/bloombits"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/sdc/gasprice"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/internal/sdcapi"
+	"github.com/sdcereum/go-sdcereum/internal/shutdowncheck"
+	"github.com/sdcereum/go-sdcereum/les/downloader"
+	"github.com/sdcereum/go-sdcereum/les/vflux"
+	vfc "github.com/sdcereum/go-sdcereum/les/vflux/client"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/p2p/enr"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
-type LightEthereum struct {
+type Lightsdcereum struct {
 	lesCommons
 
 	peers              *serverPeerSet
@@ -73,7 +73,7 @@ type LightEthereum struct {
 	eventMux       *event.TypeMux
 	engine         consensus.Engine
 	accountManager *accounts.Manager
-	netRPCService  *ethapi.NetAPI
+	netRPCService  *sdcapi.NetAPI
 
 	p2pServer  *p2p.Server
 	p2pConfig  *p2p.Config
@@ -83,12 +83,12 @@ type LightEthereum struct {
 }
 
 // New creates an instance of the light client.
-func New(stack *node.Node, config *ethconfig.Config) (*LightEthereum, error) {
-	chainDb, err := stack.OpenDatabase("lightchaindata", config.DatabaseCache, config.DatabaseHandles, "eth/db/chaindata/", false)
+func New(stack *node.Node, config *sdcconfig.Config) (*Lightsdcereum, error) {
+	chainDb, err := stack.OpenDatabase("lightchaindata", config.DatabaseCache, config.DatabaseHandles, "sdc/db/chaindata/", false)
 	if err != nil {
 		return nil, err
 	}
-	lesDb, err := stack.OpenDatabase("les.client", 0, 0, "eth/db/lesclient/", false)
+	lesDb, err := stack.OpenDatabase("les.client", 0, 0, "sdc/db/lesclient/", false)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func New(stack *node.Node, config *ethconfig.Config) (*LightEthereum, error) {
 
 	peers := newServerPeerSet()
 	merger := consensus.NewMerger(chainDb)
-	leth := &LightEthereum{
+	lsdc := &Lightsdcereum{
 		lesCommons: lesCommons{
 			genesis:     genesisHash,
 			config:      config,
@@ -128,7 +128,7 @@ func New(stack *node.Node, config *ethconfig.Config) (*LightEthereum, error) {
 		reqDist:         newRequestDistributor(peers, &mclock.System{}),
 		accountManager:  stack.AccountManager(),
 		merger:          merger,
-		engine:          ethconfig.CreateConsensusEngine(stack, &config.Ethash, chainConfig.Clique, nil, false, chainDb),
+		engine:          sdcconfig.CreateConsensusEngine(stack, &config.sdcash, chainConfig.Clique, nil, false, chainDb),
 		bloomRequests:   make(chan chan *bloombits.Retrieval),
 		bloomIndexer:    core.NewBloomIndexer(chainDb, params.BloomBitsBlocksClient, params.HelperTrieConfirmations),
 		p2pServer:       stack.Server(),
@@ -138,19 +138,19 @@ func New(stack *node.Node, config *ethconfig.Config) (*LightEthereum, error) {
 	}
 
 	var prenegQuery vfc.QueryFunc
-	if leth.udpEnabled {
-		prenegQuery = leth.prenegQuery
+	if lsdc.udpEnabled {
+		prenegQuery = lsdc.prenegQuery
 	}
-	leth.serverPool, leth.serverPoolIterator = vfc.NewServerPool(lesDb, []byte("serverpool:"), time.Second, prenegQuery, &mclock.System{}, config.UltraLightServers, requestList)
-	leth.serverPool.AddMetrics(suggestedTimeoutGauge, totalValueGauge, serverSelectableGauge, serverConnectedGauge, sessionValueMeter, serverDialedMeter)
+	lsdc.serverPool, lsdc.serverPoolIterator = vfc.NewServerPool(lesDb, []byte("serverpool:"), time.Second, prenegQuery, &mclock.System{}, config.UltraLightServers, requestList)
+	lsdc.serverPool.AddMetrics(suggestedTimeoutGauge, totalValueGauge, serverSelectableGauge, serverConnectedGauge, sessionValueMeter, serverDialedMeter)
 
-	leth.retriever = newRetrieveManager(peers, leth.reqDist, leth.serverPool.GetTimeout)
-	leth.relay = newLesTxRelay(peers, leth.retriever)
+	lsdc.retriever = newRetrieveManager(peers, lsdc.reqDist, lsdc.serverPool.GetTimeout)
+	lsdc.relay = newLesTxRelay(peers, lsdc.retriever)
 
-	leth.odr = NewLesOdr(chainDb, light.DefaultClientIndexerConfig, leth.peers, leth.retriever)
-	leth.chtIndexer = light.NewChtIndexer(chainDb, leth.odr, params.CHTFrequency, params.HelperTrieConfirmations, config.LightNoPrune)
-	leth.bloomTrieIndexer = light.NewBloomTrieIndexer(chainDb, leth.odr, params.BloomBitsBlocksClient, params.BloomTrieFrequency, config.LightNoPrune)
-	leth.odr.SetIndexers(leth.chtIndexer, leth.bloomTrieIndexer, leth.bloomIndexer)
+	lsdc.odr = NewLesOdr(chainDb, light.DefaultClientIndexerConfig, lsdc.peers, lsdc.retriever)
+	lsdc.chtIndexer = light.NewChtIndexer(chainDb, lsdc.odr, params.CHTFrequency, params.HelperTrieConfirmations, config.LightNoPrune)
+	lsdc.bloomTrieIndexer = light.NewBloomTrieIndexer(chainDb, lsdc.odr, params.BloomBitsBlocksClient, params.BloomTrieFrequency, config.LightNoPrune)
+	lsdc.odr.SetIndexers(lsdc.chtIndexer, lsdc.bloomTrieIndexer, lsdc.bloomIndexer)
 
 	checkpoint := config.Checkpoint
 	if checkpoint == nil {
@@ -158,58 +158,58 @@ func New(stack *node.Node, config *ethconfig.Config) (*LightEthereum, error) {
 	}
 	// Note: NewLightChain adds the trusted checkpoint so it needs an ODR with
 	// indexers already set but not started yet
-	if leth.blockchain, err = light.NewLightChain(leth.odr, leth.chainConfig, leth.engine, checkpoint); err != nil {
+	if lsdc.blockchain, err = light.NewLightChain(lsdc.odr, lsdc.chainConfig, lsdc.engine, checkpoint); err != nil {
 		return nil, err
 	}
-	leth.chainReader = leth.blockchain
-	leth.txPool = light.NewTxPool(leth.chainConfig, leth.blockchain, leth.relay)
+	lsdc.chainReader = lsdc.blockchain
+	lsdc.txPool = light.NewTxPool(lsdc.chainConfig, lsdc.blockchain, lsdc.relay)
 
 	// Set up checkpoint oracle.
-	leth.oracle = leth.setupOracle(stack, genesisHash, config)
+	lsdc.oracle = lsdc.setupOracle(stack, genesisHash, config)
 
 	// Note: AddChildIndexer starts the update process for the child
-	leth.bloomIndexer.AddChildIndexer(leth.bloomTrieIndexer)
-	leth.chtIndexer.Start(leth.blockchain)
-	leth.bloomIndexer.Start(leth.blockchain)
+	lsdc.bloomIndexer.AddChildIndexer(lsdc.bloomTrieIndexer)
+	lsdc.chtIndexer.Start(lsdc.blockchain)
+	lsdc.bloomIndexer.Start(lsdc.blockchain)
 
 	// Start a light chain pruner to delete useless historical data.
-	leth.pruner = newPruner(chainDb, leth.chtIndexer, leth.bloomTrieIndexer)
+	lsdc.pruner = newPruner(chainDb, lsdc.chtIndexer, lsdc.bloomTrieIndexer)
 
 	// Rewind the chain in case of an incompatible config upgrade.
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
 		log.Warn("Rewinding chain to upgrade configuration", "err", compat)
-		leth.blockchain.SetHead(compat.RewindTo)
+		lsdc.blockchain.Ssdcead(compat.RewindTo)
 		rawdb.WriteChainConfig(chainDb, genesisHash, chainConfig)
 	}
 
-	leth.ApiBackend = &LesApiBackend{stack.Config().ExtRPCEnabled(), stack.Config().AllowUnprotectedTxs, leth, nil}
+	lsdc.ApiBackend = &LesApiBackend{stack.Config().ExtRPCEnabled(), stack.Config().AllowUnprotectedTxs, lsdc, nil}
 	gpoParams := config.GPO
 	if gpoParams.Default == nil {
 		gpoParams.Default = config.Miner.GasPrice
 	}
-	leth.ApiBackend.gpo = gasprice.NewOracle(leth.ApiBackend, gpoParams)
+	lsdc.ApiBackend.gpo = gasprice.NewOracle(lsdc.ApiBackend, gpoParams)
 
-	leth.handler = newClientHandler(config.UltraLightServers, config.UltraLightFraction, checkpoint, leth)
-	if leth.handler.ulc != nil {
-		log.Warn("Ultra light client is enabled", "trustedNodes", len(leth.handler.ulc.keys), "minTrustedFraction", leth.handler.ulc.fraction)
-		leth.blockchain.DisableCheckFreq()
+	lsdc.handler = newClientHandler(config.UltraLightServers, config.UltraLightFraction, checkpoint, lsdc)
+	if lsdc.handler.ulc != nil {
+		log.Warn("Ultra light client is enabled", "trustedNodes", len(lsdc.handler.ulc.keys), "minTrustedFraction", lsdc.handler.ulc.fraction)
+		lsdc.blockchain.DisableCheckFreq()
 	}
 
-	leth.netRPCService = ethapi.NewNetAPI(leth.p2pServer, leth.config.NetworkId)
+	lsdc.netRPCService = sdcapi.NewNetAPI(lsdc.p2pServer, lsdc.config.NetworkId)
 
 	// Register the backend on the node
-	stack.RegisterAPIs(leth.APIs())
-	stack.RegisterProtocols(leth.Protocols())
-	stack.RegisterLifecycle(leth)
+	stack.RegisterAPIs(lsdc.APIs())
+	stack.RegisterProtocols(lsdc.Protocols())
+	stack.RegisterLifecycle(lsdc)
 
 	// Successful startup; push a marker and check previous unclean shutdowns.
-	leth.shutdownTracker.MarkStartup()
+	lsdc.shutdownTracker.MarkStartup()
 
-	return leth, nil
+	return lsdc, nil
 }
 
 // VfluxRequest sends a batch of requests to the given node through discv5 UDP TalkRequest and returns the responses
-func (s *LightEthereum) VfluxRequest(n *enode.Node, reqs vflux.Requests) vflux.Replies {
+func (s *Lightsdcereum) VfluxRequest(n *enode.Node, reqs vflux.Requests) vflux.Replies {
 	if !s.udpEnabled {
 		return nil
 	}
@@ -224,7 +224,7 @@ func (s *LightEthereum) VfluxRequest(n *enode.Node, reqs vflux.Requests) vflux.R
 
 // vfxVersion returns the version number of the "les" service subdomain of the vflux UDP
 // service, as advertised in the ENR record
-func (s *LightEthereum) vfxVersion(n *enode.Node) uint {
+func (s *Lightsdcereum) vfxVersion(n *enode.Node) uint {
 	if n.Seq() == 0 {
 		var err error
 		if !s.udpEnabled {
@@ -246,9 +246,9 @@ func (s *LightEthereum) vfxVersion(n *enode.Node) uint {
 	return version
 }
 
-// prenegQuery sends a capacity query to the given server node to determine whether
+// prenegQuery sends a capacity query to the given server node to determine whsdcer
 // a connection slot is immediately available
-func (s *LightEthereum) prenegQuery(n *enode.Node) int {
+func (s *Lightsdcereum) prenegQuery(n *enode.Node) int {
 	if s.vfxVersion(n) < 1 {
 		// UDP query not supported, always try TCP connection
 		return 1
@@ -272,12 +272,12 @@ func (s *LightEthereum) prenegQuery(n *enode.Node) int {
 
 type LightDummyAPI struct{}
 
-// Etherbase is the address that mining rewards will be send to
-func (s *LightDummyAPI) Etherbase() (common.Address, error) {
+// sdcerbase is the address that mining rewards will be send to
+func (s *LightDummyAPI) sdcerbase() (common.Address, error) {
 	return common.Address{}, fmt.Errorf("mining is not supported in light mode")
 }
 
-// Coinbase is the address that mining rewards will be send to (alias for Etherbase)
+// Coinbase is the address that mining rewards will be send to (alias for sdcerbase)
 func (s *LightDummyAPI) Coinbase() (common.Address, error) {
 	return common.Address{}, fmt.Errorf("mining is not supported in light mode")
 }
@@ -292,17 +292,17 @@ func (s *LightDummyAPI) Mining() bool {
 	return false
 }
 
-// APIs returns the collection of RPC services the ethereum package offers.
+// APIs returns the collection of RPC services the sdcereum package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
-func (s *LightEthereum) APIs() []rpc.API {
-	apis := ethapi.GetAPIs(s.ApiBackend)
+func (s *Lightsdcereum) APIs() []rpc.API {
+	apis := sdcapi.GetAPIs(s.ApiBackend)
 	apis = append(apis, s.engine.APIs(s.BlockChain().HeaderChain())...)
 	return append(apis, []rpc.API{
 		{
-			Namespace: "eth",
+			Namespace: "sdc",
 			Service:   &LightDummyAPI{},
 		}, {
-			Namespace: "eth",
+			Namespace: "sdc",
 			Service:   downloader.NewDownloaderAPI(s.handler.downloader, s.eventMux),
 		}, {
 			Namespace: "net",
@@ -317,20 +317,20 @@ func (s *LightEthereum) APIs() []rpc.API {
 	}...)
 }
 
-func (s *LightEthereum) ResetWithGenesisBlock(gb *types.Block) {
+func (s *Lightsdcereum) ResetWithGenesisBlock(gb *types.Block) {
 	s.blockchain.ResetWithGenesisBlock(gb)
 }
 
-func (s *LightEthereum) BlockChain() *light.LightChain      { return s.blockchain }
-func (s *LightEthereum) TxPool() *light.TxPool              { return s.txPool }
-func (s *LightEthereum) Engine() consensus.Engine           { return s.engine }
-func (s *LightEthereum) LesVersion() int                    { return int(ClientProtocolVersions[0]) }
-func (s *LightEthereum) Downloader() *downloader.Downloader { return s.handler.downloader }
-func (s *LightEthereum) EventMux() *event.TypeMux           { return s.eventMux }
-func (s *LightEthereum) Merger() *consensus.Merger          { return s.merger }
+func (s *Lightsdcereum) BlockChain() *light.LightChain      { return s.blockchain }
+func (s *Lightsdcereum) TxPool() *light.TxPool              { return s.txPool }
+func (s *Lightsdcereum) Engine() consensus.Engine           { return s.engine }
+func (s *Lightsdcereum) LesVersion() int                    { return int(ClientProtocolVersions[0]) }
+func (s *Lightsdcereum) Downloader() *downloader.Downloader { return s.handler.downloader }
+func (s *Lightsdcereum) EventMux() *event.TypeMux           { return s.eventMux }
+func (s *Lightsdcereum) Merger() *consensus.Merger          { return s.merger }
 
 // Protocols returns all the currently configured network protocols to start.
-func (s *LightEthereum) Protocols() []p2p.Protocol {
+func (s *Lightsdcereum) Protocols() []p2p.Protocol {
 	return s.makeProtocols(ClientProtocolVersions, s.handler.runPeer, func(id enode.ID) interface{} {
 		if p := s.peers.peer(id.String()); p != nil {
 			return p.Info()
@@ -340,8 +340,8 @@ func (s *LightEthereum) Protocols() []p2p.Protocol {
 }
 
 // Start implements node.Lifecycle, starting all internal goroutines needed by the
-// light ethereum protocol implementation.
-func (s *LightEthereum) Start() error {
+// light sdcereum protocol implementation.
+func (s *Lightsdcereum) Start() error {
 	log.Warn("Light client mode is an experimental feature")
 
 	// Regularly update shutdown marker
@@ -358,7 +358,7 @@ func (s *LightEthereum) Start() error {
 	s.serverPool.AddSource(discovery)
 	s.serverPool.Start()
 	// Start bloom request workers.
-	s.wg.Add(bloomServiceThreads)
+	s.wg.Add(bloomServicsdcreads)
 	s.startBloomHandlers(params.BloomBitsBlocksClient)
 	s.handler.start()
 
@@ -366,8 +366,8 @@ func (s *LightEthereum) Start() error {
 }
 
 // Stop implements node.Lifecycle, terminating all internal goroutines used by the
-// Ethereum protocol.
-func (s *LightEthereum) Stop() error {
+// sdcereum protocol.
+func (s *Lightsdcereum) Stop() error {
 	close(s.closeCh)
 	s.serverPool.Stop()
 	s.peers.close()
@@ -388,6 +388,6 @@ func (s *LightEthereum) Stop() error {
 	s.chainDb.Close()
 	s.lesDb.Close()
 	s.wg.Wait()
-	log.Info("Light ethereum stopped")
+	log.Info("Light sdcereum stopped")
 	return nil
 }

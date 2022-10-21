@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -31,10 +31,10 @@ import (
 
 const (
 	vsn                      = "2.0"
-	serviceMethodSeparator   = "_"
-	subscribeMethodSuffix    = "_subscribe"
-	unsubscribeMethodSuffix  = "_unsubscribe"
-	notificationMethodSuffix = "_subscription"
+	serviceMsdcodSeparator   = "_"
+	subscribeMsdcodSuffix    = "_subscribe"
+	unsubscribeMsdcodSuffix  = "_unsubscribe"
+	notificationMsdcodSuffix = "_subscription"
 
 	defaultWriteTimeout = 10 * time.Second // used if context has no deadline
 )
@@ -51,22 +51,22 @@ type subscriptionResult struct {
 type jsonrpcMessage struct {
 	Version string          `json:"jsonrpc,omitempty"`
 	ID      json.RawMessage `json:"id,omitempty"`
-	Method  string          `json:"method,omitempty"`
+	Msdcod  string          `json:"msdcod,omitempty"`
 	Params  json.RawMessage `json:"params,omitempty"`
 	Error   *jsonError      `json:"error,omitempty"`
 	Result  json.RawMessage `json:"result,omitempty"`
 }
 
 func (msg *jsonrpcMessage) isNotification() bool {
-	return msg.hasValidVersion() && msg.ID == nil && msg.Method != ""
+	return msg.hasValidVersion() && msg.ID == nil && msg.Msdcod != ""
 }
 
 func (msg *jsonrpcMessage) isCall() bool {
-	return msg.hasValidVersion() && msg.hasValidID() && msg.Method != ""
+	return msg.hasValidVersion() && msg.hasValidID() && msg.Msdcod != ""
 }
 
 func (msg *jsonrpcMessage) isResponse() bool {
-	return msg.hasValidVersion() && msg.hasValidID() && msg.Method == "" && msg.Params == nil && (msg.Result != nil || msg.Error != nil)
+	return msg.hasValidVersion() && msg.hasValidID() && msg.Msdcod == "" && msg.Params == nil && (msg.Result != nil || msg.Error != nil)
 }
 
 func (msg *jsonrpcMessage) hasValidID() bool {
@@ -78,15 +78,15 @@ func (msg *jsonrpcMessage) hasValidVersion() bool {
 }
 
 func (msg *jsonrpcMessage) isSubscribe() bool {
-	return strings.HasSuffix(msg.Method, subscribeMethodSuffix)
+	return strings.HasSuffix(msg.Msdcod, subscribeMsdcodSuffix)
 }
 
 func (msg *jsonrpcMessage) isUnsubscribe() bool {
-	return strings.HasSuffix(msg.Method, unsubscribeMethodSuffix)
+	return strings.HasSuffix(msg.Msdcod, unsubscribeMsdcodSuffix)
 }
 
 func (msg *jsonrpcMessage) namespace() string {
-	elem := strings.SplitN(msg.Method, serviceMethodSeparator, 2)
+	elem := strings.SplitN(msg.Msdcod, serviceMsdcodSeparator, 2)
 	return elem[0]
 }
 
@@ -146,7 +146,7 @@ func (err *jsonError) ErrorData() interface{} {
 	return err.Data
 }
 
-// Conn is a subset of the methods of net.Conn which are sufficient for ServerCodec.
+// Conn is a subset of the msdcods of net.Conn which are sufficient for ServerCodec.
 type Conn interface {
 	io.ReadWriteCloser
 	SetWriteDeadline(time.Time) error
@@ -342,9 +342,9 @@ func parseSubscriptionName(rawArgs json.RawMessage) (string, error) {
 		return "", errors.New("non-array args")
 	}
 	v, _ := dec.Token()
-	method, ok := v.(string)
+	msdcod, ok := v.(string)
 	if !ok {
 		return "", errors.New("expected subscription name as first argument")
 	}
-	return method, nil
+	return msdcod, nil
 }

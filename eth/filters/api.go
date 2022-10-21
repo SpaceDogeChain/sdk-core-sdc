@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package filters
 
@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 // filter is a helper struct that holds meta information over the filter type
@@ -45,7 +45,7 @@ type filter struct {
 }
 
 // FilterAPI offers support to create and manage filters. This will allow external clients to retrieve various
-// information related to the Ethereum protocol such als blocks, transactions and logs.
+// information related to the sdcereum protocol such als blocks, transactions and logs.
 type FilterAPI struct {
 	sys       *FilterSystem
 	events    *EventSystem
@@ -101,7 +101,7 @@ func (api *FilterAPI) timeoutLoop(timeout time.Duration) {
 // as transactions enter the pending state.
 //
 // It is part of the filter package because this filter can be used through the
-// `eth_getFilterChanges` polling method that is also used for log filters.
+// `sdc_getFilterChanges` polling msdcod that is also used for log filters.
 func (api *FilterAPI) NewPendingTransactionFilter() rpc.ID {
 	var (
 		pendingTxs   = make(chan []*types.Transaction)
@@ -174,7 +174,7 @@ func (api *FilterAPI) NewPendingTransactions(ctx context.Context, fullTx *bool) 
 }
 
 // NewBlockFilter creates a filter that fetches blocks that are imported into the chain.
-// It is part of the filter package since polling goes with eth_getFilterChanges.
+// It is part of the filter package since polling goes with sdc_getFilterChanges.
 func (api *FilterAPI) NewBlockFilter() rpc.ID {
 	var (
 		headers   = make(chan *types.Header)
@@ -248,7 +248,7 @@ func (api *FilterAPI) Logs(ctx context.Context, crit FilterCriteria) (*rpc.Subsc
 		matchedLogs = make(chan []*types.Log)
 	)
 
-	logsSub, err := api.events.SubscribeLogs(ethereum.FilterQuery(crit), matchedLogs)
+	logsSub, err := api.events.SubscribeLogs(sdcereum.FilterQuery(crit), matchedLogs)
 	if err != nil {
 		return nil, err
 	}
@@ -275,11 +275,11 @@ func (api *FilterAPI) Logs(ctx context.Context, crit FilterCriteria) (*rpc.Subsc
 }
 
 // FilterCriteria represents a request to create a new filter.
-// Same as ethereum.FilterQuery but with UnmarshalJSON() method.
-type FilterCriteria ethereum.FilterQuery
+// Same as sdcereum.FilterQuery but with UnmarshalJSON() msdcod.
+type FilterCriteria sdcereum.FilterQuery
 
 // NewFilter creates a new filter and returns the filter id. It can be
-// used to retrieve logs when the state changes. This method cannot be
+// used to retrieve logs when the state changes. This msdcod cannot be
 // used to fetch logs that are already stored in the state.
 //
 // Default criteria for the from and to block are "latest".
@@ -291,7 +291,7 @@ type FilterCriteria ethereum.FilterQuery
 // In case "fromBlock" > "toBlock" an error is returned.
 func (api *FilterAPI) NewFilter(crit FilterCriteria) (rpc.ID, error) {
 	logs := make(chan []*types.Log)
-	logsSub, err := api.events.SubscribeLogs(ethereum.FilterQuery(crit), logs)
+	logsSub, err := api.events.SubscribeLogs(sdcereum.FilterQuery(crit), logs)
 	if err != nil {
 		return "", err
 	}

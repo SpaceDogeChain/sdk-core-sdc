@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package fetcher
 
@@ -24,15 +24,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 var (
@@ -53,7 +53,7 @@ var (
 // contains a transaction and every 5th an uncle to allow testing correct block
 // reassembly.
 func makeChain(n int, seed byte, parent *types.Block) ([]common.Hash, map[common.Hash]*types.Block) {
-	blocks, _ := core.GenerateChain(gspec.Config, parent, ethash.NewFaker(), testdb, n, func(i int, block *core.BlockGen) {
+	blocks, _ := core.GenerateChain(gspec.Config, parent, sdcash.NewFaker(), testdb, n, func(i int, block *core.BlockGen) {
 		block.SetCoinbase(common.Address{seed})
 
 		// If the block number is multiple of 3, send a bonus transaction to the miner
@@ -101,14 +101,14 @@ func newTester(light bool) *fetcherTester {
 		blocks:  map[common.Hash]*types.Block{genesis.Hash(): genesis},
 		drops:   make(map[string]bool),
 	}
-	tester.fetcher = NewBlockFetcher(light, tester.getHeader, tester.getBlock, tester.verifyHeader, tester.broadcastBlock, tester.chainHeight, tester.insertHeaders, tester.insertChain, tester.dropPeer)
+	tester.fetcher = NewBlockFetcher(light, tester.gsdceader, tester.getBlock, tester.verifyHeader, tester.broadcastBlock, tester.chainHeight, tester.insertHeaders, tester.insertChain, tester.dropPeer)
 	tester.fetcher.Start()
 
 	return tester
 }
 
-// getHeader retrieves a header from the tester's block chain.
-func (f *fetcherTester) getHeader(hash common.Hash) *types.Header {
+// gsdceader retrieves a header from the tester's block chain.
+func (f *fetcherTester) gsdceader(hash common.Hash) *types.Header {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
@@ -201,19 +201,19 @@ func (f *fetcherTester) makeHeaderFetcher(peer string, blocks map[common.Hash]*t
 		closure[hash] = block
 	}
 	// Create a function that return a header from the closure
-	return func(hash common.Hash, sink chan *eth.Response) (*eth.Request, error) {
+	return func(hash common.Hash, sink chan *sdc.Response) (*sdc.Request, error) {
 		// Gather the blocks to return
 		headers := make([]*types.Header, 0, 1)
 		if block, ok := closure[hash]; ok {
 			headers = append(headers, block.Header())
 		}
 		// Return on a new thread
-		req := &eth.Request{
+		req := &sdc.Request{
 			Peer: peer,
 		}
-		res := &eth.Response{
+		res := &sdc.Response{
 			Req:  req,
-			Res:  (*eth.BlockHeadersPacket)(&headers),
+			Res:  (*sdc.BlockHeadersPacket)(&headers),
 			Time: drift,
 			Done: make(chan error, 1), // Ignore the returned status
 		}
@@ -231,7 +231,7 @@ func (f *fetcherTester) makeBodyFetcher(peer string, blocks map[common.Hash]*typ
 		closure[hash] = block
 	}
 	// Create a function that returns blocks from the closure
-	return func(hashes []common.Hash, sink chan *eth.Response) (*eth.Request, error) {
+	return func(hashes []common.Hash, sink chan *sdc.Response) (*sdc.Request, error) {
 		// Gather the block bodies to return
 		transactions := make([][]*types.Transaction, 0, len(hashes))
 		uncles := make([][]*types.Header, 0, len(hashes))
@@ -243,19 +243,19 @@ func (f *fetcherTester) makeBodyFetcher(peer string, blocks map[common.Hash]*typ
 			}
 		}
 		// Return on a new thread
-		bodies := make([]*eth.BlockBody, len(transactions))
+		bodies := make([]*sdc.BlockBody, len(transactions))
 		for i, txs := range transactions {
-			bodies[i] = &eth.BlockBody{
+			bodies[i] = &sdc.BlockBody{
 				Transactions: txs,
 				Uncles:       uncles[i],
 			}
 		}
-		req := &eth.Request{
+		req := &sdc.Request{
 			Peer: peer,
 		}
-		res := &eth.Response{
+		res := &sdc.Response{
 			Req:  req,
-			Res:  (*eth.BlockBodiesPacket)(&bodies),
+			Res:  (*sdc.BlockBodiesPacket)(&bodies),
 			Time: drift,
 			Done: make(chan error, 1), // Ignore the returned status
 		}
@@ -414,11 +414,11 @@ func testConcurrentAnnouncements(t *testing.T, light bool) {
 	secondBodyFetcher := tester.makeBodyFetcher("second", blocks, 0)
 
 	counter := uint32(0)
-	firstHeaderWrapper := func(hash common.Hash, sink chan *eth.Response) (*eth.Request, error) {
+	firstHeaderWrapper := func(hash common.Hash, sink chan *sdc.Response) (*sdc.Request, error) {
 		atomic.AddUint32(&counter, 1)
 		return firstHeaderFetcher(hash, sink)
 	}
-	secondHeaderWrapper := func(hash common.Hash, sink chan *eth.Response) (*eth.Request, error) {
+	secondHeaderWrapper := func(hash common.Hash, sink chan *sdc.Response) (*sdc.Request, error) {
 		atomic.AddUint32(&counter, 1)
 		return secondHeaderFetcher(hash, sink)
 	}
@@ -514,11 +514,11 @@ func testPendingDeduplication(t *testing.T, light bool) {
 
 	delay := 50 * time.Millisecond
 	counter := uint32(0)
-	headerWrapper := func(hash common.Hash, sink chan *eth.Response) (*eth.Request, error) {
+	headerWrapper := func(hash common.Hash, sink chan *sdc.Response) (*sdc.Request, error) {
 		atomic.AddUint32(&counter, 1)
 
 		// Simulate a long running fetch
-		resink := make(chan *eth.Response)
+		resink := make(chan *sdc.Response)
 		req, err := headerFetcher(hash, resink)
 		if err == nil {
 			go func() {
@@ -534,7 +534,7 @@ func testPendingDeduplication(t *testing.T, light bool) {
 	}
 	if light {
 		checkNonExist = func() bool {
-			return tester.getHeader(hashes[0]) == nil
+			return tester.gsdceader(hashes[0]) == nil
 		}
 	}
 	// Announce the same block many times until it's fetched (wait for any pending ops)

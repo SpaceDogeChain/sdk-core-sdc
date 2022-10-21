@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rawdb
 
@@ -22,11 +22,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -58,17 +58,17 @@ func (h *testHasher) Hash() common.Hash {
 func TestLookupStorage(t *testing.T) {
 	tests := []struct {
 		name                        string
-		writeTxLookupEntriesByBlock func(ethdb.Writer, *types.Block)
+		writeTxLookupEntriesByBlock func(sdcdb.Writer, *types.Block)
 	}{
 		{
 			"DatabaseV6",
-			func(db ethdb.Writer, block *types.Block) {
+			func(db sdcdb.Writer, block *types.Block) {
 				WriteTxLookupEntriesByBlock(db, block)
 			},
 		},
 		{
 			"DatabaseV4-V5",
-			func(db ethdb.Writer, block *types.Block) {
+			func(db sdcdb.Writer, block *types.Block) {
 				for _, tx := range block.Transactions() {
 					db.Put(txLookupKey(tx.Hash()), block.Hash().Bytes())
 				}
@@ -76,7 +76,7 @@ func TestLookupStorage(t *testing.T) {
 		},
 		{
 			"DatabaseV3",
-			func(db ethdb.Writer, block *types.Block) {
+			func(db sdcdb.Writer, block *types.Block) {
 				for index, tx := range block.Transactions() {
 					entry := LegacyTxLookupEntry{
 						BlockHash:  block.Hash(),

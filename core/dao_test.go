@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -20,10 +20,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // Tests that DAO-fork enabled clients can properly filter out fork-commencing
@@ -38,7 +38,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 		BaseFee: big.NewInt(params.InitialBaseFee),
 		Config:  &chainConfig,
 	}
-	genDb, prefix, _ := GenerateChainWithGenesis(gspec, ethash.NewFaker(), int(forkBlock.Int64()-1), func(i int, gen *BlockGen) {})
+	genDb, prefix, _ := GenerateChainWithGenesis(gspec, sdcash.NewFaker(), int(forkBlock.Int64()-1), func(i int, gen *BlockGen) {})
 
 	// Create the concurrent, conflicting two nodes
 	proDb := rawdb.NewMemoryDatabase()
@@ -50,7 +50,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 		BaseFee: big.NewInt(params.InitialBaseFee),
 		Config:  &proConf,
 	}
-	proBc, _ := NewBlockChain(proDb, nil, progspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+	proBc, _ := NewBlockChain(proDb, nil, progspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 	defer proBc.Stop()
 
 	conDb := rawdb.NewMemoryDatabase()
@@ -62,7 +62,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 		BaseFee: big.NewInt(params.InitialBaseFee),
 		Config:  &conConf,
 	}
-	conBc, _ := NewBlockChain(conDb, nil, congspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+	conBc, _ := NewBlockChain(conDb, nil, congspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 	defer conBc.Stop()
 
 	if _, err := proBc.InsertChain(prefix); err != nil {
@@ -74,7 +74,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 	// Try to expand both pro-fork and non-fork chains iteratively with other camp's blocks
 	for i := int64(0); i < params.DAOForkExtraRange.Int64(); i++ {
 		// Create a pro-fork block, and try to feed into the no-fork chain
-		bc, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, congspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+		bc, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, congspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 
 		blocks := conBc.GetBlocksFromHash(conBc.CurrentBlock().Hash(), int(conBc.CurrentBlock().NumberU64()))
 		for j := 0; j < len(blocks)/2; j++ {
@@ -87,17 +87,17 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 			t.Fatalf("failed to commit contra-fork head for expansion: %v", err)
 		}
 		bc.Stop()
-		blocks, _ = GenerateChain(&proConf, conBc.CurrentBlock(), ethash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
+		blocks, _ = GenerateChain(&proConf, conBc.CurrentBlock(), sdcash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
 		if _, err := conBc.InsertChain(blocks); err == nil {
 			t.Fatalf("contra-fork chain accepted pro-fork block: %v", blocks[0])
 		}
 		// Create a proper no-fork block for the contra-forker
-		blocks, _ = GenerateChain(&conConf, conBc.CurrentBlock(), ethash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
+		blocks, _ = GenerateChain(&conConf, conBc.CurrentBlock(), sdcash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
 		if _, err := conBc.InsertChain(blocks); err != nil {
 			t.Fatalf("contra-fork chain didn't accepted no-fork block: %v", err)
 		}
 		// Create a no-fork block, and try to feed into the pro-fork chain
-		bc, _ = NewBlockChain(rawdb.NewMemoryDatabase(), nil, progspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+		bc, _ = NewBlockChain(rawdb.NewMemoryDatabase(), nil, progspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 
 		blocks = proBc.GetBlocksFromHash(proBc.CurrentBlock().Hash(), int(proBc.CurrentBlock().NumberU64()))
 		for j := 0; j < len(blocks)/2; j++ {
@@ -110,18 +110,18 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 			t.Fatalf("failed to commit pro-fork head for expansion: %v", err)
 		}
 		bc.Stop()
-		blocks, _ = GenerateChain(&conConf, proBc.CurrentBlock(), ethash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
+		blocks, _ = GenerateChain(&conConf, proBc.CurrentBlock(), sdcash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
 		if _, err := proBc.InsertChain(blocks); err == nil {
 			t.Fatalf("pro-fork chain accepted contra-fork block: %v", blocks[0])
 		}
 		// Create a proper pro-fork block for the pro-forker
-		blocks, _ = GenerateChain(&proConf, proBc.CurrentBlock(), ethash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
+		blocks, _ = GenerateChain(&proConf, proBc.CurrentBlock(), sdcash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
 		if _, err := proBc.InsertChain(blocks); err != nil {
 			t.Fatalf("pro-fork chain didn't accepted pro-fork block: %v", err)
 		}
 	}
 	// Verify that contra-forkers accept pro-fork extra-datas after forking finishes
-	bc, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, congspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+	bc, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, congspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 	defer bc.Stop()
 
 	blocks := conBc.GetBlocksFromHash(conBc.CurrentBlock().Hash(), int(conBc.CurrentBlock().NumberU64()))
@@ -134,12 +134,12 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 	if err := bc.stateCache.TrieDB().Commit(bc.CurrentHeader().Root, true, nil); err != nil {
 		t.Fatalf("failed to commit contra-fork head for expansion: %v", err)
 	}
-	blocks, _ = GenerateChain(&proConf, conBc.CurrentBlock(), ethash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
+	blocks, _ = GenerateChain(&proConf, conBc.CurrentBlock(), sdcash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
 	if _, err := conBc.InsertChain(blocks); err != nil {
 		t.Fatalf("contra-fork chain didn't accept pro-fork block post-fork: %v", err)
 	}
 	// Verify that pro-forkers accept contra-fork extra-datas after forking finishes
-	bc, _ = NewBlockChain(rawdb.NewMemoryDatabase(), nil, progspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+	bc, _ = NewBlockChain(rawdb.NewMemoryDatabase(), nil, progspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 	defer bc.Stop()
 
 	blocks = proBc.GetBlocksFromHash(proBc.CurrentBlock().Hash(), int(proBc.CurrentBlock().NumberU64()))
@@ -152,7 +152,7 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 	if err := bc.stateCache.TrieDB().Commit(bc.CurrentHeader().Root, true, nil); err != nil {
 		t.Fatalf("failed to commit pro-fork head for expansion: %v", err)
 	}
-	blocks, _ = GenerateChain(&conConf, proBc.CurrentBlock(), ethash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
+	blocks, _ = GenerateChain(&conConf, proBc.CurrentBlock(), sdcash.NewFaker(), genDb, 1, func(i int, gen *BlockGen) {})
 	if _, err := proBc.InsertChain(blocks); err != nil {
 		t.Fatalf("pro-fork chain didn't accept contra-fork block post-fork: %v", err)
 	}

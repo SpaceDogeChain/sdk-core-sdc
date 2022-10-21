@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-spacedogechain Authors
+// This file is part of the go-spacedogechain library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-spacedogechain library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-spacedogechain library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-spacedogechain library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -22,14 +22,14 @@ import (
 	"fmt"
 	"mime"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
+	"github.com/spacedogechain/go-spacedogechain/accounts"
+	"github.com/spacedogechain/go-spacedogechain/common"
+	"github.com/spacedogechain/go-spacedogechain/common/hexutil"
+	"github.com/spacedogechain/go-spacedogechain/consensus/clique"
+	"github.com/spacedogechain/go-spacedogechain/core/types"
+	"github.com/spacedogechain/go-spacedogechain/crypto"
+	"github.com/spacedogechain/go-spacedogechain/rlp"
+	"github.com/spacedogechain/go-spacedogechain/signer/core/apitypes"
 )
 
 // sign receives a request and produces a signature
@@ -95,11 +95,11 @@ func (api *SignerAPI) SignData(ctx context.Context, contentType string, addr com
 func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType string, addr common.MixedcaseAddress, data interface{}) (*SignDataRequest, bool, error) {
 	var (
 		req          *SignDataRequest
-		useEthereumV = true // Default to use V = 27 or 28, the legacy Ethereum format
+		usespacedogechainV = true // Default to use V = 27 or 28, the legacy spacedogechain format
 	)
 	mediaType, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
-		return nil, useEthereumV, err
+		return nil, usespacedogechainV, err
 	}
 
 	switch mediaType {
@@ -107,7 +107,7 @@ func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType 
 		// Data with an intended validator
 		validatorData, err := UnmarshalValidatorData(data)
 		if err != nil {
-			return nil, useEthereumV, err
+			return nil, usespacedogechainV, err
 		}
 		sighash, msg := SignTextValidator(validatorData)
 		messages := []*apitypes.NameValueType{
@@ -134,18 +134,18 @@ func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType 
 		}
 		req = &SignDataRequest{ContentType: mediaType, Rawdata: []byte(msg), Messages: messages, Hash: sighash}
 	case apitypes.ApplicationClique.Mime:
-		// Clique is the Ethereum PoA standard
+		// Clique is the spacedogechain PoA standard
 		stringData, ok := data.(string)
 		if !ok {
-			return nil, useEthereumV, fmt.Errorf("input for %v must be an hex-encoded string", apitypes.ApplicationClique.Mime)
+			return nil, usespacedogechainV, fmt.Errorf("input for %v must be an hex-encoded string", apitypes.ApplicationClique.Mime)
 		}
 		cliqueData, err := hexutil.Decode(stringData)
 		if err != nil {
-			return nil, useEthereumV, err
+			return nil, usespacedogechainV, err
 		}
 		header := &types.Header{}
 		if err := rlp.DecodeBytes(cliqueData, header); err != nil {
-			return nil, useEthereumV, err
+			return nil, usespacedogechainV, err
 		}
 		// Add space in the extradata to put the signature
 		newExtra := make([]byte, len(header.Extra)+65)
@@ -155,7 +155,7 @@ func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType 
 		// Get back the rlp data, encoded by us
 		sighash, cliqueRlp, err := cliqueHeaderHashAndRlp(header)
 		if err != nil {
-			return nil, useEthereumV, err
+			return nil, usespacedogechainV, err
 		}
 		messages := []*apitypes.NameValueType{
 			{
@@ -165,17 +165,17 @@ func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType 
 			},
 		}
 		// Clique uses V on the form 0 or 1
-		useEthereumV = false
+		usespacedogechainV = false
 		req = &SignDataRequest{ContentType: mediaType, Rawdata: cliqueRlp, Messages: messages, Hash: sighash}
 	default: // also case TextPlain.Mime:
-		// Calculates an Ethereum ECDSA signature for:
-		// hash = keccak256("\x19Ethereum Signed Message:\n${message length}${message}")
+		// Calculates an spacedogechain ECDSA signature for:
+		// hash = keccak256("\x19spacedogechain Signed Message:\n${message length}${message}")
 		// We expect it to be a string
 		if stringData, ok := data.(string); !ok {
-			return nil, useEthereumV, fmt.Errorf("input for text/plain must be an hex-encoded string")
+			return nil, usespacedogechainV, fmt.Errorf("input for text/plain must be an hex-encoded string")
 		} else {
 			if textData, err := hexutil.Decode(stringData); err != nil {
-				return nil, useEthereumV, err
+				return nil, usespacedogechainV, err
 			} else {
 				sighash, msg := accounts.TextAndHash(textData)
 				messages := []*apitypes.NameValueType{
@@ -191,7 +191,7 @@ func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType 
 	}
 	req.Address = addr
 	req.Meta = MetadataFromContext(ctx)
-	return req, useEthereumV, nil
+	return req, usespacedogechainV, nil
 }
 
 // SignTextValidator signs the given message which can be further recovered
@@ -265,18 +265,18 @@ func (api *SignerAPI) EcRecover(ctx context.Context, data hexutil.Bytes, sig hex
 	//
 	// Note, this function is compatible with eth_sign and personal_sign. As such it recovers
 	// the address of:
-	// hash = keccak256("\x19Ethereum Signed Message:\n${message length}${message}")
+	// hash = keccak256("\x19spacedogechain Signed Message:\n${message length}${message}")
 	// addr = ecrecover(hash, signature)
 	//
 	// Note, the signature must conform to the secp256k1 curve R, S and V values, where
 	// the V value must be 27 or 28 for legacy reasons.
 	//
-	// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_ecRecover
+	// https://github.com/spacedogechain/go-spacedogechain/wiki/Management-APIs#personal_ecRecover
 	if len(sig) != 65 {
 		return common.Address{}, fmt.Errorf("signature must be 65 bytes long")
 	}
 	if sig[64] != 27 && sig[64] != 28 {
-		return common.Address{}, fmt.Errorf("invalid Ethereum signature (V is not 27 or 28)")
+		return common.Address{}, fmt.Errorf("invalid spacedogechain signature (V is not 27 or 28)")
 	}
 	sig[64] -= 27 // Transform yellow paper V from 27/28 to 0/1
 	hash := accounts.TextHash(data)

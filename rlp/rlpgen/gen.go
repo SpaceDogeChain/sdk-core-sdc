@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -23,12 +23,12 @@ import (
 	"go/types"
 	"sort"
 
-	"github.com/ethereum/go-ethereum/rlp/internal/rlpstruct"
+	"github.com/sdcereum/go-sdcereum/rlp/internal/rlpstruct"
 )
 
 // buildContext keeps the data needed for make*Op.
 type buildContext struct {
-	topType *types.Named // the type we're creating methods for
+	topType *types.Named // the type we're creating msdcods for
 
 	encoderIface *types.Interface
 	decoderIface *types.Interface
@@ -91,7 +91,7 @@ func (bctx *buildContext) typeToStructType(typ types.Type) *rlpstruct.Type {
 	return t
 }
 
-// genContext is passed to the gen* methods of op when generating
+// genContext is passed to the gen* msdcods of op when generating
 // the output code. It tracks packages to be imported by the output
 // file and assigns unique names of temporary variables.
 type genContext struct {
@@ -158,11 +158,11 @@ type op interface {
 // basicOp handles basic types bool, uint*, string.
 type basicOp struct {
 	typ           types.Type
-	writeMethod   string     // calle write the value
-	writeArgType  types.Type // parameter type of writeMethod
-	decMethod     string
-	decResultType types.Type // return type of decMethod
-	decUseBitSize bool       // if true, result bit size is appended to decMethod
+	writeMsdcod   string     // calle write the value
+	writeArgType  types.Type // parameter type of writeMsdcod
+	decMsdcod     string
+	decResultType types.Type // return type of decMsdcod
+	decUseBitSize bool       // if true, result bit size is appended to decMsdcod
 }
 
 func (*buildContext) makeBasicOp(typ *types.Basic) (op, error) {
@@ -170,20 +170,20 @@ func (*buildContext) makeBasicOp(typ *types.Basic) (op, error) {
 	kind := typ.Kind()
 	switch {
 	case kind == types.Bool:
-		op.writeMethod = "WriteBool"
+		op.writeMsdcod = "WriteBool"
 		op.writeArgType = types.Typ[types.Bool]
-		op.decMethod = "Bool"
+		op.decMsdcod = "Bool"
 		op.decResultType = types.Typ[types.Bool]
 	case kind >= types.Uint8 && kind <= types.Uint64:
-		op.writeMethod = "WriteUint64"
+		op.writeMsdcod = "WriteUint64"
 		op.writeArgType = types.Typ[types.Uint64]
-		op.decMethod = "Uint"
+		op.decMsdcod = "Uint"
 		op.decResultType = typ
 		op.decUseBitSize = true
 	case kind == types.String:
-		op.writeMethod = "WriteString"
+		op.writeMsdcod = "WriteString"
 		op.writeArgType = types.Typ[types.String]
-		op.decMethod = "String"
+		op.decMsdcod = "String"
 		op.decResultType = types.Typ[types.String]
 	default:
 		return nil, fmt.Errorf("unhandled basic type: %v", typ)
@@ -198,9 +198,9 @@ func (*buildContext) makeByteSliceOp(typ *types.Slice) op {
 	bslice := types.NewSlice(types.Typ[types.Uint8])
 	return basicOp{
 		typ:           typ,
-		writeMethod:   "WriteBytes",
+		writeMsdcod:   "WriteBytes",
 		writeArgType:  bslice,
-		decMethod:     "Bytes",
+		decMsdcod:     "Bytes",
 		decResultType: bslice,
 	}
 }
@@ -209,9 +209,9 @@ func (bctx *buildContext) makeRawValueOp() op {
 	bslice := types.NewSlice(types.Typ[types.Uint8])
 	return basicOp{
 		typ:           bctx.rawValueType,
-		writeMethod:   "Write",
+		writeMsdcod:   "Write",
 		writeArgType:  bslice,
-		decMethod:     "Raw",
+		decMsdcod:     "Raw",
 		decResultType: bslice,
 	}
 }
@@ -228,25 +228,25 @@ func (op basicOp) genWrite(ctx *genContext, v string) string {
 	if op.writeNeedsConversion() {
 		v = fmt.Sprintf("%s(%s)", op.writeArgType, v)
 	}
-	return fmt.Sprintf("w.%s(%s)\n", op.writeMethod, v)
+	return fmt.Sprintf("w.%s(%s)\n", op.writeMsdcod, v)
 }
 
 func (op basicOp) genDecode(ctx *genContext) (string, string) {
 	var (
 		resultV = ctx.temp()
 		result  = resultV
-		method  = op.decMethod
+		msdcod  = op.decMsdcod
 	)
 	if op.decUseBitSize {
 		// Note: For now, this only works for platform-independent integer
 		// sizes. makeBasicOp forbids the platform-dependent types.
 		var sizes types.StdSizes
-		method = fmt.Sprintf("%s%d", op.decMethod, sizes.Sizeof(op.typ)*8)
+		msdcod = fmt.Sprintf("%s%d", op.decMsdcod, sizes.Sizeof(op.typ)*8)
 	}
 
-	// Call the decoder method.
+	// Call the decoder msdcod.
 	var b bytes.Buffer
-	fmt.Fprintf(&b, "%s, err := dec.%s()\n", resultV, method)
+	fmt.Fprintf(&b, "%s, err := dec.%s()\n", resultV, msdcod)
 	fmt.Fprintf(&b, "if err != nil { return err }\n")
 	if op.decodeNeedsConversion() {
 		conv := ctx.temp()
@@ -285,7 +285,7 @@ func (op byteArrayOp) genDecode(ctx *genContext) (string, string) {
 
 // bigIntNoPtrOp handles non-pointer big.Int.
 // This exists because big.Int has it's own decoder operation on rlp.Stream,
-// but the decode method returns *big.Int, so it needs to be dereferenced.
+// but the decode msdcod returns *big.Int, so it needs to be dereferenced.
 type bigIntOp struct {
 	pointer bool
 }
@@ -680,7 +680,7 @@ func (bctx *buildContext) makeOp(name *types.Named, typ types.Type, tags rlpstru
 	}
 }
 
-// generateDecoder generates the DecodeRLP method on 'typ'.
+// generateDecoder generates the DecodeRLP msdcod on 'typ'.
 func generateDecoder(ctx *genContext, typ string, op op) []byte {
 	ctx.resetTemp()
 	ctx.addImport(pathOfPackageRLP)
@@ -695,7 +695,7 @@ func generateDecoder(ctx *genContext, typ string, op op) []byte {
 	return b.Bytes()
 }
 
-// generateEncoder generates the EncodeRLP method on 'typ'.
+// generateEncoder generates the EncodeRLP msdcod on 'typ'.
 func generateEncoder(ctx *genContext, typ string, op op) []byte {
 	ctx.resetTemp()
 	ctx.addImport("io")

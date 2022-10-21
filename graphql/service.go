@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package graphql
 
@@ -20,9 +20,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/eth/filters"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/node"
+	"github.com/sdcereum/go-sdcereum/sdc/filters"
+	"github.com/sdcereum/go-sdcereum/internal/sdcapi"
+	"github.com/sdcereum/go-sdcereum/node"
 	"github.com/graph-gophers/graphql-go"
 )
 
@@ -56,14 +56,14 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // New constructs a new GraphQL service instance.
-func New(stack *node.Node, backend ethapi.Backend, filterSystem *filters.FilterSystem, cors, vhosts []string) error {
+func New(stack *node.Node, backend sdcapi.Backend, filterSystem *filters.FilterSystem, cors, vhosts []string) error {
 	_, err := newHandler(stack, backend, filterSystem, cors, vhosts)
 	return err
 }
 
 // newHandler returns a new `http.Handler` that will answer GraphQL queries.
 // It additionally exports an interactive query browser on the / endpoint.
-func newHandler(stack *node.Node, backend ethapi.Backend, filterSystem *filters.FilterSystem, cors, vhosts []string) (*handler, error) {
+func newHandler(stack *node.Node, backend sdcapi.Backend, filterSystem *filters.FilterSystem, cors, vhosts []string) (*handler, error) {
 	q := Resolver{backend, filterSystem}
 
 	s, err := graphql.ParseSchema(schema, &q)

@@ -1,18 +1,18 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2014 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package trie
 
@@ -29,19 +29,19 @@ import (
 	"testing/quick"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb/memorydb"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	"golang.org/x/crypto/sha3"
 )
 
 func init() {
 	spew.Config.Indent = "    "
-	spew.Config.DisableMethods = false
+	spew.Config.DisableMsdcods = false
 }
 
 func TestEmptyTrie(t *testing.T) {
@@ -205,11 +205,11 @@ func TestDelete(t *testing.T) {
 	trie := NewEmpty(NewDatabase(rawdb.NewMemoryDatabase()))
 	vals := []struct{ k, v string }{
 		{"do", "verb"},
-		{"ether", "wookiedoo"},
+		{"sdcer", "wookiedoo"},
 		{"horse", "stallion"},
 		{"shaman", "horse"},
 		{"doge", "coin"},
-		{"ether", ""},
+		{"sdcer", ""},
 		{"dog", "puppy"},
 		{"shaman", ""},
 	}
@@ -233,11 +233,11 @@ func TestEmptyValues(t *testing.T) {
 
 	vals := []struct{ k, v string }{
 		{"do", "verb"},
-		{"ether", "wookiedoo"},
+		{"sdcer", "wookiedoo"},
 		{"horse", "stallion"},
 		{"shaman", "horse"},
 		{"doge", "coin"},
-		{"ether", ""},
+		{"sdcer", ""},
 		{"dog", "puppy"},
 		{"shaman", ""},
 	}
@@ -257,12 +257,12 @@ func TestReplication(t *testing.T) {
 	trie := NewEmpty(triedb)
 	vals := []struct{ k, v string }{
 		{"do", "verb"},
-		{"ether", "wookiedoo"},
+		{"sdcer", "wookiedoo"},
 		{"horse", "stallion"},
 		{"shaman", "horse"},
 		{"doge", "coin"},
 		{"dog", "puppy"},
-		{"somethingveryoddindeedthis is", "myothernodedata"},
+		{"somsdcingveryoddindeedthis is", "myothernodedata"},
 	}
 	for _, val := range vals {
 		updateString(trie, val.k, val.v)
@@ -302,13 +302,13 @@ func TestReplication(t *testing.T) {
 	// perform some insertions on the new trie.
 	vals2 := []struct{ k, v string }{
 		{"do", "verb"},
-		{"ether", "wookiedoo"},
+		{"sdcer", "wookiedoo"},
 		{"horse", "stallion"},
 		// {"shaman", "horse"},
 		// {"doge", "coin"},
-		// {"ether", ""},
+		// {"sdcer", ""},
 		// {"dog", "puppy"},
-		// {"somethingveryoddindeedthis is", "myothernodedata"},
+		// {"somsdcingveryoddindeedthis is", "myothernodedata"},
 		// {"shaman", ""},
 	}
 	for _, val := range vals2 {
@@ -758,9 +758,9 @@ type spongeDb struct {
 func (s *spongeDb) Has(key []byte) (bool, error)             { panic("implement me") }
 func (s *spongeDb) Get(key []byte) ([]byte, error)           { return nil, errors.New("no such elem") }
 func (s *spongeDb) Delete(key []byte) error                  { panic("implement me") }
-func (s *spongeDb) NewBatch() ethdb.Batch                    { return &spongeBatch{s} }
-func (s *spongeDb) NewBatchWithSize(size int) ethdb.Batch    { return &spongeBatch{s} }
-func (s *spongeDb) NewSnapshot() (ethdb.Snapshot, error)     { panic("implement me") }
+func (s *spongeDb) NewBatch() sdcdb.Batch                    { return &spongeBatch{s} }
+func (s *spongeDb) NewBatchWithSize(size int) sdcdb.Batch    { return &spongeBatch{s} }
+func (s *spongeDb) NewSnapshot() (sdcdb.Snapshot, error)     { panic("implement me") }
 func (s *spongeDb) Stat(property string) (string, error)     { panic("implement me") }
 func (s *spongeDb) Compact(start []byte, limit []byte) error { panic("implement me") }
 func (s *spongeDb) Close() error                             { return nil }
@@ -774,7 +774,7 @@ func (s *spongeDb) Put(key []byte, value []byte) error {
 	s.sponge.Write(value)
 	return nil
 }
-func (s *spongeDb) NewIterator(prefix []byte, start []byte) ethdb.Iterator { panic("implement me") }
+func (s *spongeDb) NewIterator(prefix []byte, start []byte) sdcdb.Iterator { panic("implement me") }
 
 // spongeBatch is a dummy batch which immediately writes to the underlying spongedb
 type spongeBatch struct {
@@ -789,12 +789,12 @@ func (b *spongeBatch) Delete(key []byte) error             { panic("implement me
 func (b *spongeBatch) ValueSize() int                      { return 100 }
 func (b *spongeBatch) Write() error                        { return nil }
 func (b *spongeBatch) Reset()                              {}
-func (b *spongeBatch) Replay(w ethdb.KeyValueWriter) error { return nil }
+func (b *spongeBatch) Replay(w sdcdb.KeyValueWriter) error { return nil }
 
 // TestCommitSequence tests that the trie.Commit operation writes the elements of the trie
 // in the expected order, and calls the callbacks in the expected order.
 // The test data was based on the 'master' code, and is basically random. It can be used
-// to check whether changes to the trie modifies the write order or data in any way.
+// to check whsdcer changes to the trie modifies the write order or data in any way.
 func TestCommitSequence(t *testing.T) {
 	for i, tc := range []struct {
 		count              int

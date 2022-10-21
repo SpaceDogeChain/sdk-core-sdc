@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package light
 
@@ -25,16 +25,16 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/bitutil"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/bitutil"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 // IndexerConfig includes a set of configs for chain indexers.
@@ -111,7 +111,7 @@ type ChtNode struct {
 }
 
 // GetChtRoot reads the CHT root associated to the given section from the database
-func GetChtRoot(db ethdb.Database, sectionIdx uint64, sectionHead common.Hash) common.Hash {
+func GetChtRoot(db sdcdb.Database, sectionIdx uint64, sectionHead common.Hash) common.Hash {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], sectionIdx)
 	data, _ := db.Get(append(append(rawdb.ChtPrefix, encNumber[:]...), sectionHead.Bytes()...))
@@ -119,7 +119,7 @@ func GetChtRoot(db ethdb.Database, sectionIdx uint64, sectionHead common.Hash) c
 }
 
 // StoreChtRoot writes the CHT root associated to the given section into the database
-func StoreChtRoot(db ethdb.Database, sectionIdx uint64, sectionHead, root common.Hash) {
+func StoreChtRoot(db sdcdb.Database, sectionIdx uint64, sectionHead, root common.Hash) {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], sectionIdx)
 	db.Put(append(append(rawdb.ChtPrefix, encNumber[:]...), sectionHead.Bytes()...), root.Bytes())
@@ -128,7 +128,7 @@ func StoreChtRoot(db ethdb.Database, sectionIdx uint64, sectionHead, root common
 // ChtIndexerBackend implements core.ChainIndexerBackend.
 type ChtIndexerBackend struct {
 	disablePruning       bool
-	diskdb, trieTable    ethdb.Database
+	diskdb, trieTable    sdcdb.Database
 	odr                  OdrBackend
 	triedb               *trie.Database
 	section, sectionSize uint64
@@ -137,7 +137,7 @@ type ChtIndexerBackend struct {
 }
 
 // NewChtIndexer creates a Cht chain indexer
-func NewChtIndexer(db ethdb.Database, odr OdrBackend, size, confirms uint64, disablePruning bool) *core.ChainIndexer {
+func NewChtIndexer(db sdcdb.Database, odr OdrBackend, size, confirms uint64, disablePruning bool) *core.ChainIndexer {
 	trieTable := rawdb.NewTable(db, string(rawdb.ChtTablePrefix))
 	backend := &ChtIndexerBackend{
 		diskdb:         db,
@@ -294,7 +294,7 @@ func (c *ChtIndexerBackend) Prune(threshold uint64) error {
 			rawdb.DeleteCanonicalHash(batch, numbers[i])
 			rawdb.DeleteBlockWithoutNumber(batch, hashes[i], numbers[i])
 		}
-		if batch.ValueSize() > ethdb.IdealBatchSize {
+		if batch.ValueSize() > sdcdb.IdealBatchSize {
 			if err := batch.Write(); err != nil {
 				return err
 			}
@@ -310,7 +310,7 @@ func (c *ChtIndexerBackend) Prune(threshold uint64) error {
 }
 
 // GetBloomTrieRoot reads the BloomTrie root associated to the given section from the database
-func GetBloomTrieRoot(db ethdb.Database, sectionIdx uint64, sectionHead common.Hash) common.Hash {
+func GetBloomTrieRoot(db sdcdb.Database, sectionIdx uint64, sectionHead common.Hash) common.Hash {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], sectionIdx)
 	data, _ := db.Get(append(append(rawdb.BloomTriePrefix, encNumber[:]...), sectionHead.Bytes()...))
@@ -318,7 +318,7 @@ func GetBloomTrieRoot(db ethdb.Database, sectionIdx uint64, sectionHead common.H
 }
 
 // StoreBloomTrieRoot writes the BloomTrie root associated to the given section into the database
-func StoreBloomTrieRoot(db ethdb.Database, sectionIdx uint64, sectionHead, root common.Hash) {
+func StoreBloomTrieRoot(db sdcdb.Database, sectionIdx uint64, sectionHead, root common.Hash) {
 	var encNumber [8]byte
 	binary.BigEndian.PutUint64(encNumber[:], sectionIdx)
 	db.Put(append(append(rawdb.BloomTriePrefix, encNumber[:]...), sectionHead.Bytes()...), root.Bytes())
@@ -327,7 +327,7 @@ func StoreBloomTrieRoot(db ethdb.Database, sectionIdx uint64, sectionHead, root 
 // BloomTrieIndexerBackend implements core.ChainIndexerBackend
 type BloomTrieIndexerBackend struct {
 	disablePruning    bool
-	diskdb, trieTable ethdb.Database
+	diskdb, trieTable sdcdb.Database
 	triedb            *trie.Database
 	odr               OdrBackend
 	section           uint64
@@ -339,7 +339,7 @@ type BloomTrieIndexerBackend struct {
 }
 
 // NewBloomTrieIndexer creates a BloomTrie chain indexer
-func NewBloomTrieIndexer(db ethdb.Database, odr OdrBackend, parentSize, size uint64, disablePruning bool) *core.ChainIndexer {
+func NewBloomTrieIndexer(db sdcdb.Database, odr OdrBackend, parentSize, size uint64, disablePruning bool) *core.ChainIndexer {
 	trieTable := rawdb.NewTable(db, string(rawdb.BloomTrieTablePrefix))
 	backend := &BloomTrieIndexerBackend{
 		diskdb:         db,

@@ -1,20 +1,20 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"errors"
@@ -24,21 +24,21 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/beacon"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/forkid"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/fetcher"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/eth/protocols/snap"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/beacon"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/forkid"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/fetcher"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/snap"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 const (
@@ -51,10 +51,10 @@ var (
 	syncChallengeTimeout = 15 * time.Second // Time allowance for a node to reply to the sync progress challenge
 )
 
-// txPool defines the methods needed from a transaction pool implementation to
-// support all the operations needed by the Ethereum chain protocols.
+// txPool defines the msdcods needed from a transaction pool implementation to
+// support all the operations needed by the sdcereum chain protocols.
 type txPool interface {
-	// Has returns an indicator whether txpool has a transaction
+	// Has returns an indicator whsdcer txpool has a transaction
 	// cached with the given hash.
 	Has(hash common.Hash) bool
 
@@ -77,12 +77,12 @@ type txPool interface {
 // handlerConfig is the collection of initialization parameters to create a full
 // node network handler.
 type handlerConfig struct {
-	Database       ethdb.Database            // Database for direct sync insertions
+	Database       sdcdb.Database            // Database for direct sync insertions
 	Chain          *core.BlockChain          // Blockchain to serve data from
 	TxPool         txPool                    // Transaction pool to propagate from
-	Merger         *consensus.Merger         // The manager for eth1/2 transition
+	Merger         *consensus.Merger         // The manager for sdc1/2 transition
 	Network        uint64                    // Network identifier to adfvertise
-	Sync           downloader.SyncMode       // Whether to snap or full sync
+	Sync           downloader.SyncMode       // Whsdcer to snap or full sync
 	BloomCache     uint64                    // Megabytes to alloc for snap sync bloom
 	EventMux       *event.TypeMux            // Legacy event mux, deprecate for `feed`
 	Checkpoint     *params.TrustedCheckpoint // Hard coded checkpoint for sync challenges
@@ -93,13 +93,13 @@ type handler struct {
 	networkID  uint64
 	forkFilter forkid.Filter // Fork ID filter, constant across the lifetime of the node
 
-	snapSync  uint32 // Flag whether snap sync is enabled (gets disabled if we already have blocks)
-	acceptTxs uint32 // Flag whether we're considered synchronised (enables transaction processing)
+	snapSync  uint32 // Flag whsdcer snap sync is enabled (gets disabled if we already have blocks)
+	acceptTxs uint32 // Flag whsdcer we're considered synchronised (enables transaction processing)
 
 	checkpointNumber uint64      // Block number for the sync progress validator to cross reference
 	checkpointHash   common.Hash // Block hash for the sync progress validator to cross reference
 
-	database ethdb.Database
+	database sdcdb.Database
 	txpool   txPool
 	chain    *core.BlockChain
 	maxPeers int
@@ -125,7 +125,7 @@ type handler struct {
 	peerWG    sync.WaitGroup
 }
 
-// newHandler returns a handler for all Ethereum chain management protocol.
+// newHandler returns a handler for all sdcereum chain management protocol.
 func newHandler(config *handlerConfig) (*handler, error) {
 	// Create the protocol manager with the base fields
 	if config.EventMux == nil {
@@ -257,7 +257,7 @@ func newHandler(config *handlerConfig) (*handler, error) {
 		// If snap sync is running, deny importing weird blocks. This is a problematic
 		// clause when starting up a new network, because snap-syncing miners might not
 		// accept each others' blocks until a restart. Unfortunately we haven't figured
-		// out a way yet where nodes can decide unilaterally whether the network is new
+		// out a way yet where nodes can decide unilaterally whsdcer the network is new
 		// or not. This should be fixed if we figure out a solution.
 		if atomic.LoadUint32(&h.snapSync) == 1 {
 			log.Warn("Snap syncing, discarded propagated block", "number", blocks[0].Number(), "hash", blocks[0].Hash())
@@ -269,7 +269,7 @@ func newHandler(config *handlerConfig) (*handler, error) {
 			// entirely whenever the transition is started. But in order to
 			// handle the transition boundary reorg in the consensus-layer,
 			// the legacy blocks are still accepted, but only for the terminal
-			// pow blocks. Spec: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-3675.md#halt-the-importing-of-pow-blocks
+			// pow blocks. Spec: https://github.com/sdcereum/EIPs/blob/master/EIPS/eip-3675.md#halt-the-importing-of-pow-blocks
 			for i, block := range blocks {
 				ptd := h.chain.GetTd(block.ParentHash(), block.NumberU64()-1)
 				if ptd == nil {
@@ -280,7 +280,7 @@ func newHandler(config *handlerConfig) (*handler, error) {
 					log.Info("Filtered out non-termimal pow block", "number", block.NumberU64(), "hash", block.Hash())
 					return 0, nil
 				}
-				if err := h.chain.InsertBlockWithoutSetHead(block); err != nil {
+				if err := h.chain.InsertBlockWithoutSsdcead(block); err != nil {
 					return i, err
 				}
 			}
@@ -306,9 +306,9 @@ func newHandler(config *handlerConfig) (*handler, error) {
 	return h, nil
 }
 
-// runEthPeer registers an eth peer into the joint eth/snap peerset, adds it to
+// runsdcPeer registers an sdc peer into the joint sdc/snap peerset, adds it to
 // various subsystems and starts handling messages.
-func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
+func (h *handler) runsdcPeer(peer *sdc.Peer, handler sdc.Handler) error {
 	// If the peer has a `snap` extension, wait for it to connect so we can have
 	// a uniform initialization/teardown mechanism
 	snap, err := h.peers.waitSnapExtension(peer)
@@ -323,7 +323,7 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 	h.peerWG.Add(1)
 	defer h.peerWG.Done()
 
-	// Execute the Ethereum handshake
+	// Execute the sdcereum handshake
 	var (
 		genesis = h.chain.Genesis()
 		head    = h.chain.CurrentHeader()
@@ -333,7 +333,7 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 	)
 	forkID := forkid.NewID(h.chain.Config(), h.chain.Genesis().Hash(), h.chain.CurrentHeader().Number.Uint64())
 	if err := peer.Handshake(h.networkID, td, hash, genesis.Hash(), forkID, h.forkFilter); err != nil {
-		peer.Log().Debug("Ethereum handshake failed", "err", err)
+		peer.Log().Debug("sdcereum handshake failed", "err", err)
 		return err
 	}
 	reject := false // reserved peer slots
@@ -353,11 +353,11 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 			return p2p.DiscTooManyPeers
 		}
 	}
-	peer.Log().Debug("Ethereum peer connected", "name", peer.Name())
+	peer.Log().Debug("sdcereum peer connected", "name", peer.Name())
 
 	// Register the peer locally
 	if err := h.peers.registerPeer(peer, snap); err != nil {
-		peer.Log().Error("Ethereum peer registration failed", "err", err)
+		peer.Log().Error("sdcereum peer registration failed", "err", err)
 		return err
 	}
 	defer h.unregisterPeer(peer.ID())
@@ -368,7 +368,7 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 	}
 	// Register the peer in the downloader. If the downloader considers it banned, we disconnect
 	if err := h.downloader.RegisterPeer(peer.ID(), peer.Version(), peer); err != nil {
-		peer.Log().Error("Failed to register peer in eth syncer", "err", err)
+		peer.Log().Error("Failed to register peer in sdc syncer", "err", err)
 		return err
 	}
 	if snap != nil {
@@ -390,7 +390,7 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 	// If we have a trusted CHT, reject all peers below that (avoid fast sync eclipse)
 	if h.checkpointHash != (common.Hash{}) {
 		// Request the peer's checkpoint header for chain height/weight validation
-		resCh := make(chan *eth.Response)
+		resCh := make(chan *sdc.Response)
 
 		req, err := peer.RequestHeadersByNumber(h.checkpointNumber, 1, 0, false, resCh)
 		if err != nil {
@@ -406,7 +406,7 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 
 			select {
 			case res := <-resCh:
-				headers := ([]*types.Header)(*res.Res.(*eth.BlockHeadersPacket))
+				headers := ([]*types.Header)(*res.Res.(*sdc.BlockHeadersPacket))
 				if len(headers) == 0 {
 					// If we're doing a snap sync, we must enforce the checkpoint
 					// block to avoid eclipse attacks. Unsynced nodes are welcome
@@ -441,13 +441,13 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 	}
 	// If we have any explicit peer required block hashes, request them
 	for number, hash := range h.requiredBlocks {
-		resCh := make(chan *eth.Response)
+		resCh := make(chan *sdc.Response)
 
 		req, err := peer.RequestHeadersByNumber(number, 1, 0, false, resCh)
 		if err != nil {
 			return err
 		}
-		go func(number uint64, hash common.Hash, req *eth.Request) {
+		go func(number uint64, hash common.Hash, req *sdc.Request) {
 			// Ensure the request gets cancelled in case of error/drop
 			defer req.Close()
 
@@ -456,7 +456,7 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 
 			select {
 			case res := <-resCh:
-				headers := ([]*types.Header)(*res.Res.(*eth.BlockHeadersPacket))
+				headers := ([]*types.Header)(*res.Res.(*sdc.BlockHeadersPacket))
 				if len(headers) == 0 {
 					// Required blocks are allowed to be missing if the remote
 					// node is not yet synced
@@ -485,10 +485,10 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 	return handler(peer)
 }
 
-// runSnapExtension registers a `snap` peer into the joint eth/snap peerset and
+// runSnapExtension registers a `snap` peer into the joint sdc/snap peerset and
 // starts handling inbound messages. As `snap` is only a satellite protocol to
-// `eth`, all subsystem registrations and lifecycle management will be done by
-// the main `eth` handler to prevent strange races.
+// `sdc`, all subsystem registrations and lifecycle management will be done by
+// the main `sdc` handler to prevent strange races.
 func (h *handler) runSnapExtension(peer *snap.Peer, handler snap.Handler) error {
 	h.peerWG.Add(1)
 	defer h.peerWG.Done()
@@ -521,11 +521,11 @@ func (h *handler) unregisterPeer(id string) {
 	// Abort if the peer does not exist
 	peer := h.peers.peer(id)
 	if peer == nil {
-		logger.Error("Ethereum peer removal failed", "err", errPeerNotRegistered)
+		logger.Error("sdcereum peer removal failed", "err", errPeerNotRegistered)
 		return
 	}
-	// Remove the `eth` peer if it exists
-	logger.Debug("Removing Ethereum peer", "snap", peer.snapExt != nil)
+	// Remove the `sdc` peer if it exists
+	logger.Debug("Removing sdcereum peer", "snap", peer.snapExt != nil)
 
 	// Remove the `snap` extension if it exists
 	if peer.snapExt != nil {
@@ -535,7 +535,7 @@ func (h *handler) unregisterPeer(id string) {
 	h.txFetcher.Drop(id)
 
 	if err := h.peers.unregisterPeer(id); err != nil {
-		logger.Error("Ethereum peer removal failed", "err", err)
+		logger.Error("sdcereum peer removal failed", "err", err)
 	}
 }
 
@@ -574,7 +574,7 @@ func (h *handler) Stop() {
 	h.peers.close()
 	h.peerWG.Wait()
 
-	log.Info("Ethereum protocol stopped")
+	log.Info("sdcereum protocol stopped")
 }
 
 // BroadcastBlock will either propagate a block to a subset of its peers, or
@@ -632,8 +632,8 @@ func (h *handler) BroadcastTransactions(txs types.Transactions) {
 		directCount int // Count of the txs sent directly to peers
 		directPeers int // Count of the peers that were sent transactions directly
 
-		txset = make(map[*ethPeer][]common.Hash) // Set peer->hash to transfer directly
-		annos = make(map[*ethPeer][]common.Hash) // Set peer->hash to announce
+		txset = make(map[*sdcPeer][]common.Hash) // Set peer->hash to transfer directly
+		annos = make(map[*sdcPeer][]common.Hash) // Set peer->hash to announce
 
 	)
 	// Broadcast transactions to a batch of peers not knowing about it

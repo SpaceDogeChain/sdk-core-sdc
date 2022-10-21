@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package flags
 
@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/internal/version"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/internal/version"
+	"github.com/sdcereum/go-sdcereum/params"
 	"github.com/urfave/cli/v2"
 )
 
@@ -32,7 +32,7 @@ func NewApp(usage string) *cli.App {
 	app.EnableBashCompletion = true
 	app.Version = params.VersionWithCommit(git.Commit, git.Date)
 	app.Usage = usage
-	app.Copyright = "Copyright 2013-2022 The go-ethereum Authors"
+	app.Copyright = "Copyright 2013-2022 The go-sdcereum Authors"
 	app.Before = func(ctx *cli.Context) error {
 		MigrateGlobalFlags(ctx)
 		return nil
@@ -56,11 +56,11 @@ var migrationApplied = map[*cli.Command]struct{}{}
 //
 // Example:
 //
-//	geth account new --keystore /tmp/mykeystore --lightkdf
+//	gsdc account new --keystore /tmp/mykeystore --lightkdf
 //
-// is equivalent after calling this method with:
+// is equivalent after calling this msdcod with:
 //
-//	geth --keystore /tmp/mykeystore --lightkdf account new
+//	gsdc --keystore /tmp/mykeystore --lightkdf account new
 //
 // i.e. in the subcommand Action function of 'account new', ctx.Bool("lightkdf)
 // will return true even if --lightkdf is set as a global option.

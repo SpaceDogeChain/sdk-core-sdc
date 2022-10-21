@@ -1,18 +1,18 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2014 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package crypto
 
@@ -29,9 +29,9 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -51,7 +51,7 @@ var (
 
 var errInvalidPubkey = errors.New("invalid secp256k1 public key")
 
-// KeccakState wraps sha3.state. In addition to the usual hash methods, it also supports
+// KeccakState wraps sha3.state. In addition to the usual hash msdcods, it also supports
 // Read to get a variable amount of data from the hash state. Read is faster than Sum
 // because it doesn't copy the internal state, but also modifies the internal state.
 type KeccakState interface {
@@ -103,13 +103,13 @@ func Keccak512(data ...[]byte) []byte {
 	return d.Sum(nil)
 }
 
-// CreateAddress creates an ethereum address given the bytes and the nonce
+// CreateAddress creates an sdcereum address given the bytes and the nonce
 func CreateAddress(b common.Address, nonce uint64) common.Address {
 	data, _ := rlp.EncodeToBytes([]interface{}{b, nonce})
 	return common.BytesToAddress(Keccak256(data)[12:])
 }
 
-// CreateAddress2 creates an ethereum address given the address bytes, initial
+// CreateAddress2 creates an sdcereum address given the address bytes, initial
 // contract code hash and a salt.
 func CreateAddress2(b common.Address, salt [32]byte, inithash []byte) common.Address {
 	return common.BytesToAddress(Keccak256([]byte{0xff}, b.Bytes(), salt[:], inithash)[12:])
@@ -129,7 +129,7 @@ func ToECDSAUnsafe(d []byte) *ecdsa.PrivateKey {
 }
 
 // toECDSA creates a private key with the given D value. The strict parameter
-// controls whether the key's length should be enforced at the curve size or
+// controls whsdcer the key's length should be enforced at the curve size or
 // it can also accept legacy encodings (0 prefixes).
 func toECDSA(d []byte, strict bool) (*ecdsa.PrivateKey, error) {
 	priv := new(ecdsa.PrivateKey)
@@ -257,7 +257,7 @@ func GenerateKey() (*ecdsa.PrivateKey, error) {
 	return ecdsa.GenerateKey(S256(), rand.Reader)
 }
 
-// ValidateSignatureValues verifies whether the signature values are valid with
+// ValidateSignatureValues verifies whsdcer the signature values are valid with
 // the given chain rules. The v value is assumed to be either 0 or 1.
 func ValidateSignatureValues(v byte, r, s *big.Int, homestead bool) bool {
 	if r.Cmp(common.Big1) < 0 || s.Cmp(common.Big1) < 0 {

@@ -28,7 +28,7 @@ Now you're ready to start logging:
 # Convention
 
 Because recording a human-meaningful message is common and good practice, the first argument to every
-logging method is the value to the *implicit* key 'msg'.
+logging msdcod is the value to the *implicit* key 'msg'.
 
 Additionally, the level you choose for a message will be automatically added with the key 'lvl', and so
 will the current timestamp with key 't'.
@@ -93,7 +93,7 @@ an example that adds the source file and line number of each logging call to
 the context.
 
 	h := log.CallerFileHandler(log.StdoutHandler)
-	log.Root().SetHandler(h)
+	log.Root().Ssdcandler(h)
 	...
 	log.Error("open file", "err", err)
 
@@ -104,7 +104,7 @@ This will output a line that looks like:
 Here's an example that logs the call stack rather than just the call site.
 
 	h := log.CallerStackHandler("%+v", log.StdoutHandler)
-	log.Root().SetHandler(h)
+	log.Root().Ssdcandler(h)
 	...
 	log.Error("open file", "err", err)
 
@@ -171,7 +171,7 @@ a game where you have Player objects:
 	    log.Logger
 	}
 
-You always want to log a player's name and whether they're alive or dead, so when you create the player
+You always want to log a player's name and whsdcer they're alive or dead, so when you create the player
 object, you might do:
 
 	p := &Player{name: name, alive: true}
@@ -179,7 +179,7 @@ object, you might do:
 
 Only now, even after a player has died, the logger will still report they are alive because the logging
 context is evaluated when the logger was created. By using the Lazy wrapper, we can defer the evaluation
-of whether the player is alive or not to each log message, so that the log records will reflect the player's
+of whsdcer the player is alive or not to each log message, so that the log records will reflect the player's
 current state no matter when the log message is written:
 
 	p := &Player{name: name, alive: true}
@@ -196,7 +196,7 @@ on log level.
 # Error Handling
 
 Becasuse log15 allows you to step around the type system, there are a few ways you can specify
-invalid arguments to the logging functions. You could, for example, wrap something that is not
+invalid arguments to the logging functions. You could, for example, wrap somsdcing that is not
 a zero-argument function with log.Lazy or pass a context key that is not a string. Since logging libraries
 are typically the mechanism by which errors are reported, it would be onerous for the logging functions
 to return errors. Instead, log15 handles errors by making these guarantees to you:
@@ -206,7 +206,7 @@ to return errors. Instead, log15 handles errors by making these guarantees to yo
 - Any log record containing an error will include the context key LOG15_ERROR, enabling you to easily
 (and if you like, automatically) detect if any of your logging calls are passing bad values.
 
-Understanding this, you might wonder why the Handler interface can return an error value in its Log method. Handlers
+Understanding this, you might wonder why the Handler interface can return an error value in its Log msdcod. Handlers
 are encouraged to return errors only if they fail to write their log records out to an external source like if the
 syslog daemon is not responding. This allows the construction of useful handlers which cope with those failures
 like the FailoverHandler.
@@ -224,7 +224,7 @@ by default and to provide a public Logger instance that consumers of your librar
 	var Log = log.New()
 
 	func init() {
-	    Log.SetHandler(log.DiscardHandler())
+	    Log.Ssdcandler(log.DiscardHandler())
 	}
 
 Users of your library may then enable it if they like:
@@ -234,7 +234,7 @@ Users of your library may then enable it if they like:
 
 	func main() {
 	    handler := // custom handler setup
-	    yourlib.Log.SetHandler(handler)
+	    yourlib.Log.Ssdcandler(handler)
 	}
 
 # Best practices attaching logger context
@@ -300,7 +300,7 @@ function which will return no error but panics on failure. They are all availabl
 on the Must object. For example:
 
 	log.Must.FileHandler("/path", log.JSONFormat)
-	log.Must.NetHandler("tcp", ":1234", log.JSONFormat)
+	log.Must.Nsdcandler("tcp", ":1234", log.JSONFormat)
 
 # Inspiration and Credit
 

@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2017 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
 // faucet is an Ether faucet backed by a light client.
 package main
@@ -39,24 +39,24 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/ethstats"
-	"github.com/ethereum/go-ethereum/internal/version"
-	"github.com/ethereum/go-ethereum/les"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/spacedogechain/go-spacedogechain/accounts"
+	"github.com/spacedogechain/go-spacedogechain/accounts/keystore"
+	"github.com/spacedogechain/go-spacedogechain/cmd/utils"
+	"github.com/spacedogechain/go-spacedogechain/common"
+	"github.com/spacedogechain/go-spacedogechain/core"
+	"github.com/spacedogechain/go-spacedogechain/core/types"
+	"github.com/spacedogechain/go-spacedogechain/eth/downloader"
+	"github.com/spacedogechain/go-spacedogechain/eth/ethconfig"
+	"github.com/spacedogechain/go-spacedogechain/ethclient"
+	"github.com/spacedogechain/go-spacedogechain/ethstats"
+	"github.com/spacedogechain/go-spacedogechain/internal/version"
+	"github.com/spacedogechain/go-spacedogechain/les"
+	"github.com/spacedogechain/go-spacedogechain/log"
+	"github.com/spacedogechain/go-spacedogechain/node"
+	"github.com/spacedogechain/go-spacedogechain/p2p"
+	"github.com/spacedogechain/go-spacedogechain/p2p/enode"
+	"github.com/spacedogechain/go-spacedogechain/p2p/nat"
+	"github.com/spacedogechain/go-spacedogechain/params"
 	"github.com/gorilla/websocket"
 )
 
@@ -65,7 +65,7 @@ var (
 	apiPortFlag = flag.Int("apiport", 8080, "Listener port for the HTTP API connection")
 	ethPortFlag = flag.Int("ethport", 30303, "Listener port for the devp2p connection")
 	bootFlag    = flag.String("bootnodes", "", "Comma separated bootnode enode URLs to seed with")
-	netFlag     = flag.Uint64("network", 0, "Network ID to use for the Ethereum protocol")
+	netFlag     = flag.Uint64("network", 0, "Network ID to use for the spacedogechain protocol")
 	statsFlag   = flag.String("ethstats", "", "Ethstats network monitoring auth string")
 
 	netnameFlag = flag.String("faucet.name", "", "Network name to assign to the faucet")
@@ -80,7 +80,7 @@ var (
 	captchaSecret = flag.String("captcha.secret", "", "Recaptcha secret key to authenticate server side")
 
 	noauthFlag = flag.Bool("noauth", false, "Enables funding requests without authentication")
-	logFlag    = flag.Int("loglevel", 3, "Log level to use for Ethereum and the faucet")
+	logFlag    = flag.Int("loglevel", 3, "Log level to use for spacedogechain and the faucet")
 
 	twitterTokenFlag   = flag.String("twitter.token", "", "Bearer token to authenticate with the v2 Twitter API")
 	twitterTokenV1Flag = flag.String("twitter.token.v1", "", "Bearer token to authenticate with the v1.1 Twitter API")
@@ -186,16 +186,16 @@ func main() {
 // request represents an accepted funding request.
 type request struct {
 	Avatar  string             `json:"avatar"`  // Avatar URL to make the UI nicer
-	Account common.Address     `json:"account"` // Ethereum address being funded
+	Account common.Address     `json:"account"` // spacedogechain address being funded
 	Time    time.Time          `json:"time"`    // Timestamp when the request was accepted
 	Tx      *types.Transaction `json:"tx"`      // Transaction funding the account
 }
 
-// faucet represents a crypto faucet backed by an Ethereum light client.
+// faucet represents a crypto faucet backed by an spacedogechain light client.
 type faucet struct {
 	config *params.ChainConfig // Chain configurations for signing
-	stack  *node.Node          // Ethereum protocol stack
-	client *ethclient.Client   // Client connection to the Ethereum chain
+	stack  *node.Node          // spacedogechain protocol stack
+	client *ethclient.Client   // Client connection to the spacedogechain chain
 	index  []byte              // Index page to serve up on the web
 
 	keystore *keystore.KeyStore // Keystore containing the single signer
@@ -240,7 +240,7 @@ func newFaucet(genesis *core.Genesis, port int, enodes []*enode.Node, network ui
 		return nil, err
 	}
 
-	// Assemble the Ethereum light client protocol
+	// Assemble the spacedogechain light client protocol
 	cfg := ethconfig.Defaults
 	cfg.SyncMode = downloader.LightSync
 	cfg.NetworkId = network
@@ -249,7 +249,7 @@ func newFaucet(genesis *core.Genesis, port int, enodes []*enode.Node, network ui
 
 	lesBackend, err := les.New(stack, &cfg)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to register the Ethereum service: %w", err)
+		return nil, fmt.Errorf("Failed to register the spacedogechain service: %w", err)
 	}
 
 	// Assemble the ethstats monitoring and reporting service'
@@ -288,7 +288,7 @@ func newFaucet(genesis *core.Genesis, port int, enodes []*enode.Node, network ui
 	}, nil
 }
 
-// close terminates the Ethereum connection and tears down the faucet.
+// close terminates the spacedogechain connection and tears down the faucet.
 func (f *faucet) close() error {
 	return f.stack.Close()
 }
@@ -445,7 +445,7 @@ func (f *faucet) apiHandler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 		}
-		// Retrieve the Ethereum address to fund, the requesting user and a profile picture
+		// Retrieve the spacedogechain address to fund, the requesting user and a profile picture
 		var (
 			id       string
 			username string
@@ -463,7 +463,7 @@ func (f *faucet) apiHandler(w http.ResponseWriter, r *http.Request) {
 			id = username
 		default:
 			//lint:ignore ST1005 This error is to be displayed in the browser
-			err = errors.New("Something funky happened, please open an issue at https://github.com/ethereum/go-ethereum/issues")
+			err = errors.New("Something funky happened, please open an issue at https://github.com/spacedogechain/go-spacedogechain/issues")
 		}
 		if err != nil {
 			if err = sendError(wsconn, err); err != nil {
@@ -680,7 +680,7 @@ func sendSuccess(conn *wsConn, msg string) error {
 }
 
 // authTwitter tries to authenticate a faucet request using Twitter posts, returning
-// the uniqueness identifier (user id/username), username, avatar URL and Ethereum address to fund on success.
+// the uniqueness identifier (user id/username), username, avatar URL and spacedogechain address to fund on success.
 func authTwitter(url string, tokenV1, tokenV2 string) (string, string, string, common.Address, error) {
 	// Ensure the user specified a meaningful URL, no fancy nonsense
 	parts := strings.Split(url, "/")
@@ -707,7 +707,7 @@ func authTwitter(url string, tokenV1, tokenV2 string) (string, string, string, c
 		return authTwitterWithTokenV2(tweetID, tokenV2)
 	}
 	// Twitter API token isn't provided so we just load the public posts
-	// and scrape it for the Ethereum address and profile URL. We need to load
+	// and scrape it for the spacedogechain address and profile URL. We need to load
 	// the mobile page though since the main page loads tweet contents via JS.
 	url = strings.Replace(url, "https://twitter.com/", "https://mobile.twitter.com/", 1)
 
@@ -732,7 +732,7 @@ func authTwitter(url string, tokenV1, tokenV2 string) (string, string, string, c
 	address := common.HexToAddress(string(regexp.MustCompile("0x[0-9a-fA-F]{40}").Find(body)))
 	if address == (common.Address{}) {
 		//lint:ignore ST1005 This error is to be displayed in the browser
-		return "", "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", "", common.Address{}, errors.New("No spacedogechain address found to fund")
 	}
 	var avatar string
 	if parts = regexp.MustCompile(`src="([^"]+twimg\.com/profile_images[^"]+)"`).FindStringSubmatch(string(body)); len(parts) == 2 {
@@ -742,7 +742,7 @@ func authTwitter(url string, tokenV1, tokenV2 string) (string, string, string, c
 }
 
 // authTwitterWithTokenV1 tries to authenticate a faucet request using Twitter's v1
-// API, returning the user id, username, avatar URL and Ethereum address to fund on
+// API, returning the user id, username, avatar URL and spacedogechain address to fund on
 // success.
 func authTwitterWithTokenV1(tweetID string, token string) (string, string, string, common.Address, error) {
 	// Query the tweet details from Twitter
@@ -773,13 +773,13 @@ func authTwitterWithTokenV1(tweetID string, token string) (string, string, strin
 	address := common.HexToAddress(regexp.MustCompile("0x[0-9a-fA-F]{40}").FindString(result.Text))
 	if address == (common.Address{}) {
 		//lint:ignore ST1005 This error is to be displayed in the browser
-		return "", "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", "", common.Address{}, errors.New("No spacedogechain address found to fund")
 	}
 	return result.User.ID + "@twitter", result.User.Username, result.User.Avatar, address, nil
 }
 
 // authTwitterWithTokenV2 tries to authenticate a faucet request using Twitter's v2
-// API, returning the user id, username, avatar URL and Ethereum address to fund on
+// API, returning the user id, username, avatar URL and spacedogechain address to fund on
 // success.
 func authTwitterWithTokenV2(tweetID string, token string) (string, string, string, common.Address, error) {
 	// Query the tweet details from Twitter
@@ -817,13 +817,13 @@ func authTwitterWithTokenV2(tweetID string, token string) (string, string, strin
 	address := common.HexToAddress(regexp.MustCompile("0x[0-9a-fA-F]{40}").FindString(result.Data.Text))
 	if address == (common.Address{}) {
 		//lint:ignore ST1005 This error is to be displayed in the browser
-		return "", "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", "", common.Address{}, errors.New("No spacedogechain address found to fund")
 	}
 	return result.Data.AuthorID + "@twitter", result.Includes.Users[0].Username, result.Includes.Users[0].Avatar, address, nil
 }
 
 // authFacebook tries to authenticate a faucet request using Facebook posts,
-// returning the username, avatar URL and Ethereum address to fund on success.
+// returning the username, avatar URL and spacedogechain address to fund on success.
 func authFacebook(url string) (string, string, common.Address, error) {
 	// Ensure the user specified a meaningful URL, no fancy nonsense
 	parts := strings.Split(strings.Split(url, "?")[0], "/")
@@ -838,7 +838,7 @@ func authFacebook(url string) (string, string, common.Address, error) {
 
 	// Facebook's Graph API isn't really friendly with direct links. Still, we don't
 	// want to do ask read permissions from users, so just load the public posts and
-	// scrape it for the Ethereum address and profile URL.
+	// scrape it for the spacedogechain address and profile URL.
 	//
 	// Facebook recently changed their desktop webpage to use AJAX for loading post
 	// content, so switch over to the mobile site for now. Will probably end up having
@@ -858,7 +858,7 @@ func authFacebook(url string) (string, string, common.Address, error) {
 	address := common.HexToAddress(string(regexp.MustCompile("0x[0-9a-fA-F]{40}").Find(body)))
 	if address == (common.Address{}) {
 		//lint:ignore ST1005 This error is to be displayed in the browser
-		return "", "", common.Address{}, errors.New("No Ethereum address found to fund. Please check the post URL and verify that it can be viewed publicly.")
+		return "", "", common.Address{}, errors.New("No spacedogechain address found to fund. Please check the post URL and verify that it can be viewed publicly.")
 	}
 	var avatar string
 	if parts = regexp.MustCompile(`src="([^"]+fbcdn\.net[^"]+)"`).FindStringSubmatch(string(body)); len(parts) == 2 {
@@ -867,14 +867,14 @@ func authFacebook(url string) (string, string, common.Address, error) {
 	return username + "@facebook", avatar, address, nil
 }
 
-// authNoAuth tries to interpret a faucet request as a plain Ethereum address,
+// authNoAuth tries to interpret a faucet request as a plain spacedogechain address,
 // without actually performing any remote authentication. This mode is prone to
 // Byzantine attack, so only ever use for truly private networks.
 func authNoAuth(url string) (string, string, common.Address, error) {
 	address := common.HexToAddress(regexp.MustCompile("0x[0-9a-fA-F]{40}").FindString(url))
 	if address == (common.Address{}) {
 		//lint:ignore ST1005 This error is to be displayed in the browser
-		return "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", common.Address{}, errors.New("No spacedogechain address found to fund")
 	}
 	return address.Hex() + "@noauth", "", address, nil
 }

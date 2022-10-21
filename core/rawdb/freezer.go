@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rawdb
 
@@ -26,11 +26,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/prometheus/tsdb/fileutil"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/promsdceus/tsdb/fileutil"
 )
 
 var (
@@ -59,8 +59,8 @@ const freezerTableSize = 2 * 1000 * 1000 * 1000
 //
 //   - The append-only nature ensures that disk writes are minimized.
 //   - The memory mapping ensures we can max out system memory for caching without
-//     reserving it for go-ethereum. This would also reduce the memory requirements
-//     of Geth, and thus also GC overhead.
+//     reserving it for go-sdcereum. This would also reduce the memory requirements
+//     of Gsdc, and thus also GC overhead.
 type Freezer struct {
 	// WARNING: The `frozen` and `tail` fields are accessed atomically. On 32 bit platforms, only
 	// 64-bit aligned fields can be atomic. The struct is guaranteed to be so aligned,
@@ -169,7 +169,7 @@ func (f *Freezer) Close() error {
 	return nil
 }
 
-// HasAncient returns an indicator whether the specified ancient data exists
+// HasAncient returns an indicator whsdcer the specified ancient data exists
 // in the freezer.
 func (f *Freezer) HasAncient(kind string, number uint64) (bool, error) {
 	if table := f.tables[kind]; table != nil {
@@ -223,7 +223,7 @@ func (f *Freezer) AncientSize(kind string) (uint64, error) {
 
 // ReadAncients runs the given read operation while ensuring that no writes take place
 // on the underlying freezer.
-func (f *Freezer) ReadAncients(fn func(ethdb.AncientReaderOp) error) (err error) {
+func (f *Freezer) ReadAncients(fn func(sdcdb.AncientReaderOp) error) (err error) {
 	f.writeLock.RLock()
 	defer f.writeLock.RUnlock()
 
@@ -231,7 +231,7 @@ func (f *Freezer) ReadAncients(fn func(ethdb.AncientReaderOp) error) (err error)
 }
 
 // ModifyAncients runs the given write operation.
-func (f *Freezer) ModifyAncients(fn func(ethdb.AncientWriteOp) error) (writeSize int64, err error) {
+func (f *Freezer) ModifyAncients(fn func(sdcdb.AncientWriteOp) error) (writeSize int64, err error) {
 	if f.readonly {
 		return 0, errReadOnly
 	}

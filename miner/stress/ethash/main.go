@@ -1,20 +1,20 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// This file contains a miner stress test based on the Ethash consensus engine.
+// This file contains a miner stress test based on the sdcash consensus engine.
 package main
 
 import (
@@ -25,25 +25,25 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/fdlimit"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/miner"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/fdlimit"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/miner"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 func main() {
-	log.Root().SetHandler(log.LvlFilterHandler(log.LvlInfo, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlInfo, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	fdlimit.Raise(2048)
 
 	// Generate a batch of accounts to seal and fund with
@@ -51,10 +51,10 @@ func main() {
 	for i := 0; i < len(faucets); i++ {
 		faucets[i], _ = crypto.GenerateKey()
 	}
-	// Pre-generate the ethash mining DAG so we don't race
-	ethash.MakeDataset(1, ethconfig.Defaults.Ethash.DatasetDir)
+	// Pre-generate the sdcash mining DAG so we don't race
+	sdcash.MakeDataset(1, sdcconfig.Defaults.sdcash.DatasetDir)
 
-	// Create an Ethash network based off of the Ropsten config
+	// Create an sdcash network based off of the Ropsten config
 	genesis := makeGenesis(faucets)
 
 	// Handle interrupts.
@@ -63,12 +63,12 @@ func main() {
 
 	var (
 		stacks []*node.Node
-		nodes  []*eth.Ethereum
+		nodes  []*sdc.sdcereum
 		enodes []*enode.Node
 	)
 	for i := 0; i < 4; i++ {
 		// Start the node and wait until it's up
-		stack, ethBackend, err := makeMiner(genesis)
+		stack, sdcBackend, err := makeMiner(genesis)
 		if err != nil {
 			panic(err)
 		}
@@ -83,7 +83,7 @@ func main() {
 		}
 		// Start tracking the node and its enode
 		stacks = append(stacks, stack)
-		nodes = append(nodes, ethBackend)
+		nodes = append(nodes, sdcBackend)
 		enodes = append(enodes, stack.Server().Self())
 	}
 
@@ -130,7 +130,7 @@ func main() {
 	}
 }
 
-// makeGenesis creates a custom Ethash genesis block based on some pre-defined
+// makeGenesis creates a custom sdcash genesis block based on some pre-defined
 // faucet accounts.
 func makeGenesis(faucets []*ecdsa.PrivateKey) *core.Genesis {
 	genesis := core.DefaultRopstenGenesisBlock()
@@ -149,12 +149,12 @@ func makeGenesis(faucets []*ecdsa.PrivateKey) *core.Genesis {
 	return genesis
 }
 
-func makeMiner(genesis *core.Genesis) (*node.Node, *eth.Ethereum, error) {
-	// Define the basic configurations for the Ethereum node
+func makeMiner(genesis *core.Genesis) (*node.Node, *sdc.sdcereum, error) {
+	// Define the basic configurations for the sdcereum node
 	datadir, _ := os.MkdirTemp("", "")
 
 	config := &node.Config{
-		Name:    "geth",
+		Name:    "gsdc",
 		Version: params.Version,
 		DataDir: datadir,
 		P2P: p2p.Config{
@@ -164,22 +164,22 @@ func makeMiner(genesis *core.Genesis) (*node.Node, *eth.Ethereum, error) {
 		},
 		UseLightweightKDF: true,
 	}
-	// Create the node and configure a full Ethereum node on it
+	// Create the node and configure a full sdcereum node on it
 	stack, err := node.New(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	ethBackend, err := eth.New(stack, &ethconfig.Config{
+	sdcBackend, err := sdc.New(stack, &sdcconfig.Config{
 		Genesis:         genesis,
 		NetworkId:       genesis.Config.ChainID.Uint64(),
 		SyncMode:        downloader.FullSync,
 		DatabaseCache:   256,
 		DatabaseHandles: 256,
 		TxPool:          core.DefaultTxPoolConfig,
-		GPO:             ethconfig.Defaults.GPO,
-		Ethash:          ethconfig.Defaults.Ethash,
+		GPO:             sdcconfig.Defaults.GPO,
+		sdcash:          sdcconfig.Defaults.sdcash,
 		Miner: miner.Config{
-			Etherbase: common.Address{1},
+			sdcerbase: common.Address{1},
 			GasCeil:   genesis.GasLimit * 11 / 10,
 			GasPrice:  big.NewInt(1),
 			Recommit:  time.Second,
@@ -190,5 +190,5 @@ func makeMiner(genesis *core.Genesis) (*node.Node, *eth.Ethereum, error) {
 	}
 
 	err = stack.Start()
-	return stack, ethBackend, err
+	return stack, sdcBackend, err
 }

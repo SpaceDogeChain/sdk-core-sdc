@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -57,7 +57,7 @@ func TestWebsocketOriginCheck(t *testing.T) {
 
 	var (
 		srv     = newTestServer()
-		httpsrv = httptest.NewServer(srv.WebsocketHandler([]string{"http://example.com"}))
+		httpsrv = httptest.NewServer(srv.Websocksdcandler([]string{"http://example.com"}))
 		wsURL   = "ws:" + strings.TrimPrefix(httpsrv.URL, "http:")
 	)
 	defer srv.Stop()
@@ -81,13 +81,13 @@ func TestWebsocketOriginCheck(t *testing.T) {
 	client.Close()
 }
 
-// This test checks whether calls exceeding the request size limit are rejected.
+// This test checks whsdcer calls exceeding the request size limit are rejected.
 func TestWebsocketLargeCall(t *testing.T) {
 	t.Parallel()
 
 	var (
 		srv     = newTestServer()
-		httpsrv = httptest.NewServer(srv.WebsocketHandler([]string{"*"}))
+		httpsrv = httptest.NewServer(srv.Websocksdcandler([]string{"*"}))
 		wsURL   = "ws:" + strings.TrimPrefix(httpsrv.URL, "http:")
 	)
 	defer srv.Stop()
@@ -120,7 +120,7 @@ func TestWebsocketLargeCall(t *testing.T) {
 func TestWebsocketPeerInfo(t *testing.T) {
 	var (
 		s     = newTestServer()
-		ts    = httptest.NewServer(s.WebsocketHandler([]string{"origin.example.com"}))
+		ts    = httptest.NewServer(s.Websocksdcandler([]string{"origin.example.com"}))
 		tsurl = "ws:" + strings.TrimPrefix(ts.URL, "http:")
 	)
 	defer s.Stop()
@@ -171,7 +171,7 @@ func TestClientWebsocketPing(t *testing.T) {
 	defer client.Close()
 
 	resultChan := make(chan int)
-	sub, err := client.EthSubscribe(ctx, resultChan, "foo")
+	sub, err := client.sdcSubscribe(ctx, resultChan, "foo")
 	if err != nil {
 		t.Fatalf("client subscribe error: %v", err)
 	}
@@ -179,7 +179,7 @@ func TestClientWebsocketPing(t *testing.T) {
 	// server can't handle the request.
 
 	// Wait for the context's deadline to be reached before proceeding.
-	// This is important for reproducing https://github.com/ethereum/go-ethereum/issues/19798
+	// This is important for reproducing https://github.com/sdcereum/go-sdcereum/issues/19798
 	<-ctx.Done()
 	close(sendPing)
 
@@ -204,7 +204,7 @@ func TestClientWebsocketPing(t *testing.T) {
 func TestClientWebsocketLargeMessage(t *testing.T) {
 	var (
 		srv     = NewServer()
-		httpsrv = httptest.NewServer(srv.WebsocketHandler(nil))
+		httpsrv = httptest.NewServer(srv.Websocksdcandler(nil))
 		wsURL   = "ws:" + strings.TrimPrefix(httpsrv.URL, "http:")
 	)
 	defer srv.Stop()
@@ -258,7 +258,7 @@ func TestClientWebsocketSevered(t *testing.T) {
 	defer client.Close()
 
 	resultChan := make(chan int)
-	sub, err := client.EthSubscribe(ctx, resultChan, "foo")
+	sub, err := client.sdcSubscribe(ctx, resultChan, "foo")
 	if err != nil {
 		t.Fatalf("client subscribe error: %v", err)
 	}
@@ -320,10 +320,10 @@ func wsPingTestServer(t *testing.T, sendPing <-chan struct{}) *http.Server {
 }
 
 func wsPingTestHandler(t *testing.T, conn *websocket.Conn, shutdown, sendPing <-chan struct{}) {
-	// Canned responses for the eth_subscribe call in TestClientWebsocketPing.
+	// Canned responses for the sdc_subscribe call in TestClientWebsocketPing.
 	const (
 		subResp   = `{"jsonrpc":"2.0","id":1,"result":"0x00"}`
-		subNotify = `{"jsonrpc":"2.0","method":"eth_subscription","params":{"subscription":"0x00","result":1}}`
+		subNotify = `{"jsonrpc":"2.0","msdcod":"sdc_subscription","params":{"subscription":"0x00","result":1}}`
 	)
 
 	// Handle subscribe request.
@@ -387,7 +387,7 @@ func wsPingTestHandler(t *testing.T, conn *websocket.Conn, shutdown, sendPing <-
 	}
 }
 
-// severableReadWriteCloser wraps an io.ReadWriteCloser and provides a Sever() method to drop writes and read empty.
+// severableReadWriteCloser wraps an io.ReadWriteCloser and provides a Sever() msdcod to drop writes and read empty.
 type severableReadWriteCloser struct {
 	io.ReadWriteCloser
 	severed int32 // atomic

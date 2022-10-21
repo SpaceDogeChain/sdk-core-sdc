@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package miner
 
@@ -25,16 +25,16 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/misc"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 const (
@@ -73,8 +73,8 @@ const (
 	// increasing upper limit or decreasing lower limit so that the limit can be reachable.
 	intervalAdjustBias = 200 * 1000.0 * 1000.0
 
-	// staleThreshold is the maximum depth of the acceptable stale block.
-	staleThreshold = 7
+	// stalsdcreshold is the maximum depth of the acceptable stale block.
+	stalsdcreshold = 7
 )
 
 var (
@@ -188,7 +188,7 @@ type worker struct {
 	config      *Config
 	chainConfig *params.ChainConfig
 	engine      consensus.Engine
-	eth         Backend
+	sdc         Backend
 	chain       *core.BlockChain
 
 	// Feeds
@@ -233,10 +233,10 @@ type worker struct {
 	snapshotState    *state.StateDB
 
 	// atomic status counters
-	running int32 // The indicator whether the consensus engine is running or not.
+	running int32 // The indicator whsdcer the consensus engine is running or not.
 	newTxs  int32 // New arrival transaction count since last sealing work submitting.
 
-	// noempty is the flag used to control whether the feature of pre-seal empty
+	// noempty is the flag used to control whsdcer the feature of pre-seal empty
 	// block is enabled. The default value is false(pre-seal is enabled by default).
 	// But in some special scenario the consensus engine will seal blocks instantaneously,
 	// in this case this feature will add all empty blocks into canonical chain
@@ -245,33 +245,33 @@ type worker struct {
 
 	// newpayloadTimeout is the maximum timeout allowance for creating payload.
 	// The default value is 2 seconds but node operator can set it to arbitrary
-	// large value. A large timeout allowance may cause Geth to fail creating
+	// large value. A large timeout allowance may cause Gsdc to fail creating
 	// a non-empty payload within the specified time and eventually miss the slot
 	// in case there are some computation expensive transactions in txpool.
 	newpayloadTimeout time.Duration
 
 	// External functions
-	isLocalBlock func(header *types.Header) bool // Function used to determine whether the specified block is mined by local miner.
+	isLocalBlock func(header *types.Header) bool // Function used to determine whsdcer the specified block is mined by local miner.
 
 	// Test hooks
-	newTaskHook  func(*task)                        // Method to call upon receiving a new sealing task.
-	skipSealHook func(*task) bool                   // Method to decide whether skipping the sealing.
-	fullTaskHook func()                             // Method to call before pushing the full sealing task.
-	resubmitHook func(time.Duration, time.Duration) // Method to call upon updating resubmitting interval.
+	newTaskHook  func(*task)                        // Msdcod to call upon receiving a new sealing task.
+	skipSealHook func(*task) bool                   // Msdcod to decide whsdcer skipping the sealing.
+	fullTaskHook func()                             // Msdcod to call before pushing the full sealing task.
+	resubmitHook func(time.Duration, time.Duration) // Msdcod to call upon updating resubmitting interval.
 }
 
-func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, isLocalBlock func(header *types.Header) bool, init bool) *worker {
+func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus.Engine, sdc Backend, mux *event.TypeMux, isLocalBlock func(header *types.Header) bool, init bool) *worker {
 	worker := &worker{
 		config:             config,
 		chainConfig:        chainConfig,
 		engine:             engine,
-		eth:                eth,
+		sdc:                sdc,
 		mux:                mux,
-		chain:              eth.BlockChain(),
+		chain:              sdc.BlockChain(),
 		isLocalBlock:       isLocalBlock,
 		localUncles:        make(map[common.Hash]*types.Block),
 		remoteUncles:       make(map[common.Hash]*types.Block),
-		unconfirmed:        newUnconfirmedBlocks(eth.BlockChain(), sealingLogAtDepth),
+		unconfirmed:        newUnconfirmedBlocks(sdc.BlockChain(), sealingLogAtDepth),
 		pendingTasks:       make(map[common.Hash]*task),
 		txsCh:              make(chan core.NewTxsEvent, txChanSize),
 		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
@@ -286,10 +286,10 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
 	}
 	// Subscribe NewTxsEvent for tx pool
-	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
+	worker.txsSub = sdc.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// Subscribe events for blockchain
-	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
-	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
+	worker.chainHeadSub = sdc.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
+	worker.chainSideSub = sdc.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
 
 	// Sanitize recommit interval if the user-specified one is too short.
 	recommit := worker.config.Recommit
@@ -321,8 +321,8 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	return worker
 }
 
-// setEtherbase sets the etherbase used to initialize the block coinbase field.
-func (w *worker) setEtherbase(addr common.Address) {
+// setsdcerbase sets the sdcerbase used to initialize the block coinbase field.
+func (w *worker) setsdcerbase(addr common.Address) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.coinbase = addr
@@ -397,7 +397,7 @@ func (w *worker) stop() {
 	atomic.StoreInt32(&w.running, 0)
 }
 
-// isRunning returns an indicator whether worker is running or not.
+// isRunning returns an indicator whsdcer worker is running or not.
 func (w *worker) isRunning() bool {
 	return atomic.LoadInt32(&w.running) == 1
 }
@@ -463,7 +463,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 	clearPending := func(number uint64) {
 		w.pendingMu.Lock()
 		for h, t := range w.pendingTasks {
-			if t.block.NumberU64()+staleThreshold <= number {
+			if t.block.NumberU64()+stalsdcreshold <= number {
 				delete(w.pendingTasks, h)
 			}
 		}
@@ -588,12 +588,12 @@ func (w *worker) mainLoop() {
 		case <-cleanTicker.C:
 			chainHead := w.chain.CurrentBlock()
 			for hash, uncle := range w.localUncles {
-				if uncle.NumberU64()+staleThreshold <= chainHead.NumberU64() {
+				if uncle.NumberU64()+stalsdcreshold <= chainHead.NumberU64() {
 					delete(w.localUncles, hash)
 				}
 			}
 			for hash, uncle := range w.remoteUncles {
-				if uncle.NumberU64()+staleThreshold <= chainHead.NumberU64() {
+				if uncle.NumberU64()+stalsdcreshold <= chainHead.NumberU64() {
 					delete(w.remoteUncles, hash)
 				}
 			}
@@ -750,7 +750,7 @@ func (w *worker) resultLoop() {
 				logs = append(logs, receipt.Logs...)
 			}
 			// Commit block and state to database.
-			_, err := w.chain.WriteBlockAndSetHead(block, receipts, logs, task.state, true)
+			_, err := w.chain.WriteBlockAndSsdcead(block, receipts, logs, task.state, true)
 			if err != nil {
 				log.Error("Failed writing block to chain", "err", err)
 				continue
@@ -883,7 +883,7 @@ func (w *worker) commitTransactions(env *environment, txs *types.TransactionsByP
 		// during transaction acceptance is the transaction pool.
 		from, _ := types.Sender(env.signer, tx)
 
-		// Check whether the tx is replay protected. If we're not in the EIP155 hf
+		// Check whsdcer the tx is replay protected. If we're not in the EIP155 hf
 		// phase, start ignoring the sender until we do.
 		if tx.Protected() && !w.chainConfig.IsEIP155(env.header.Number) {
 			log.Trace("Ignoring reply protected transaction", "hash", tx.Hash(), "eip155", w.chainConfig.EIP155Block)
@@ -950,13 +950,13 @@ func (w *worker) commitTransactions(env *environment, txs *types.TransactionsByP
 // generateParams wraps various of settings for generating sealing task.
 type generateParams struct {
 	timestamp  uint64         // The timstamp for sealing task
-	forceTime  bool           // Flag whether the given timestamp is immutable or not
+	forceTime  bool           // Flag whsdcer the given timestamp is immutable or not
 	parentHash common.Hash    // Parent block hash, empty means the latest chain head
 	coinbase   common.Address // The fee recipient address for including transaction
 	random     common.Hash    // The randomness generated by beacon chain, empty before the merge
-	noUncle    bool           // Flag whether the uncle block inclusion is allowed
-	noExtra    bool           // Flag whether the extra field assignment is allowed
-	noTxs      bool           // Flag whether an empty block without any transaction is expected
+	noUncle    bool           // Flag whsdcer the uncle block inclusion is allowed
+	noExtra    bool           // Flag whsdcer the extra field assignment is allowed
+	noTxs      bool           // Flag whsdcer an empty block without any transaction is expected
 }
 
 // prepareWork constructs the sealing task according to the given parameters,
@@ -1047,9 +1047,9 @@ func (w *worker) prepareWork(genParams *generateParams) (*environment, error) {
 func (w *worker) fillTransactions(interrupt *int32, env *environment) error {
 	// Split the pending transactions into locals and remotes
 	// Fill the block with all available pending transactions.
-	pending := w.eth.TxPool().Pending(true)
+	pending := w.sdc.TxPool().Pending(true)
 	localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
-	for _, account := range w.eth.TxPool().Locals() {
+	for _, account := range w.sdc.TxPool().Locals() {
 		if txs := remoteTxs[account]; len(txs) > 0 {
 			delete(remoteTxs, account)
 			localTxs[account] = txs
@@ -1102,7 +1102,7 @@ func (w *worker) commitWork(interrupt *int32, noempty bool, timestamp int64) {
 	var coinbase common.Address
 	if w.isRunning() {
 		if w.coinbase == (common.Address{}) {
-			log.Error("Refusing to mine without etherbase")
+			log.Error("Refusing to mine without sdcerbase")
 			return
 		}
 		coinbase = w.coinbase // Use the preset address as the fee recipient
@@ -1169,7 +1169,7 @@ func (w *worker) commit(env *environment, interval func(), update bool, start ti
 			interval()
 		}
 		// Create a local environment copy, avoid the data race with snapshot state.
-		// https://github.com/ethereum/go-ethereum/issues/24299
+		// https://github.com/sdcereum/go-sdcereum/issues/24299
 		env := env.copy()
 		block, err := w.engine.FinalizeAndAssemble(w.chain, env.header, env.state, env.txs, env.unclelist(), env.receipts)
 		if err != nil {
@@ -1251,14 +1251,14 @@ func (w *worker) postSideBlock(event core.ChainSideEvent) {
 	}
 }
 
-// totalFees computes total consumed miner fees in ETH. Block transactions and receipts have to have the same order.
+// totalFees computes total consumed miner fees in sdc. Block transactions and receipts have to have the same order.
 func totalFees(block *types.Block, receipts []*types.Receipt) *big.Float {
 	feesWei := new(big.Int)
 	for i, tx := range block.Transactions() {
 		minerFee, _ := tx.EffectiveGasTip(block.BaseFee())
 		feesWei.Add(feesWei, new(big.Int).Mul(new(big.Int).SetUint64(receipts[i].GasUsed), minerFee))
 	}
-	return new(big.Float).Quo(new(big.Float).SetInt(feesWei), new(big.Float).SetInt(big.NewInt(params.Ether)))
+	return new(big.Float).Quo(new(big.Float).SetInt(feesWei), new(big.Float).SetInt(big.NewInt(params.sdcer)))
 }
 
 // signalToErr converts the interruption signal to a concrete error type for return.

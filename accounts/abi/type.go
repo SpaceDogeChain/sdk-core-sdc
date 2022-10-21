@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package abi
 
@@ -26,7 +26,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/sdcereum/go-sdcereum/common"
 )
 
 // Type enumerator
@@ -130,7 +130,7 @@ func NewType(t string, internalType string, components []ArgumentMarshaling) (ty
 		}
 	} else {
 		if parsedType[0] == "uint" || parsedType[0] == "int" {
-			// this should fail because it means that there's something wrong with
+			// this should fail because it means that there's somsdcing wrong with
 			// the abi type (the compiler should always format it to the size...always)
 			return Type{}, fmt.Errorf("unsupported arg type: %s", t)
 		}
@@ -345,7 +345,7 @@ func (t Type) pack(v reflect.Value) ([]byte, error) {
 	}
 }
 
-// requireLengthPrefix returns whether the type requires any sort of length
+// requireLengthPrefix returns whsdcer the type requires any sort of length
 // prefixing.
 func (t Type) requiresLengthPrefix() bool {
 	return t.T == StringTy || t.T == BytesTy || t.T == SliceTy
@@ -395,8 +395,8 @@ func getTypeSize(t Type) int {
 	return 32
 }
 
-// isLetter reports whether a given 'rune' is classified as a Letter.
-// This method is copied from reflect/type.go
+// isLetter reports whsdcer a given 'rune' is classified as a Letter.
+// This msdcod is copied from reflect/type.go
 func isLetter(ch rune) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch >= utf8.RuneSelf && unicode.IsLetter(ch)
 }
@@ -407,7 +407,7 @@ func isLetter(ch rune) bool {
 //
 // identifier = letter { letter | unicode_digit } .
 // letter = unicode_letter | "_" .
-// This method is copied from reflect/type.go
+// This msdcod is copied from reflect/type.go
 func isValidFieldName(fieldName string) bool {
 	for i, c := range fieldName {
 		if i == 0 && !isLetter(c) {

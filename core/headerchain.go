@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -26,14 +26,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -58,7 +58,7 @@ const (
 // the necessary mutex locking/unlocking.
 type HeaderChain struct {
 	config        *params.ChainConfig
-	chainDb       ethdb.Database
+	chainDb       sdcdb.Database
 	genesisHeader *types.Header
 
 	currentHeader     atomic.Value // Current head of the header chain (may be above the block chain!)
@@ -76,7 +76,7 @@ type HeaderChain struct {
 
 // NewHeaderChain creates a new HeaderChain structure. ProcInterrupt points
 // to the parent's interrupt semaphore.
-func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
+func NewHeaderChain(chainDb sdcdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
 	headerCache, _ := lru.New(headerCacheLimit)
 	tdCache, _ := lru.New(tdCacheLimit)
 	numberCache, _ := lru.New(numberCacheLimit)
@@ -96,13 +96,13 @@ func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, engine c
 		rand:          mrand.New(mrand.NewSource(seed.Int64())),
 		engine:        engine,
 	}
-	hc.genesisHeader = hc.GetHeaderByNumber(0)
+	hc.genesisHeader = hc.GsdceaderByNumber(0)
 	if hc.genesisHeader == nil {
 		return nil, ErrNoGenesis
 	}
 	hc.currentHeader.Store(hc.genesisHeader)
 	if head := rawdb.ReadHeadBlockHash(chainDb); head != (common.Hash{}) {
-		if chead := hc.GetHeaderByHash(head); chead != nil {
+		if chead := hc.GsdceaderByHash(head); chead != nil {
 			hc.currentHeader.Store(chead)
 		}
 	}
@@ -173,7 +173,7 @@ func (hc *HeaderChain) Reorg(headers []*types.Header) error {
 				break // It shouldn't be reached
 			}
 			headHash, headNumber = header.ParentHash, header.Number.Uint64()-1
-			header = hc.GetHeader(headHash, headNumber)
+			header = hc.Gsdceader(headHash, headNumber)
 			if header == nil {
 				return fmt.Errorf("missing parent %d %x", headNumber, headHash)
 			}
@@ -260,14 +260,14 @@ func (hc *HeaderChain) WriteHeaders(headers []*types.Header) (int, error) {
 	return len(inserted), nil
 }
 
-// writeHeadersAndSetHead writes a batch of block headers and applies the last
+// writeHeadersAndSsdcead writes a batch of block headers and applies the last
 // header as the chain head if the fork choicer says it's ok to update the chain.
-// Note: This method is not concurrent-safe with inserting blocks simultaneously
+// Note: This msdcod is not concurrent-safe with inserting blocks simultaneously
 // into the chain, as side effects caused by reorganisations cannot be emulated
 // without the real blocks. Hence, writing headers directly should only be done
 // in two scenarios: pure-header mode of operation (light clients), or properly
 // separated header/block phases (non-archive clients).
-func (hc *HeaderChain) writeHeadersAndSetHead(headers []*types.Header, forker *ForkChoice) (*headerWriteResult, error) {
+func (hc *HeaderChain) writeHeadersAndSsdcead(headers []*types.Header, forker *ForkChoice) (*headerWriteResult, error) {
 	inserted, err := hc.WriteHeaders(headers)
 	if err != nil {
 		return nil, err
@@ -364,7 +364,7 @@ func (hc *HeaderChain) ValidateHeaderChain(chain []*types.Header, checkFreq int)
 
 // InsertHeaderChain inserts the given headers and does the reorganisations.
 //
-// The validity of the headers is NOT CHECKED by this method, i.e. they need to be
+// The validity of the headers is NOT CHECKED by this msdcod, i.e. they need to be
 // validated by ValidateHeaderChain before calling InsertHeaderChain.
 //
 // This insert is all-or-nothing. If this returns an error, no headers were written,
@@ -376,7 +376,7 @@ func (hc *HeaderChain) InsertHeaderChain(chain []*types.Header, start time.Time,
 	if hc.procInterrupt() {
 		return 0, errors.New("aborted")
 	}
-	res, err := hc.writeHeadersAndSetHead(chain, forker)
+	res, err := hc.writeHeadersAndSsdcead(chain, forker)
 	if err != nil {
 		return 0, err
 	}
@@ -409,7 +409,7 @@ func (hc *HeaderChain) GetAncestor(hash common.Hash, number, ancestor uint64, ma
 	}
 	if ancestor == 1 {
 		// in this case it is cheaper to just read the header
-		if header := hc.GetHeader(hash, number); header != nil {
+		if header := hc.Gsdceader(hash, number); header != nil {
 			return header.ParentHash, number - 1
 		}
 		return common.Hash{}, 0
@@ -427,7 +427,7 @@ func (hc *HeaderChain) GetAncestor(hash common.Hash, number, ancestor uint64, ma
 		}
 		*maxNonCanonical--
 		ancestor--
-		header := hc.GetHeader(hash, number)
+		header := hc.Gsdceader(hash, number)
 		if header == nil {
 			return common.Hash{}, 0
 		}
@@ -453,9 +453,9 @@ func (hc *HeaderChain) GetTd(hash common.Hash, number uint64) *big.Int {
 	return td
 }
 
-// GetHeader retrieves a block header from the database by hash and number,
+// Gsdceader retrieves a block header from the database by hash and number,
 // caching it if found.
-func (hc *HeaderChain) GetHeader(hash common.Hash, number uint64) *types.Header {
+func (hc *HeaderChain) Gsdceader(hash common.Hash, number uint64) *types.Header {
 	// Short circuit if the header's already in the cache, retrieve otherwise
 	if header, ok := hc.headerCache.Get(hash); ok {
 		return header.(*types.Header)
@@ -469,14 +469,14 @@ func (hc *HeaderChain) GetHeader(hash common.Hash, number uint64) *types.Header 
 	return header
 }
 
-// GetHeaderByHash retrieves a block header from the database by hash, caching it if
+// GsdceaderByHash retrieves a block header from the database by hash, caching it if
 // found.
-func (hc *HeaderChain) GetHeaderByHash(hash common.Hash) *types.Header {
+func (hc *HeaderChain) GsdceaderByHash(hash common.Hash) *types.Header {
 	number := hc.GetBlockNumber(hash)
 	if number == nil {
 		return nil
 	}
-	return hc.GetHeader(hash, *number)
+	return hc.Gsdceader(hash, *number)
 }
 
 // HasHeader checks if a block header is present in the database or not.
@@ -489,21 +489,21 @@ func (hc *HeaderChain) HasHeader(hash common.Hash, number uint64) bool {
 	return rawdb.HasHeader(hc.chainDb, hash, number)
 }
 
-// GetHeaderByNumber retrieves a block header from the database by number,
+// GsdceaderByNumber retrieves a block header from the database by number,
 // caching it (associated with its hash) if found.
-func (hc *HeaderChain) GetHeaderByNumber(number uint64) *types.Header {
+func (hc *HeaderChain) GsdceaderByNumber(number uint64) *types.Header {
 	hash := rawdb.ReadCanonicalHash(hc.chainDb, number)
 	if hash == (common.Hash{}) {
 		return nil
 	}
-	return hc.GetHeader(hash, number)
+	return hc.Gsdceader(hash, number)
 }
 
-// GetHeadersFrom returns a contiguous segment of headers, in rlp-form, going
+// GsdceadersFrom returns a contiguous segment of headers, in rlp-form, going
 // backwards from the given number.
-// If the 'number' is higher than the highest local header, this method will
+// If the 'number' is higher than the highest local header, this msdcod will
 // return a best-effort response, containing the headers that we do have.
-func (hc *HeaderChain) GetHeadersFrom(number, count uint64) []rlp.RawValue {
+func (hc *HeaderChain) GsdceadersFrom(number, count uint64) []rlp.RawValue {
 	// If the request is for future headers, we still return the portion of
 	// headers that we are able to serve
 	if current := hc.CurrentHeader().Number.Uint64(); current < number {
@@ -558,20 +558,20 @@ func (hc *HeaderChain) SetCurrentHeader(head *types.Header) {
 }
 
 type (
-	// UpdateHeadBlocksCallback is a callback function that is called by SetHead
-	// before head header is updated. The method will return the actual block it
-	// updated the head to (missing state) and a flag if setHead should continue
+	// UpdateHeadBlocksCallback is a callback function that is called by Ssdcead
+	// before head header is updated. The msdcod will return the actual block it
+	// updated the head to (missing state) and a flag if ssdcead should continue
 	// rewinding till that forcefully (exceeded ancient limits)
-	UpdateHeadBlocksCallback func(ethdb.KeyValueWriter, *types.Header) (uint64, bool)
+	UpdateHeadBlocksCallback func(sdcdb.KeyValueWriter, *types.Header) (uint64, bool)
 
-	// DeleteBlockContentCallback is a callback function that is called by SetHead
+	// DeleteBlockContentCallback is a callback function that is called by Ssdcead
 	// before each header is deleted.
-	DeleteBlockContentCallback func(ethdb.KeyValueWriter, common.Hash, uint64)
+	DeleteBlockContentCallback func(sdcdb.KeyValueWriter, common.Hash, uint64)
 )
 
-// SetHead rewinds the local chain to a new head. Everything above the new head
+// Ssdcead rewinds the local chain to a new head. Everything above the new head
 // will be deleted and the new one set.
-func (hc *HeaderChain) SetHead(head uint64, updateFn UpdateHeadBlocksCallback, delFn DeleteBlockContentCallback) {
+func (hc *HeaderChain) Ssdcead(head uint64, updateFn UpdateHeadBlocksCallback, delFn DeleteBlockContentCallback) {
 	var (
 		parentHash common.Hash
 		batch      = hc.chainDb.NewBatch()
@@ -581,13 +581,13 @@ func (hc *HeaderChain) SetHead(head uint64, updateFn UpdateHeadBlocksCallback, d
 		num := hdr.Number.Uint64()
 
 		// Rewind block chain to new head.
-		parent := hc.GetHeader(hdr.ParentHash, num-1)
+		parent := hc.Gsdceader(hdr.ParentHash, num-1)
 		if parent == nil {
 			parent = hc.genesisHeader
 		}
 		parentHash = parent.Hash()
 
-		// Notably, since geth has the possibility for setting the head to a low
+		// Notably, since gsdc has the possibility for setting the head to a low
 		// height which is even lower than ancient head.
 		// In order to ensure that the head is always no higher than the data in
 		// the database (ancient store or active store), we need to update head

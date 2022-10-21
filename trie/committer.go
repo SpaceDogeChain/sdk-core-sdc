@@ -1,25 +1,25 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package trie
 
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/sdcereum/go-sdcereum/common"
 )
 
 // leaf represents a trie leaf node
@@ -205,9 +205,9 @@ func (c *committer) store(path []byte, n node) node {
 }
 
 // estimateSize estimates the size of an rlp-encoded node, without actually
-// rlp-encoding it (zero allocs). This method has been experimentally tried, and with a trie
+// rlp-encoding it (zero allocs). This msdcod has been experimentally tried, and with a trie
 // with 1000 leaves, the only errors above 1% are on small shortnodes, where this
-// method overestimates by 2 or 3 bytes (e.g. 37 instead of 35)
+// msdcod overestimates by 2 or 3 bytes (e.g. 37 instead of 35)
 func estimateSize(n node) int {
 	switch n := n.(type) {
 	case *shortNode:

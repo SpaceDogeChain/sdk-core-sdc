@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package snapshot
 
@@ -24,15 +24,15 @@ import (
 	"time"
 
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb/memorydb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 var (
@@ -62,7 +62,7 @@ var (
 // generateSnapshot regenerates a brand new snapshot based on an existing state
 // database and head block asynchronously. The snapshot is returned immediately
 // and generation is continued in the background until done.
-func generateSnapshot(diskdb ethdb.KeyValueStore, triedb *trie.Database, cache int, root common.Hash) *diskLayer {
+func generateSnapshot(diskdb sdcdb.KeyValueStore, triedb *trie.Database, cache int, root common.Hash) *diskLayer {
 	// Create a new disk layer with an initialized state marker at zero
 	var (
 		stats     = &generatorStats{start: time.Now()}
@@ -89,7 +89,7 @@ func generateSnapshot(diskdb ethdb.KeyValueStore, triedb *trie.Database, cache i
 }
 
 // journalProgress persists the generator stats into the database to resume later.
-func journalProgress(db ethdb.KeyValueWriter, marker []byte, stats *generatorStats) {
+func journalProgress(db sdcdb.KeyValueWriter, marker []byte, stats *generatorStats) {
 	// Write out the generator marker. Note it's a standalone disk layer generator
 	// which is not mixed with journal. It's ok if the generator is persisted while
 	// journal is not.
@@ -128,7 +128,7 @@ type proofResult struct {
 	vals     [][]byte   // The val set of all elements being iterated, even proving is failed
 	diskMore bool       // Set when the database has extra snapshot states since last iteration
 	trieMore bool       // Set when the trie has extra snapshot states(only meaningful for successful proving)
-	proofErr error      // Indicator whether the given state range is valid or not
+	proofErr error      // Indicator whsdcer the given state range is valid or not
 	tr       *trie.Trie // The trie, in case the trie was resolved by the prover (may be nil)
 }
 
@@ -137,7 +137,7 @@ func (result *proofResult) valid() bool {
 	return result.proofErr == nil
 }
 
-// last returns the last verified element key regardless of whether the range proof is
+// last returns the last verified element key regardless of whsdcer the range proof is
 // successful or not. Nil is returned if nothing involved in the proving.
 func (result *proofResult) last() []byte {
 	var last []byte
@@ -360,7 +360,7 @@ func (dl *diskLayer) generateRange(ctx *generatorContext, trieId *trie.ID, prefi
 	}
 	// We use the snap data to build up a cache which can be used by the
 	// main account trie as a primary lookup when resolving hashes
-	var snapNodeCache ethdb.KeyValueStore
+	var snapNodeCache sdcdb.KeyValueStore
 	if len(result.keys) > 0 {
 		snapNodeCache = memorydb.New()
 		snapTrieDb := trie.NewDatabase(snapNodeCache)
@@ -477,7 +477,7 @@ func (dl *diskLayer) checkAndFlush(ctx *generatorContext, current []byte) error 
 	case abort = <-dl.genAbort:
 	default:
 	}
-	if ctx.batch.ValueSize() > ethdb.IdealBatchSize || abort != nil {
+	if ctx.batch.ValueSize() > sdcdb.IdealBatchSize || abort != nil {
 		if bytes.Compare(current, dl.genMarker) < 0 {
 			log.Error("Snapshot generator went backwards", "current", fmt.Sprintf("%x", current), "genMarker", fmt.Sprintf("%x", dl.genMarker))
 		}
@@ -662,7 +662,7 @@ func generateAccounts(ctx *generatorContext, dl *diskLayer, accMarker []byte) er
 
 // generate is a background thread that iterates over the state and storage tries,
 // constructing the state snapshot. All the arguments are purely for statistics
-// gathering and logging, since the method surfs the blocks as they arrive, often
+// gathering and logging, since the msdcod surfs the blocks as they arrive, often
 // being restarted.
 func (dl *diskLayer) generate(stats *generatorStats) {
 	var (

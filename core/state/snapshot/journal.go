@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package snapshot
 
@@ -25,23 +25,23 @@ import (
 	"time"
 
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 const journalVersion uint64 = 0
 
 // journalGenerator is a disk layer entry containing the generator progress marker.
 type journalGenerator struct {
-	// Indicator that whether the database was in progress of being wiped.
+	// Indicator that whsdcer the database was in progress of being wiped.
 	// It's deprecated but keep it here for background compatibility.
 	Wiping bool
 
-	Done     bool // Whether the generator finished creating the snapshot
+	Done     bool // Whsdcer the generator finished creating the snapshot
 	Marker   []byte
 	Accounts uint64
 	Slots    uint64
@@ -75,7 +75,7 @@ func ParseGeneratorStatus(generatorBlob []byte) string {
 		log.Warn("failed to decode snapshot generator", "err", err)
 		return ""
 	}
-	// Figure out whether we're after or within an account
+	// Figure out whsdcer we're after or within an account
 	var m string
 	switch marker := generator.Marker; len(marker) {
 	case common.HashLength:
@@ -90,7 +90,7 @@ func ParseGeneratorStatus(generatorBlob []byte) string {
 }
 
 // loadAndParseJournal tries to parse the snapshot journal in latest format.
-func loadAndParseJournal(db ethdb.KeyValueStore, base *diskLayer) (snapshot, journalGenerator, error) {
+func loadAndParseJournal(db sdcdb.KeyValueStore, base *diskLayer) (snapshot, journalGenerator, error) {
 	// Retrieve the disk layer generator. It must exist, no matter the
 	// snapshot is fully generated or not. Otherwise the entire disk
 	// layer is invalid.
@@ -103,7 +103,7 @@ func loadAndParseJournal(db ethdb.KeyValueStore, base *diskLayer) (snapshot, jou
 		return nil, journalGenerator{}, fmt.Errorf("failed to decode snapshot generator: %v", err)
 	}
 	// Retrieve the diff layer journal. It's possible that the journal is
-	// not existent, e.g. the disk layer is generating while that the Geth
+	// not existent, e.g. the disk layer is generating while that the Gsdc
 	// crashes without persisting the diff journal.
 	// So if there is no journal, or the journal is invalid(e.g. the journal
 	// is not matched with disk layer; or the it's the legacy-format journal,
@@ -120,9 +120,9 @@ func loadAndParseJournal(db ethdb.KeyValueStore, base *diskLayer) (snapshot, jou
 }
 
 // loadSnapshot loads a pre-existing state snapshot backed by a key-value store.
-func loadSnapshot(diskdb ethdb.KeyValueStore, triedb *trie.Database, root common.Hash, cache int, recovery bool, noBuild bool) (snapshot, bool, error) {
+func loadSnapshot(diskdb sdcdb.KeyValueStore, triedb *trie.Database, root common.Hash, cache int, recovery bool, noBuild bool) (snapshot, bool, error) {
 	// If snapshotting is disabled (initial sync in progress), don't do anything,
-	// wait for the chain to permit us to do something meaningful
+	// wait for the chain to permit us to do somsdcing meaningful
 	if rawdb.ReadSnapshotDisabled(diskdb) {
 		return nil, true, nil
 	}
@@ -147,7 +147,7 @@ func loadSnapshot(diskdb ethdb.KeyValueStore, triedb *trie.Database, root common
 	// snapshot is not matched with current state root, print a warning log
 	// or discard the entire snapshot it's legacy snapshot.
 	//
-	// Possible scenario: Geth was crashed without persisting journal and then
+	// Possible scenario: Gsdc was crashed without persisting journal and then
 	// restart, the head is rewound to the point with available state(trie)
 	// which is below the snapshot. In this case the snapshot can be recovered
 	// by re-executing blocks but right now it's unavailable.
@@ -277,9 +277,9 @@ type journalCallback = func(parent common.Hash, root common.Hash, destructs map[
 // the database, and invoking the callback for each loaded layer.
 // The order is incremental; starting with the bottom-most difflayer, going towards
 // the most recent layer.
-// This method returns error either if there was some error reading from disk,
+// This msdcod returns error either if there was some error reading from disk,
 // OR if the callback returns an error when invoked.
-func iterateJournal(db ethdb.KeyValueReader, callback journalCallback) error {
+func iterateJournal(db sdcdb.KeyValueReader, callback journalCallback) error {
 	journal := rawdb.ReadSnapshotJournal(db)
 	if len(journal) == 0 {
 		log.Warn("Loaded snapshot journal", "diffs", "missing")

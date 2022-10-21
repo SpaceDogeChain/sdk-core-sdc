@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package miner
 
@@ -24,20 +24,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/clique"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 const (
@@ -52,7 +52,7 @@ const (
 var (
 	// Test chain configurations
 	testTxPoolConfig  core.TxPoolConfig
-	ethashChainConfig *params.ChainConfig
+	sdcashChainConfig *params.ChainConfig
 	cliqueChainConfig *params.ChainConfig
 
 	// Test accounts
@@ -76,8 +76,8 @@ var (
 func init() {
 	testTxPoolConfig = core.DefaultTxPoolConfig
 	testTxPoolConfig.Journal = ""
-	ethashChainConfig = new(params.ChainConfig)
-	*ethashChainConfig = *params.TestChainConfig
+	sdcashChainConfig = new(params.ChainConfig)
+	*sdcashChainConfig = *params.TestChainConfig
 	cliqueChainConfig = new(params.ChainConfig)
 	*cliqueChainConfig = *params.TestChainConfig
 	cliqueChainConfig.Clique = &params.CliqueConfig{
@@ -110,14 +110,14 @@ func init() {
 
 // testWorkerBackend implements worker.Backend interfaces and wraps all information needed during the testing.
 type testWorkerBackend struct {
-	db         ethdb.Database
+	db         sdcdb.Database
 	txPool     *core.TxPool
 	chain      *core.BlockChain
 	genesis    *core.Genesis
 	uncleBlock *types.Block
 }
 
-func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine, db ethdb.Database, n int) *testWorkerBackend {
+func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine, db sdcdb.Database, n int) *testWorkerBackend {
 	var gspec = &core.Genesis{
 		Config: chainConfig,
 		Alloc:  core.GenesisAlloc{testBankAddress: {Balance: testBankFunds}},
@@ -129,7 +129,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 		e.Authorize(testBankAddress, func(account accounts.Account, s string, data []byte) ([]byte, error) {
 			return crypto.Sign(crypto.Keccak256(data), testBankKey)
 		})
-	case *ethash.Ethash:
+	case *sdcash.sdcash:
 	default:
 		t.Fatalf("unexpected consensus engine type: %T", engine)
 	}
@@ -198,15 +198,15 @@ func (b *testWorkerBackend) newRandomTx(creation bool) *types.Transaction {
 	return tx
 }
 
-func newTestWorker(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine, db ethdb.Database, blocks int) (*worker, *testWorkerBackend) {
+func newTestWorker(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine, db sdcdb.Database, blocks int) (*worker, *testWorkerBackend) {
 	backend := newTestWorkerBackend(t, chainConfig, engine, db, blocks)
 	backend.txPool.AddLocals(pendingTxs)
 	w := newWorker(testConfig, chainConfig, engine, backend, new(event.TypeMux), nil, false)
-	w.setEtherbase(testBankAddress)
+	w.setsdcerbase(testBankAddress)
 	return w, backend
 }
 
-func TestGenerateBlockAndImportEthash(t *testing.T) {
+func TestGenerateBlockAndImportsdcash(t *testing.T) {
 	testGenerateBlockAndImport(t, false)
 }
 
@@ -225,8 +225,8 @@ func testGenerateBlockAndImport(t *testing.T, isClique bool) {
 		chainConfig.Clique = &params.CliqueConfig{Period: 1, Epoch: 30000}
 		engine = clique.New(chainConfig.Clique, db)
 	} else {
-		chainConfig = *params.AllEthashProtocolChanges
-		engine = ethash.NewFaker()
+		chainConfig = *params.AllsdcashProtocolChanges
+		engine = sdcash.NewFaker()
 	}
 	w, b := newTestWorker(t, &chainConfig, engine, db, 0)
 	defer w.close()
@@ -265,8 +265,8 @@ func testGenerateBlockAndImport(t *testing.T, isClique bool) {
 	}
 }
 
-func TestEmptyWorkEthash(t *testing.T) {
-	testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
+func TestEmptyWorksdcash(t *testing.T) {
+	testEmptyWork(t, sdcashChainConfig, sdcash.NewFaker())
 }
 func TestEmptyWorkClique(t *testing.T) {
 	testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, rawdb.NewMemoryDatabase()))
@@ -318,10 +318,10 @@ func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consens
 }
 
 func TestStreamUncleBlock(t *testing.T) {
-	ethash := ethash.NewFaker()
-	defer ethash.Close()
+	sdcash := sdcash.NewFaker()
+	defer sdcash.Close()
 
-	w, b := newTestWorker(t, ethashChainConfig, ethash, rawdb.NewMemoryDatabase(), 1)
+	w, b := newTestWorker(t, sdcashChainConfig, sdcash, rawdb.NewMemoryDatabase(), 1)
 	defer w.close()
 
 	var taskCh = make(chan struct{})
@@ -368,8 +368,8 @@ func TestStreamUncleBlock(t *testing.T) {
 	}
 }
 
-func TestRegenerateMiningBlockEthash(t *testing.T) {
-	testRegenerateMiningBlock(t, ethashChainConfig, ethash.NewFaker())
+func TestRegenerateMiningBlocksdcash(t *testing.T) {
+	testRegenerateMiningBlock(t, sdcashChainConfig, sdcash.NewFaker())
 }
 
 func TestRegenerateMiningBlockClique(t *testing.T) {
@@ -428,8 +428,8 @@ func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, en
 	}
 }
 
-func TestAdjustIntervalEthash(t *testing.T) {
-	testAdjustInterval(t, ethashChainConfig, ethash.NewFaker())
+func TestAdjustIntervalsdcash(t *testing.T) {
+	testAdjustInterval(t, sdcashChainConfig, sdcash.NewFaker())
 }
 
 func TestAdjustIntervalClique(t *testing.T) {
@@ -522,8 +522,8 @@ func testAdjustInterval(t *testing.T, chainConfig *params.ChainConfig, engine co
 	}
 }
 
-func TestGetSealingWorkEthash(t *testing.T) {
-	testGetSealingWork(t, ethashChainConfig, ethash.NewFaker())
+func TestGetSealingWorksdcash(t *testing.T) {
+	testGetSealingWork(t, sdcashChainConfig, sdcash.NewFaker())
 }
 
 func TestGetSealingWorkClique(t *testing.T) {
@@ -532,9 +532,9 @@ func TestGetSealingWorkClique(t *testing.T) {
 
 func TestGetSealingWorkPostMerge(t *testing.T) {
 	local := new(params.ChainConfig)
-	*local = *ethashChainConfig
+	*local = *sdcashChainConfig
 	local.TerminalTotalDifficulty = big.NewInt(0)
-	testGetSealingWork(t, local, ethash.NewFaker())
+	testGetSealingWork(t, local, sdcash.NewFaker())
 }
 
 func testGetSealingWork(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {

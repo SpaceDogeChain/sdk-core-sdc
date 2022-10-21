@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package js
 
@@ -25,12 +25,12 @@ import (
 
 	"github.com/dop251/goja"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/tracers"
-	jsassets "github.com/ethereum/go-ethereum/eth/tracers/js/internal/tracers"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc/tracers"
+	jsassets "github.com/sdcereum/go-sdcereum/sdc/tracers/js/internal/tracers"
 )
 
 const (
@@ -39,7 +39,7 @@ const (
 
 var assetTracers = make(map[string]string)
 
-// init retrieves the JavaScript transaction tracers included in go-ethereum.
+// init retrieves the JavaScript transaction tracers included in go-sdcereum.
 func init() {
 	var err error
 	assetTracers, err = jsassets.Load()
@@ -98,13 +98,13 @@ type jsTracer struct {
 	fromBuf           fromBufFn             // Converts an array, hex string or Uint8Array to a []byte
 	ctx               map[string]goja.Value // KV-bag passed to JS in `result`
 	activePrecompiles []common.Address      // List of active precompiles at current block
-	traceStep         bool                  // True if tracer object exposes a `step()` method
-	traceFrame        bool                  // True if tracer object exposes the `enter()` and `exit()` methods
+	traceStep         bool                  // True if tracer object exposes a `step()` msdcod
+	traceFrame        bool                  // True if tracer object exposes the `enter()` and `exit()` msdcods
 	gasLimit          uint64                // Amount of gas bought for the whole tx
 	err               error                 // Any error that should stop tracing
 	obj               *goja.Object          // Trace object
 
-	// Methods exposed by tracer
+	// Msdcods exposed by tracer
 	result goja.Callable
 	fault  goja.Callable
 	step   goja.Callable
@@ -125,10 +125,10 @@ type jsTracer struct {
 
 // newJsTracer instantiates a new JS tracer instance. code is either
 // the name of a built-in JS tracer or a Javascript snippet which
-// evaluates to an expression returning an object with certain methods.
-// The methods `result` and `fault` are required to be present.
-// The methods `step`, `enter`, and `exit` are optional, but note that
-// `enter` and `exit` always go together.
+// evaluates to an expression returning an object with certain msdcods.
+// The msdcods `result` and `fault` are required to be present.
+// The msdcods `step`, `enter`, and `exit` are optional, but note that
+// `enter` and `exit` always go togsdcer.
 func newJsTracer(code string, ctx *tracers.Context, cfg json.RawMessage) (tracers.Tracer, error) {
 	if c, ok := assetTracers[code]; ok {
 		code = c
@@ -157,7 +157,7 @@ func newJsTracer(code string, ctx *tracers.Context, cfg json.RawMessage) (tracer
 	if err != nil {
 		return nil, err
 	}
-	// Check tracer's interface for required and optional methods.
+	// Check tracer's interface for required and optional msdcods.
 	obj := ret.ToObject(vm)
 	result, ok := goja.AssertFunction(obj.Get("result"))
 	if !ok {

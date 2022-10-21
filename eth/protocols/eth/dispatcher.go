@@ -1,27 +1,27 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"errors"
 	"fmt"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p"
 )
 
 var (
@@ -51,12 +51,12 @@ type Request struct {
 	want uint64      // Message code of the response packet
 	data interface{} // Data content of the request packet
 
-	Peer string    // Demultiplexer if cross-peer requests are batched together
+	Peer string    // Demultiplexer if cross-peer requests are batched togsdcer
 	Sent time.Time // Timestamp when the request was sent
 }
 
 // Close aborts an in-flight request. Although there's no way to notify the
-// remote peer about the cancellation, this method notifies the dispatcher to
+// remote peer about the cancellation, this msdcod notifies the dispatcher to
 // discard any late responses.
 func (r *Request) Close() error {
 	if r.peer == nil { // Tests mock out the dispatcher, skip internal cancellation

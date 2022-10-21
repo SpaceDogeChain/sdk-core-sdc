@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package abi
 
@@ -23,24 +23,24 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/crypto"
 )
 
 // The ABI holds information about a contract's context and available
-// invokable methods. It will allow you to type check function calls and
+// invokable msdcods. It will allow you to type check function calls and
 // packs data accordingly.
 type ABI struct {
-	Constructor Method
-	Methods     map[string]Method
+	Constructor Msdcod
+	Msdcods     map[string]Msdcod
 	Events      map[string]Event
 	Errors      map[string]Error
 
 	// Additional "special" functions introduced in solidity v0.6.0.
 	// It's separated from the original default fallback. Each contract
 	// can only define one fallback and receive function.
-	Fallback Method // Note it's also used to represent legacy fallback before v0.6.0
-	Receive  Method
+	Fallback Msdcod // Note it's also used to represent legacy fallback before v0.6.0
+	Receive  Msdcod
 }
 
 // JSON returns a parsed ABI interface and error if it failed.
@@ -54,13 +54,13 @@ func JSON(reader io.Reader) (ABI, error) {
 	return abi, nil
 }
 
-// Pack the given method name to conform the ABI. Method call's data
-// will consist of method_id, args0, arg1, ... argN. Method id consists
+// Pack the given msdcod name to conform the ABI. Msdcod call's data
+// will consist of msdcod_id, args0, arg1, ... argN. Msdcod id consists
 // of 4 bytes and arguments are all 32 bytes.
-// Method ids are created from the first 4 bytes of the hash of the
-// methods string signature. (signature = baz(uint32,string32))
+// Msdcod ids are created from the first 4 bytes of the hash of the
+// msdcods string signature. (signature = baz(uint32,string32))
 func (abi ABI) Pack(name string, args ...interface{}) ([]byte, error) {
-	// Fetch the ABI of the requested method
+	// Fetch the ABI of the requested msdcod
 	if name == "" {
 		// constructor
 		arguments, err := abi.Constructor.Inputs.Pack(args...)
@@ -69,33 +69,33 @@ func (abi ABI) Pack(name string, args ...interface{}) ([]byte, error) {
 		}
 		return arguments, nil
 	}
-	method, exist := abi.Methods[name]
+	msdcod, exist := abi.Msdcods[name]
 	if !exist {
-		return nil, fmt.Errorf("method '%s' not found", name)
+		return nil, fmt.Errorf("msdcod '%s' not found", name)
 	}
-	arguments, err := method.Inputs.Pack(args...)
+	arguments, err := msdcod.Inputs.Pack(args...)
 	if err != nil {
 		return nil, err
 	}
-	// Pack up the method ID too if not a constructor and return
-	return append(method.ID, arguments...), nil
+	// Pack up the msdcod ID too if not a constructor and return
+	return append(msdcod.ID, arguments...), nil
 }
 
 func (abi ABI) getArguments(name string, data []byte) (Arguments, error) {
 	// since there can't be naming collisions with contracts and events,
-	// we need to decide whether we're calling a method or an event
+	// we need to decide whsdcer we're calling a msdcod or an event
 	var args Arguments
-	if method, ok := abi.Methods[name]; ok {
+	if msdcod, ok := abi.Msdcods[name]; ok {
 		if len(data)%32 != 0 {
 			return nil, fmt.Errorf("abi: improperly formatted output: %s - Bytes: [%+v]", string(data), data)
 		}
-		args = method.Outputs
+		args = msdcod.Outputs
 	}
 	if event, ok := abi.Events[name]; ok {
 		args = event.Inputs
 	}
 	if args == nil {
-		return nil, fmt.Errorf("abi: could not locate named method or event: %s", name)
+		return nil, fmt.Errorf("abi: could not locate named msdcod or event: %s", name)
 	}
 	return args, nil
 }
@@ -156,23 +156,23 @@ func (abi *ABI) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &fields); err != nil {
 		return err
 	}
-	abi.Methods = make(map[string]Method)
+	abi.Msdcods = make(map[string]Msdcod)
 	abi.Events = make(map[string]Event)
 	abi.Errors = make(map[string]Error)
 	for _, field := range fields {
 		switch field.Type {
 		case "constructor":
-			abi.Constructor = NewMethod("", "", Constructor, field.StateMutability, field.Constant, field.Payable, field.Inputs, nil)
+			abi.Constructor = NewMsdcod("", "", Constructor, field.StateMutability, field.Constant, field.Payable, field.Inputs, nil)
 		case "function":
-			name := ResolveNameConflict(field.Name, func(s string) bool { _, ok := abi.Methods[s]; return ok })
-			abi.Methods[name] = NewMethod(name, field.Name, Function, field.StateMutability, field.Constant, field.Payable, field.Inputs, field.Outputs)
+			name := ResolveNameConflict(field.Name, func(s string) bool { _, ok := abi.Msdcods[s]; return ok })
+			abi.Msdcods[name] = NewMsdcod(name, field.Name, Function, field.StateMutability, field.Constant, field.Payable, field.Inputs, field.Outputs)
 		case "fallback":
 			// New introduced function type in v0.6.0, check more detail
 			// here https://solidity.readthedocs.io/en/v0.6.0/contracts.html#fallback-function
 			if abi.HasFallback() {
 				return errors.New("only single fallback is allowed")
 			}
-			abi.Fallback = NewMethod("", "", Fallback, field.StateMutability, field.Constant, field.Payable, nil, nil)
+			abi.Fallback = NewMsdcod("", "", Fallback, field.StateMutability, field.Constant, field.Payable, nil, nil)
 		case "receive":
 			// New introduced function type in v0.6.0, check more detail
 			// here https://solidity.readthedocs.io/en/v0.6.0/contracts.html#fallback-function
@@ -182,7 +182,7 @@ func (abi *ABI) UnmarshalJSON(data []byte) error {
 			if field.StateMutability != "payable" {
 				return errors.New("the statemutability of receive can only be payable")
 			}
-			abi.Receive = NewMethod("", "", Receive, field.StateMutability, field.Constant, field.Payable, nil, nil)
+			abi.Receive = NewMsdcod("", "", Receive, field.StateMutability, field.Constant, field.Payable, nil, nil)
 		case "event":
 			name := ResolveNameConflict(field.Name, func(s string) bool { _, ok := abi.Events[s]; return ok })
 			abi.Events[name] = NewEvent(name, field.Name, field.Anonymous, field.Inputs)
@@ -197,18 +197,18 @@ func (abi *ABI) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MethodById looks up a method by the 4-byte id,
+// MsdcodById looks up a msdcod by the 4-byte id,
 // returns nil if none found.
-func (abi *ABI) MethodById(sigdata []byte) (*Method, error) {
+func (abi *ABI) MsdcodById(sigdata []byte) (*Msdcod, error) {
 	if len(sigdata) < 4 {
-		return nil, fmt.Errorf("data too short (%d bytes) for abi method lookup", len(sigdata))
+		return nil, fmt.Errorf("data too short (%d bytes) for abi msdcod lookup", len(sigdata))
 	}
-	for _, method := range abi.Methods {
-		if bytes.Equal(method.ID, sigdata[:4]) {
-			return &method, nil
+	for _, msdcod := range abi.Msdcods {
+		if bytes.Equal(msdcod.ID, sigdata[:4]) {
+			return &msdcod, nil
 		}
 	}
-	return nil, fmt.Errorf("no method with id: %#x", sigdata[:4])
+	return nil, fmt.Errorf("no msdcod with id: %#x", sigdata[:4])
 }
 
 // EventByID looks an event up by its topic hash in the
@@ -222,12 +222,12 @@ func (abi *ABI) EventByID(topic common.Hash) (*Event, error) {
 	return nil, fmt.Errorf("no event with id: %#x", topic.Hex())
 }
 
-// HasFallback returns an indicator whether a fallback function is included.
+// HasFallback returns an indicator whsdcer a fallback function is included.
 func (abi *ABI) HasFallback() bool {
 	return abi.Fallback.Type == Fallback
 }
 
-// HasReceive returns an indicator whether a receive function is included.
+// HasReceive returns an indicator whsdcer a receive function is included.
 func (abi *ABI) HasReceive() bool {
 	return abi.Receive.Type == Receive
 }

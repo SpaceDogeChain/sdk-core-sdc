@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package downloader
 
@@ -22,9 +22,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // beaconBackfiller is the chain and state backfilling that can be commenced once
@@ -35,13 +35,13 @@ type beaconBackfiller struct {
 	downloader *Downloader   // Downloader to direct via this callback implementation
 	syncMode   SyncMode      // Sync mode to use for backfilling the skeleton chains
 	success    func()        // Callback to run on successful sync cycle completion
-	filling    bool          // Flag whether the downloader is backfilling or not
+	filling    bool          // Flag whsdcer the downloader is backfilling or not
 	filled     *types.Header // Last header filled by the last terminated sync loop
-	started    chan struct{} // Notification channel whether the downloader inited
+	started    chan struct{} // Notification channel whsdcer the downloader inited
 	lock       sync.Mutex    // Mutex protecting the sync lock
 }
 
-// newBeaconBackfiller is a helper method to create the backfiller.
+// newBeaconBackfiller is a helper msdcod to create the backfiller.
 func newBeaconBackfiller(dl *Downloader, success func()) backfiller {
 	return &beaconBackfiller{
 		downloader: dl,
@@ -138,7 +138,7 @@ func (b *beaconBackfiller) setMode(mode SyncMode) {
 }
 
 // SetBadBlockCallback sets the callback to run when a bad block is hit by the
-// block processor. This method is not thread safe and should be set only once
+// block processor. This msdcod is not thread safe and should be set only once
 // on startup before system events are fired.
 func (d *Downloader) SetBadBlockCallback(onBadBlock badBlockFn) {
 	d.badBlock = onBadBlock
@@ -227,7 +227,7 @@ func (d *Downloader) findBeaconAncestor() (uint64, error) {
 		// This is a programming error. The chain backfiller was called with a
 		// tail that's not linked to the local chain. Whilst this should never
 		// happen, there might be some weirdnesses if beacon sync backfilling
-		// races with the user (or beacon client) calling setHead. Whilst panic
+		// races with the user (or beacon client) calling ssdcead. Whilst panic
 		// would be the ideal thing to do, it is safer long term to attempt a
 		// recovery and fix any noticed issue after the fact.
 		log.Error("Beacon sync linkup unavailable", "number", beaconTail.Number.Uint64()-1, "hash", beaconTail.ParentHash)

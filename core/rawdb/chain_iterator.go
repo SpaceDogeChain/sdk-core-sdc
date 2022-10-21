@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rawdb
 
@@ -21,18 +21,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/prque"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 // InitDatabaseFromFreezer reinitializes an empty database from a previous batch
-// of frozen ancient blocks. The method iterates over all the frozen blocks and
+// of frozen ancient blocks. The msdcod iterates over all the frozen blocks and
 // injects into the database the block hash->number mappings.
-func InitDatabaseFromFreezer(db ethdb.Database) {
+func InitDatabaseFromFreezer(db sdcdb.Database) {
 	// If we can't access the freezer or it's empty, abort
 	frozen, err := db.Ancients()
 	if err != nil || frozen == 0 {
@@ -59,7 +59,7 @@ func InitDatabaseFromFreezer(db ethdb.Database) {
 			hash = common.BytesToHash(h)
 			WriteHeaderNumber(batch, hash, number)
 			// If enough data was accumulated in memory or we're at the last block, dump to disk
-			if batch.ValueSize() > ethdb.IdealBatchSize {
+			if batch.ValueSize() > sdcdb.IdealBatchSize {
 				if err := batch.Write(); err != nil {
 					log.Crit("Failed to write data to db", "err", err)
 				}
@@ -92,7 +92,7 @@ type blockTxHashes struct {
 // number(s) given, and yields the hashes on a channel. If there is a signal
 // received from interrupt channel, the iteration will be aborted and result
 // channel will be closed.
-func iterateTransactions(db ethdb.Database, from uint64, to uint64, reverse bool, interrupt chan struct{}) chan *blockTxHashes {
+func iterateTransactions(db sdcdb.Database, from uint64, to uint64, reverse bool, interrupt chan struct{}) chan *blockTxHashes {
 	// One thread sequentially reads data from db
 	type numberRlp struct {
 		number uint64
@@ -177,7 +177,7 @@ func iterateTransactions(db ethdb.Database, from uint64, to uint64, reverse bool
 //
 // There is a passed channel, the whole procedure will be interrupted if any
 // signal received.
-func indexTransactions(db ethdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
+func indexTransactions(db sdcdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
 	// short circuit for invalid range
 	if from >= to {
 		return
@@ -216,7 +216,7 @@ func indexTransactions(db ethdb.Database, from uint64, to uint64, interrupt chan
 			blocks++
 			txs += len(delivery.hashes)
 			// If enough data was accumulated in memory or we're at the last block, dump to disk
-			if batch.ValueSize() > ethdb.IdealBatchSize {
+			if batch.ValueSize() > sdcdb.IdealBatchSize {
 				WriteTxIndexTail(batch, lastNum) // Also write the tail here
 				if err := batch.Write(); err != nil {
 					log.Crit("Failed writing batch to db", "error", err)
@@ -256,12 +256,12 @@ func indexTransactions(db ethdb.Database, from uint64, to uint64, interrupt chan
 //
 // There is a passed channel, the whole procedure will be interrupted if any
 // signal received.
-func IndexTransactions(db ethdb.Database, from uint64, to uint64, interrupt chan struct{}) {
+func IndexTransactions(db sdcdb.Database, from uint64, to uint64, interrupt chan struct{}) {
 	indexTransactions(db, from, to, interrupt, nil)
 }
 
 // indexTransactionsForTesting is the internal debug version with an additional hook.
-func indexTransactionsForTesting(db ethdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
+func indexTransactionsForTesting(db sdcdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
 	indexTransactions(db, from, to, interrupt, hook)
 }
 
@@ -269,7 +269,7 @@ func indexTransactionsForTesting(db ethdb.Database, from uint64, to uint64, inte
 //
 // There is a passed channel, the whole procedure will be interrupted if any
 // signal received.
-func unindexTransactions(db ethdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
+func unindexTransactions(db sdcdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
 	// short circuit for invalid range
 	if from >= to {
 		return
@@ -344,11 +344,11 @@ func unindexTransactions(db ethdb.Database, from uint64, to uint64, interrupt ch
 //
 // There is a passed channel, the whole procedure will be interrupted if any
 // signal received.
-func UnindexTransactions(db ethdb.Database, from uint64, to uint64, interrupt chan struct{}) {
+func UnindexTransactions(db sdcdb.Database, from uint64, to uint64, interrupt chan struct{}) {
 	unindexTransactions(db, from, to, interrupt, nil)
 }
 
 // unindexTransactionsForTesting is the internal debug version with an additional hook.
-func unindexTransactionsForTesting(db ethdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
+func unindexTransactionsForTesting(db sdcdb.Database, from uint64, to uint64, interrupt chan struct{}, hook func(uint64) bool) {
 	unindexTransactions(db, from, to, interrupt, hook)
 }

@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package state
 
@@ -21,11 +21,11 @@ import (
 	"fmt"
 
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/trie"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -55,13 +55,13 @@ type Database interface {
 	ContractCodeSize(addrHash, codeHash common.Hash) (int, error)
 
 	// DiskDB returns the underlying key-value disk database.
-	DiskDB() ethdb.KeyValueStore
+	DiskDB() sdcdb.KeyValueStore
 
 	// TrieDB retrieves the low level trie database used for data storage.
 	TrieDB() *trie.Database
 }
 
-// Trie is a Ethereum Merkle Patricia trie.
+// Trie is a sdcereum Merkle Patricia trie.
 type Trie interface {
 	// GetKey returns the sha3 preimage of a hashed key that was previously used
 	// to store a value.
@@ -116,20 +116,20 @@ type Trie interface {
 	// If the trie does not contain a value for key, the returned proof contains all
 	// nodes of the longest existing prefix of the key (at least the root), ending
 	// with the node that proves the absence of the key.
-	Prove(key []byte, fromLevel uint, proofDb ethdb.KeyValueWriter) error
+	Prove(key []byte, fromLevel uint, proofDb sdcdb.KeyValueWriter) error
 }
 
 // NewDatabase creates a backing store for state. The returned database is safe for
 // concurrent use, but does not retain any recent trie nodes in memory. To keep some
 // historical state in memory, use the NewDatabaseWithConfig constructor.
-func NewDatabase(db ethdb.Database) Database {
+func NewDatabase(db sdcdb.Database) Database {
 	return NewDatabaseWithConfig(db, nil)
 }
 
 // NewDatabaseWithConfig creates a backing store for state. The returned database
 // is safe for concurrent use and retains a lot of collapsed RLP trie nodes in a
 // large memory cache.
-func NewDatabaseWithConfig(db ethdb.Database, config *trie.Config) Database {
+func NewDatabaseWithConfig(db sdcdb.Database, config *trie.Config) Database {
 	csc, _ := lru.New(codeSizeCacheSize)
 	return &cachingDB{
 		db:            trie.NewDatabaseWithConfig(db, config),
@@ -141,7 +141,7 @@ func NewDatabaseWithConfig(db ethdb.Database, config *trie.Config) Database {
 
 type cachingDB struct {
 	db            *trie.Database
-	disk          ethdb.KeyValueStore
+	disk          sdcdb.KeyValueStore
 	codeSizeCache *lru.Cache
 	codeCache     *fastcache.Cache
 }
@@ -214,7 +214,7 @@ func (db *cachingDB) ContractCodeSize(addrHash, codeHash common.Hash) (int, erro
 }
 
 // DiskDB returns the underlying key-value disk database.
-func (db *cachingDB) DiskDB() ethdb.KeyValueStore {
+func (db *cachingDB) DiskDB() sdcdb.KeyValueStore {
 	return db.disk
 }
 

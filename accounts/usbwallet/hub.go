@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package usbwallet
 
@@ -23,9 +23,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
 	"github.com/karalabe/usb"
 )
 
@@ -50,13 +50,13 @@ type Hub struct {
 	productIDs []uint16                // USB product identifiers used for device discovery
 	usageID    uint16                  // USB usage page identifier used for macOS device discovery
 	endpointID int                     // USB endpoint identifier used for non-macOS device discovery
-	makeDriver func(log.Logger) driver // Factory method to construct a vendor specific driver
+	makeDriver func(log.Logger) driver // Factory msdcod to construct a vendor specific driver
 
 	refreshed   time.Time               // Time instance when the list of wallets was last refreshed
 	wallets     []accounts.Wallet       // List of USB wallet devices currently tracking
 	updateFeed  event.Feed              // Event feed to notify wallet additions/removals
 	updateScope event.SubscriptionScope // Subscription scope tracking current live listeners
-	updating    bool                    // Whether the event notification loop is running
+	updating    bool                    // Whsdcer the event notification loop is running
 
 	quit chan chan error
 

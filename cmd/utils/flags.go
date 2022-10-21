@@ -1,20 +1,20 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2015 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
-// Package utils contains internal helper functions for go-ethereum commands.
+// Package utils contains internal helper functions for go-spacedogechain commands.
 package utils
 
 import (
@@ -32,42 +32,42 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/fdlimit"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
-	ethcatalyst "github.com/ethereum/go-ethereum/eth/catalyst"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/eth/filters"
-	"github.com/ethereum/go-ethereum/eth/gasprice"
-	"github.com/ethereum/go-ethereum/eth/tracers"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/remotedb"
-	"github.com/ethereum/go-ethereum/ethstats"
-	"github.com/ethereum/go-ethereum/graphql"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/internal/flags"
-	"github.com/ethereum/go-ethereum/les"
-	lescatalyst "github.com/ethereum/go-ethereum/les/catalyst"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/metrics/exp"
-	"github.com/ethereum/go-ethereum/metrics/influxdb"
-	"github.com/ethereum/go-ethereum/miner"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/spacedogechain/go-spacedogechain/accounts"
+	"github.com/spacedogechain/go-spacedogechain/accounts/keystore"
+	"github.com/spacedogechain/go-spacedogechain/common"
+	"github.com/spacedogechain/go-spacedogechain/common/fdlimit"
+	"github.com/spacedogechain/go-spacedogechain/consensus/ethash"
+	"github.com/spacedogechain/go-spacedogechain/core"
+	"github.com/spacedogechain/go-spacedogechain/core/rawdb"
+	"github.com/spacedogechain/go-spacedogechain/core/vm"
+	"github.com/spacedogechain/go-spacedogechain/crypto"
+	"github.com/spacedogechain/go-spacedogechain/eth"
+	ethcatalyst "github.com/spacedogechain/go-spacedogechain/eth/catalyst"
+	"github.com/spacedogechain/go-spacedogechain/eth/downloader"
+	"github.com/spacedogechain/go-spacedogechain/eth/ethconfig"
+	"github.com/spacedogechain/go-spacedogechain/eth/filters"
+	"github.com/spacedogechain/go-spacedogechain/eth/gasprice"
+	"github.com/spacedogechain/go-spacedogechain/eth/tracers"
+	"github.com/spacedogechain/go-spacedogechain/ethdb"
+	"github.com/spacedogechain/go-spacedogechain/ethdb/remotedb"
+	"github.com/spacedogechain/go-spacedogechain/ethstats"
+	"github.com/spacedogechain/go-spacedogechain/graphql"
+	"github.com/spacedogechain/go-spacedogechain/internal/ethapi"
+	"github.com/spacedogechain/go-spacedogechain/internal/flags"
+	"github.com/spacedogechain/go-spacedogechain/les"
+	lescatalyst "github.com/spacedogechain/go-spacedogechain/les/catalyst"
+	"github.com/spacedogechain/go-spacedogechain/log"
+	"github.com/spacedogechain/go-spacedogechain/metrics"
+	"github.com/spacedogechain/go-spacedogechain/metrics/exp"
+	"github.com/spacedogechain/go-spacedogechain/metrics/influxdb"
+	"github.com/spacedogechain/go-spacedogechain/miner"
+	"github.com/spacedogechain/go-spacedogechain/node"
+	"github.com/spacedogechain/go-spacedogechain/p2p"
+	"github.com/spacedogechain/go-spacedogechain/p2p/enode"
+	"github.com/spacedogechain/go-spacedogechain/p2p/nat"
+	"github.com/spacedogechain/go-spacedogechain/p2p/netutil"
+	"github.com/spacedogechain/go-spacedogechain/params"
+	"github.com/spacedogechain/go-spacedogechain/rpc"
 	pcsclite "github.com/gballet/go-libpcsclite"
 	gopsutil "github.com/shirou/gopsutil/mem"
 	"github.com/urfave/cli/v2"
@@ -127,7 +127,7 @@ var (
 	}
 	MainnetFlag = &cli.BoolFlag{
 		Name:     "mainnet",
-		Usage:    "Ethereum mainnet",
+		Usage:    "spacedogechain mainnet",
 		Category: flags.EthCategory,
 	}
 	RopstenFlag = &cli.BoolFlag{
@@ -1997,14 +1997,14 @@ func SetDNSDiscoveryDefaults(cfg *ethconfig.Config, genesis common.Hash) {
 	}
 }
 
-// RegisterEthService adds an Ethereum client to the stack.
+// RegisterEthService adds an spacedogechain client to the stack.
 // The second return value is the full node instance, which may be nil if the
 // node is running as a light client.
-func RegisterEthService(stack *node.Node, cfg *ethconfig.Config) (ethapi.Backend, *eth.Ethereum) {
+func RegisterEthService(stack *node.Node, cfg *ethconfig.Config) (ethapi.Backend, *eth.spacedogechain) {
 	if cfg.SyncMode == downloader.LightSync {
 		backend, err := les.New(stack, cfg)
 		if err != nil {
-			Fatalf("Failed to register the Ethereum service: %v", err)
+			Fatalf("Failed to register the spacedogechain service: %v", err)
 		}
 		stack.RegisterAPIs(tracers.APIs(backend.ApiBackend))
 		if err := lescatalyst.Register(stack, backend); err != nil {
@@ -2014,7 +2014,7 @@ func RegisterEthService(stack *node.Node, cfg *ethconfig.Config) (ethapi.Backend
 	}
 	backend, err := eth.New(stack, cfg)
 	if err != nil {
-		Fatalf("Failed to register the Ethereum service: %v", err)
+		Fatalf("Failed to register the spacedogechain service: %v", err)
 	}
 	if cfg.LightServ > 0 {
 		_, err := les.NewLesServer(stack, backend, cfg)
@@ -2029,10 +2029,10 @@ func RegisterEthService(stack *node.Node, cfg *ethconfig.Config) (ethapi.Backend
 	return backend.APIBackend, backend
 }
 
-// RegisterEthStatsService configures the Ethereum Stats daemon and adds it to the node.
+// RegisterEthStatsService configures the spacedogechain Stats daemon and adds it to the node.
 func RegisterEthStatsService(stack *node.Node, backend ethapi.Backend, url string) {
 	if err := ethstats.New(stack, backend, backend.Engine(), url); err != nil {
-		Fatalf("Failed to register the Ethereum Stats service: %v", err)
+		Fatalf("Failed to register the spacedogechain Stats service: %v", err)
 	}
 }
 

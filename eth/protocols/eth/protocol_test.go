@@ -1,29 +1,29 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"bytes"
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 // Tests that the custom union field encoder and decoder works correctly.
@@ -70,8 +70,8 @@ func TestGetBlockHeadersDataEncodeDecode(t *testing.T) {
 	}
 }
 
-// TestEth66EmptyMessages tests encoding of empty eth66 messages
-func TestEth66EmptyMessages(t *testing.T) {
+// Testsdc66EmptyMessages tests encoding of empty sdc66 messages
+func Testsdc66EmptyMessages(t *testing.T) {
 	// All empty messages encodes to the same format
 	want := common.FromHex("c4820457c0")
 
@@ -117,8 +117,8 @@ func TestEth66EmptyMessages(t *testing.T) {
 	}
 }
 
-// TestEth66Messages tests the encoding of all redefined eth66 messages
-func TestEth66Messages(t *testing.T) {
+// Testsdc66Messages tests the encoding of all redefined sdc66 messages
+func Testsdc66Messages(t *testing.T) {
 	// Some basic structs used during testing
 	var (
 		header       *types.Header

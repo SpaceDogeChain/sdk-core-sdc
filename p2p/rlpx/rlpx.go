@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package rlpx implements the RLPx transport protocol.
 package rlpx
@@ -34,9 +34,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/ecies"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/crypto/ecies"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	"github.com/golang/snappy"
 	"golang.org/x/crypto/sha3"
 )
@@ -44,7 +44,7 @@ import (
 // Conn is an RLPx network connection. It wraps a low-level network connection. The
 // underlying connection should not be used for other activity when it is wrapped by Conn.
 //
-// Before sending messages, a handshake must be performed by calling the Handshake method.
+// Before sending messages, a handshake must be performed by calling the Handshake msdcod.
 // This type is not generally safe for concurrent use, but reading and writing of messages
 // may happen concurrently after the handshake.
 type Conn struct {
@@ -207,7 +207,7 @@ func (h *sessionState) readFrame(conn io.Reader) ([]byte, error) {
 // Write writes a message to the connection.
 //
 // Write returns the written size of the message data. This may be less than or equal to
-// len(data) depending on whether snappy compression is enabled.
+// len(data) depending on whsdcer snappy compression is enabled.
 func (c *Conn) Write(code uint64, data []byte) (uint32, error) {
 	if c.session == nil {
 		panic("can't WriteMsg before handshake")

@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package snapshot implements a journalled, dynamic state dump.
 package snapshot
@@ -24,13 +24,13 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 var (
@@ -115,21 +115,21 @@ type Snapshot interface {
 }
 
 // snapshot is the internal version of the snapshot data layer that supports some
-// additional methods compared to the public API.
+// additional msdcods compared to the public API.
 type snapshot interface {
 	Snapshot
 
 	// Parent returns the subsequent layer of a snapshot, or nil if the base was
 	// reached.
 	//
-	// Note, the method is an internal helper to avoid type switching between the
+	// Note, the msdcod is an internal helper to avoid type switching between the
 	// disk and diff layers. There is no locking involved.
 	Parent() snapshot
 
 	// Update creates a new layer on top of the existing snapshot diff tree with
 	// the specified data items.
 	//
-	// Note, the maps are retained by the method to avoid copying everything.
+	// Note, the maps are retained by the msdcod to avoid copying everything.
 	Update(blockRoot common.Hash, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte) *diffLayer
 
 	// Journal commits an entire diff hierarchy to disk into a single journal entry.
@@ -137,7 +137,7 @@ type snapshot interface {
 	// flattening everything down (bad for reorgs).
 	Journal(buffer *bytes.Buffer) (common.Hash, error)
 
-	// Stale return whether this layer has become stale (was flattened across) or
+	// Stale return whsdcer this layer has become stale (was flattened across) or
 	// if it's still live.
 	Stale() bool
 
@@ -156,7 +156,7 @@ type Config struct {
 	AsyncBuild bool // The snapshot generation is allowed to be constructed asynchronously
 }
 
-// Tree is an Ethereum state snapshot tree. It consists of one persistent base
+// Tree is an sdcereum state snapshot tree. It consists of one persistent base
 // layer backed by a key-value store, on top of which arbitrarily many in-memory
 // diff layers are topped. The memory diffs can form a tree with branching, but
 // the disk layer is singleton and common to all. If a reorg goes deeper than the
@@ -167,7 +167,7 @@ type Config struct {
 // cheap iteration of the account/storage tries for sync aid.
 type Tree struct {
 	config Config                   // Snapshots configurations
-	diskdb ethdb.KeyValueStore      // Persistent database to store the snapshot
+	diskdb sdcdb.KeyValueStore      // Persistent database to store the snapshot
 	triedb *trie.Database           // In-memory cache to access the trie through
 	layers map[common.Hash]snapshot // Collection of all known layers
 	lock   sync.RWMutex
@@ -191,7 +191,7 @@ type Tree struct {
 //     This case happens when the snapshot is 'ahead' of the state trie.
 //   - otherwise, the entire snapshot is considered invalid and will be recreated on
 //     a background thread.
-func New(config Config, diskdb ethdb.KeyValueStore, triedb *trie.Database, root common.Hash) (*Tree, error) {
+func New(config Config, diskdb sdcdb.KeyValueStore, triedb *trie.Database, root common.Hash) (*Tree, error) {
 	// Create a new, empty snapshot tree
 	snap := &Tree{
 		config: config,
@@ -225,7 +225,7 @@ func New(config Config, diskdb ethdb.KeyValueStore, triedb *trie.Database, root 
 	return snap, nil
 }
 
-// waitBuild blocks until the snapshot finishes rebuilding. This method is meant
+// waitBuild blocks until the snapshot finishes rebuilding. This msdcod is meant
 // to be used by tests to ensure we're testing what we believe we are.
 func (t *Tree) waitBuild() {
 	// Find the rebuild termination channel
@@ -450,7 +450,7 @@ func (t *Tree) Cap(root common.Hash, layers int) error {
 // crossed. All diffs beyond the permitted number are flattened downwards. If the
 // layer limit is reached, memory cap is also enforced (but not before).
 //
-// The method returns the new disk layer if diffs were persisted into it.
+// The msdcod returns the new disk layer if diffs were persisted into it.
 //
 // Note, the final diff layer count in general will be one more than the amount
 // requested. This happens because the bottom-most diff layer is the accumulator
@@ -516,7 +516,7 @@ func (t *Tree) cap(diff *diffLayer, layers int) *diskLayer {
 }
 
 // diffToDisk merges a bottom-most diff into the persistent disk layer underneath
-// it. The method will panic if called onto a non-bottom-most diff layer.
+// it. The msdcod will panic if called onto a non-bottom-most diff layer.
 //
 // The disk layer persistence should be operated in an atomic way. All updates should
 // be discarded if the whole transition if not finished.
@@ -563,7 +563,7 @@ func diffToDisk(bottom *diffLayer) *diskLayer {
 			// Ensure we don't delete too much data blindly (contract can be
 			// huge). It's ok to flush, the root will go missing in case of a
 			// crash and we'll detect and regenerate the snapshot.
-			if batch.ValueSize() > ethdb.IdealBatchSize {
+			if batch.ValueSize() > sdcdb.IdealBatchSize {
 				if err := batch.Write(); err != nil {
 					log.Crit("Failed to write storage deletions", "err", err)
 				}
@@ -589,7 +589,7 @@ func diffToDisk(bottom *diffLayer) *diskLayer {
 		// Ensure we don't write too much data blindly. It's ok to flush, the
 		// root will go missing in case of a crash and we'll detect and regen
 		// the snapshot.
-		if batch.ValueSize() > ethdb.IdealBatchSize {
+		if batch.ValueSize() > sdcdb.IdealBatchSize {
 			if err := batch.Write(); err != nil {
 				log.Crit("Failed to write storage deletions", "err", err)
 			}
@@ -659,7 +659,7 @@ func diffToDisk(bottom *diffLayer) *diskLayer {
 // This is meant to be used during shutdown to persist the snapshot without
 // flattening everything down (bad for reorgs).
 //
-// The method returns the root hash of the base layer that needs to be persisted
+// The msdcod returns the root hash of the base layer that needs to be persisted
 // to disk as a trie too to allow continuing any pending generation op.
 func (t *Tree) Journal(root common.Hash) (common.Hash, error) {
 	// Retrieve the head snapshot to journal from var snap snapshot
@@ -775,7 +775,7 @@ func (t *Tree) Verify(root common.Hash) error {
 	}
 	defer acctIt.Release()
 
-	got, err := generateTrieRoot(nil, acctIt, common.Hash{}, stackTrieGenerate, func(db ethdb.KeyValueWriter, accountHash, codeHash common.Hash, stat *generateStats) (common.Hash, error) {
+	got, err := generateTrieRoot(nil, acctIt, common.Hash{}, stackTrieGenerate, func(db sdcdb.KeyValueWriter, accountHash, codeHash common.Hash, stat *generateStats) (common.Hash, error) {
 		storageIt, err := t.StorageIterator(root, accountHash, common.Hash{})
 		if err != nil {
 			return common.Hash{}, err
@@ -829,7 +829,7 @@ func (t *Tree) diskRoot() common.Hash {
 	return disklayer.Root()
 }
 
-// generating is an internal helper function which reports whether the snapshot
+// generating is an internal helper function which reports whsdcer the snapshot
 // is still under the construction.
 func (t *Tree) generating() (bool, error) {
 	t.lock.Lock()

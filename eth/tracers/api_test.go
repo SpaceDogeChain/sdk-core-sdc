@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package tracers
 
@@ -30,21 +30,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/tracers/logger"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc/tracers/logger"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/internal/sdcapi"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 var (
@@ -56,7 +56,7 @@ var (
 type testBackend struct {
 	chainConfig *params.ChainConfig
 	engine      consensus.Engine
-	chaindb     ethdb.Database
+	chaindb     sdcdb.Database
 	chain       *core.BlockChain
 
 	refHook func() // Hook is invoked when the requested state is referenced
@@ -68,7 +68,7 @@ type testBackend struct {
 func newTestBackend(t *testing.T, n int, gspec *core.Genesis, generator func(i int, b *core.BlockGen)) *testBackend {
 	backend := &testBackend{
 		chainConfig: gspec.Config,
-		engine:      ethash.NewFaker(),
+		engine:      sdcash.NewFaker(),
 		chaindb:     rawdb.NewMemoryDatabase(),
 	}
 	// Generate blocks for testing
@@ -94,14 +94,14 @@ func newTestBackend(t *testing.T, n int, gspec *core.Genesis, generator func(i i
 }
 
 func (b *testBackend) HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error) {
-	return b.chain.GetHeaderByHash(hash), nil
+	return b.chain.GsdceaderByHash(hash), nil
 }
 
 func (b *testBackend) HeaderByNumber(ctx context.Context, number rpc.BlockNumber) (*types.Header, error) {
 	if number == rpc.PendingBlockNumber || number == rpc.LatestBlockNumber {
 		return b.chain.CurrentHeader(), nil
 	}
-	return b.chain.GetHeaderByNumber(uint64(number)), nil
+	return b.chain.GsdceaderByNumber(uint64(number)), nil
 }
 
 func (b *testBackend) BlockByHash(ctx context.Context, hash common.Hash) (*types.Block, error) {
@@ -135,7 +135,7 @@ func (b *testBackend) Engine() consensus.Engine {
 	return b.engine
 }
 
-func (b *testBackend) ChainDb() ethdb.Database {
+func (b *testBackend) ChainDb() sdcdb.Database {
 	return b.chaindb
 }
 
@@ -198,9 +198,9 @@ func TestTraceCall(t *testing.T) {
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
 		Alloc: core.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[1].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[2].addr: {Balance: big.NewInt(params.sdcer)},
 		},
 	}
 	genBlocks := 10
@@ -216,7 +216,7 @@ func TestTraceCall(t *testing.T) {
 	api := NewAPI(backend)
 	var testSuite = []struct {
 		blockNumber rpc.BlockNumber
-		call        ethapi.TransactionArgs
+		call        sdcapi.TransactionArgs
 		config      *TraceCallConfig
 		expectErr   error
 		expect      string
@@ -224,7 +224,7 @@ func TestTraceCall(t *testing.T) {
 		// Standard JSON trace upon the genesis, plain transfer.
 		{
 			blockNumber: rpc.BlockNumber(0),
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &accounts[0].addr,
 				To:    &accounts[1].addr,
 				Value: (*hexutil.Big)(big.NewInt(1000)),
@@ -236,7 +236,7 @@ func TestTraceCall(t *testing.T) {
 		// Standard JSON trace upon the head, plain transfer.
 		{
 			blockNumber: rpc.BlockNumber(genBlocks),
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &accounts[0].addr,
 				To:    &accounts[1].addr,
 				Value: (*hexutil.Big)(big.NewInt(1000)),
@@ -248,7 +248,7 @@ func TestTraceCall(t *testing.T) {
 		// Standard JSON trace upon the non-existent block, error expects
 		{
 			blockNumber: rpc.BlockNumber(genBlocks + 1),
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &accounts[0].addr,
 				To:    &accounts[1].addr,
 				Value: (*hexutil.Big)(big.NewInt(1000)),
@@ -260,7 +260,7 @@ func TestTraceCall(t *testing.T) {
 		// Standard JSON trace upon the latest block
 		{
 			blockNumber: rpc.LatestBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &accounts[0].addr,
 				To:    &accounts[1].addr,
 				Value: (*hexutil.Big)(big.NewInt(1000)),
@@ -272,7 +272,7 @@ func TestTraceCall(t *testing.T) {
 		// Tracing on 'pending' should fail:
 		{
 			blockNumber: rpc.PendingBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &accounts[0].addr,
 				To:    &accounts[1].addr,
 				Value: (*hexutil.Big)(big.NewInt(1000)),
@@ -282,12 +282,12 @@ func TestTraceCall(t *testing.T) {
 		},
 		{
 			blockNumber: rpc.LatestBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &accounts[0].addr,
 				Input: &hexutil.Bytes{0x43}, // blocknumber
 			},
 			config: &TraceCallConfig{
-				BlockOverrides: &ethapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
+				BlockOverrides: &sdcapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
 			},
 			expectErr: nil,
 			expect: ` {"gas":53018,"failed":false,"returnValue":"","structLogs":[
@@ -333,8 +333,8 @@ func TestTraceTransaction(t *testing.T) {
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
 		Alloc: core.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[1].addr: {Balance: big.NewInt(params.sdcer)},
 		},
 	}
 	target := common.Hash{}
@@ -375,9 +375,9 @@ func TestTraceBlock(t *testing.T) {
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
 		Alloc: core.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[1].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[2].addr: {Balance: big.NewInt(params.sdcer)},
 		},
 	}
 	genBlocks := 10
@@ -455,9 +455,9 @@ func TestTracingWithOverrides(t *testing.T) {
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
 		Alloc: core.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[1].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[2].addr: {Balance: big.NewInt(params.sdcer)},
 		},
 	}
 	genBlocks := 10
@@ -479,7 +479,7 @@ func TestTracingWithOverrides(t *testing.T) {
 	}
 	var testSuite = []struct {
 		blockNumber rpc.BlockNumber
-		call        ethapi.TransactionArgs
+		call        sdcapi.TransactionArgs
 		config      *TraceCallConfig
 		expectErr   error
 		want        string
@@ -487,14 +487,14 @@ func TestTracingWithOverrides(t *testing.T) {
 		// Call which can only succeed if state is state overridden
 		{
 			blockNumber: rpc.LatestBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &randomAccounts[0].addr,
 				To:    &randomAccounts[1].addr,
 				Value: (*hexutil.Big)(big.NewInt(1000)),
 			},
 			config: &TraceCallConfig{
-				StateOverrides: &ethapi.StateOverride{
-					randomAccounts[0].addr: ethapi.OverrideAccount{Balance: newRPCBalance(new(big.Int).Mul(big.NewInt(1), big.NewInt(params.Ether)))},
+				StateOverrides: &sdcapi.StateOverride{
+					randomAccounts[0].addr: sdcapi.OverrideAccount{Balance: newRPCBalance(new(big.Int).Mul(big.NewInt(1), big.NewInt(params.sdcer)))},
 				},
 			},
 			want: `{"gas":21000,"failed":false,"returnValue":""}`,
@@ -502,7 +502,7 @@ func TestTracingWithOverrides(t *testing.T) {
 		// Invalid call without state overriding
 		{
 			blockNumber: rpc.LatestBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From:  &randomAccounts[0].addr,
 				To:    &randomAccounts[1].addr,
 				Value: (*hexutil.Big)(big.NewInt(1000)),
@@ -528,15 +528,15 @@ func TestTracingWithOverrides(t *testing.T) {
 		//  }
 		{
 			blockNumber: rpc.LatestBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From: &randomAccounts[0].addr,
 				To:   &randomAccounts[2].addr,
 				Data: newRPCBytes(common.Hex2Bytes("8381f58a")), // call number()
 			},
 			config: &TraceCallConfig{
 				//Tracer: &tracer,
-				StateOverrides: &ethapi.StateOverride{
-					randomAccounts[2].addr: ethapi.OverrideAccount{
+				StateOverrides: &sdcapi.StateOverride{
+					randomAccounts[2].addr: sdcapi.OverrideAccount{
 						Code:      newRPCBytes(common.Hex2Bytes("6080604052348015600f57600080fd5b506004361060285760003560e01c80638381f58a14602d575b600080fd5b60336049565b6040518082815260200191505060405180910390f35b6000548156fea2646970667358221220eab35ffa6ab2adfe380772a48b8ba78e82a1b820a18fcb6f59aa4efb20a5f60064736f6c63430007040033")),
 						StateDiff: newStates([]common.Hash{{}}, []common.Hash{common.BigToHash(big.NewInt(123))}),
 					},
@@ -546,20 +546,20 @@ func TestTracingWithOverrides(t *testing.T) {
 		},
 		{ // Override blocknumber
 			blockNumber: rpc.LatestBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From: &accounts[0].addr,
 				// BLOCKNUMBER PUSH1 MSTORE
 				Input: newRPCBytes(common.Hex2Bytes("4360005260206000f3")),
 				//&hexutil.Bytes{0x43}, // blocknumber
 			},
 			config: &TraceCallConfig{
-				BlockOverrides: &ethapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
+				BlockOverrides: &sdcapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
 			},
 			want: `{"gas":59537,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000001337"}`,
 		},
 		{ // Override blocknumber, and query a blockhash
 			blockNumber: rpc.LatestBlockNumber,
-			call: ethapi.TransactionArgs{
+			call: sdcapi.TransactionArgs{
 				From: &accounts[0].addr,
 				Input: &hexutil.Bytes{
 					0x60, 0x00, 0x40, // BLOCKHASH(0)
@@ -573,7 +573,7 @@ func TestTracingWithOverrides(t *testing.T) {
 				}, // blocknumber
 			},
 			config: &TraceCallConfig{
-				BlockOverrides: &ethapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
+				BlockOverrides: &sdcapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
 			},
 			want: `{"gas":72666,"failed":false,"returnValue":"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"}`,
 		},
@@ -656,9 +656,9 @@ func TestTraceChain(t *testing.T) {
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
 		Alloc: core.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[1].addr: {Balance: big.NewInt(params.sdcer)},
+			accounts[2].addr: {Balance: big.NewInt(params.sdcer)},
 		},
 	}
 	genBlocks := 50

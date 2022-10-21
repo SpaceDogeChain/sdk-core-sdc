@@ -5,7 +5,7 @@ protocol development purposes. It can do many things.
 
 ### ENR Decoding
 
-Use `devp2p enrdump <base64>` to verify and display an Ethereum Node Record.
+Use `devp2p enrdump <base64>` to verify and display an spacedogechain Node Record.
 
 ### Node Key Management
 
@@ -134,7 +134,7 @@ replacing `<enode>` with the enode of the geth node:
  devp2p rlpx eth66-test <enode> cmd/devp2p/internal/ethtest/testdata/chain.rlp cmd/devp2p/internal/ethtest/testdata/genesis.json
 ```
 
-[eth]: https://github.com/ethereum/devp2p/blob/master/caps/eth.md
-[dns-tutorial]: https://geth.ethereum.org/docs/developers/dns-discovery-setup
-[discv4]: https://github.com/ethereum/devp2p/tree/master/discv4.md
-[discv5]: https://github.com/ethereum/devp2p/tree/master/discv5/discv5.md
+[eth]: https://github.com/spacedogechain/devp2p/blob/master/caps/eth.md
+[dns-tutorial]: https://geth.spacedogechain.org/docs/developers/dns-discovery-setup
+[discv4]: https://github.com/spacedogechain/devp2p/tree/master/discv4.md
+[discv5]: https://github.com/spacedogechain/devp2p/tree/master/discv5/discv5.md

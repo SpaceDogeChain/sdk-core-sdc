@@ -1,27 +1,27 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package vm
 
 import (
 	"errors"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 func makeGasSStoreFunc(clearingRefund uint64) gasFunc {
@@ -138,10 +138,10 @@ func gasExtCodeCopyEIP2929(evm *EVM, contract *Contract, stack *Stack, mem *Memo
 	return gas, nil
 }
 
-// gasEip2929AccountCheck checks whether the first stack item (as address) is present in the access list.
-// If it is, this method returns '0', otherwise 'cold-warm' gas, presuming that the opcode using it
+// gasEip2929AccountCheck checks whsdcer the first stack item (as address) is present in the access list.
+// If it is, this msdcod returns '0', otherwise 'cold-warm' gas, presuming that the opcode using it
 // is also using 'warm' as constant factor.
-// This method is used by:
+// This msdcod is used by:
 // - extcodehash,
 // - extcodesize,
 // - (ext) balance

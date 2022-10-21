@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -20,22 +20,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // pruner is responsible for pruning historical light chain data.
 type pruner struct {
-	db       ethdb.Database
+	db       sdcdb.Database
 	indexers []*core.ChainIndexer
 	closeCh  chan struct{}
 	wg       sync.WaitGroup
 }
 
 // newPruner returns a light chain pruner instance.
-func newPruner(db ethdb.Database, indexers ...*core.ChainIndexer) *pruner {
+func newPruner(db sdcdb.Database, indexers ...*core.ChainIndexer) *pruner {
 	pruner := &pruner{
 		db:       db,
 		indexers: indexers,
@@ -53,7 +53,7 @@ func (p *pruner) close() {
 }
 
 // loop periodically queries the status of chain indexers and prunes useless
-// historical chain data. Notably, whenever Geth restarts, it will iterate
+// historical chain data. Notably, whenever Gsdc restarts, it will iterate
 // all historical sections even they don't exist at all(below checkpoint) so
 // that light client can prune cached chain data that was ODRed after pruning
 // that section.
@@ -66,7 +66,7 @@ func (p *pruner) loop() {
 
 	// pruning finds the sections that have been processed by all indexers
 	// and deletes all historical chain data.
-	// Note, if some indexers don't support pruning(e.g. eth.BloomIndexer),
+	// Note, if some indexers don't support pruning(e.g. sdc.BloomIndexer),
 	// pruning operations can be silently ignored.
 	pruning := func() {
 		min := uint64(math.MaxUint64)

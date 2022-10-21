@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 //go:build none
 // +build none
@@ -30,7 +30,7 @@ AUTHORS file. The author names are mapped and deduplicated using the
 address for each author. See git-shortlog(1) for an explanation of the
 .mailmap format.
 
-Please review the resulting diff to check whether the correct
+Please review the resulting diff to check whsdcer the correct
 copyright assignments are performed.
 */
 
@@ -67,7 +67,7 @@ var (
 		"cmd/internal/browser",
 		"common/bitutil/bitutil",
 		"common/prque/",
-		"consensus/ethash/xor.go",
+		"consensus/sdcash/xor.go",
 		"crypto/blake2b/",
 		"crypto/bn256/",
 		"crypto/bls12381/",
@@ -79,7 +79,7 @@ var (
 		"signer/rules/deps",
 
 		// skip special licenses
-		"crypto/secp256k1", // Relicensed to BSD-3 via https://github.com/ethereum/go-ethereum/pull/17225
+		"crypto/secp256k1", // Relicensed to BSD-3 via https://github.com/sdcereum/go-sdcereum/pull/17225
 	}
 
 	// paths with this prefix are licensed as GPL. all other files are LGPL.
@@ -90,13 +90,13 @@ var (
 	licenseCommentRE = regexp.MustCompile(`^//\s*(Copyright|This file is part of).*?\n(?://.*?\n)*\n*`)
 
 	// this text appears at the start of AUTHORS
-	authorsFileHeader = "# This is the official list of go-ethereum authors for copyright purposes.\n\n"
+	authorsFileHeader = "# This is the official list of go-sdcereum authors for copyright purposes.\n\n"
 )
 
 // this template generates the license comment.
 // its input is an info structure.
 var licenseT = template.Must(template.New("").Parse(`
-// Copyright {{.Year}} The go-ethereum Authors
+// Copyright {{.Year}} The go-sdcereum Authors
 // This file is part of {{.Whole false}}.
 //
 // {{.Whole true}} is free software: you can redistribute it and/or modify
@@ -135,12 +135,12 @@ func (i info) ShortLicense() string {
 
 func (i info) Whole(startOfSentence bool) string {
 	if i.gpl() {
-		return "go-ethereum"
+		return "go-sdcereum"
 	}
 	if startOfSentence {
-		return "The go-ethereum library"
+		return "The go-sdcereum library"
 	}
-	return "the go-ethereum library"
+	return "the go-sdcereum library"
 }
 
 func (i info) gpl() bool {

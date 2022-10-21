@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package snapshot
 
@@ -21,16 +21,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 // CheckDanglingStorage iterates the snap storage data, and verifies that all
 // storage also has corresponding account data.
-func CheckDanglingStorage(chaindb ethdb.KeyValueStore) error {
+func CheckDanglingStorage(chaindb sdcdb.KeyValueStore) error {
 	if err := checkDanglingDiskStorage(chaindb); err != nil {
 		log.Error("Database check error", "err", err)
 	}
@@ -39,7 +39,7 @@ func CheckDanglingStorage(chaindb ethdb.KeyValueStore) error {
 
 // checkDanglingDiskStorage checks if there is any 'dangling' storage data in the
 // disk-backed snapshot layer.
-func checkDanglingDiskStorage(chaindb ethdb.KeyValueStore) error {
+func checkDanglingDiskStorage(chaindb sdcdb.KeyValueStore) error {
 	var (
 		lastReport = time.Now()
 		start      = time.Now()
@@ -72,7 +72,7 @@ func checkDanglingDiskStorage(chaindb ethdb.KeyValueStore) error {
 
 // checkDanglingMemStorage checks if there is any 'dangling' storage in the journalled
 // snapshot difflayers.
-func checkDanglingMemStorage(db ethdb.KeyValueStore) error {
+func checkDanglingMemStorage(db sdcdb.KeyValueStore) error {
 	start := time.Now()
 	log.Info("Checking dangling journalled storage")
 	err := iterateJournal(db, func(pRoot, root common.Hash, destructs map[common.Hash]struct{}, accounts map[common.Hash][]byte, storage map[common.Hash]map[common.Hash][]byte) error {
@@ -93,7 +93,7 @@ func checkDanglingMemStorage(db ethdb.KeyValueStore) error {
 
 // CheckJournalAccount shows information about an account, from the disk layer and
 // up through the diff layers.
-func CheckJournalAccount(db ethdb.KeyValueStore, hash common.Hash) error {
+func CheckJournalAccount(db sdcdb.KeyValueStore, hash common.Hash) error {
 	// Look up the disk layer first
 	baseRoot := rawdb.ReadSnapshotRoot(db)
 	fmt.Printf("Disklayer: Root: %x\n", baseRoot)

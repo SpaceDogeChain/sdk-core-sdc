@@ -1,39 +1,39 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package trie
 
 import (
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
 )
 
 // preimageStore is the store for caching preimages of node key.
 type preimageStore struct {
 	lock          sync.RWMutex
-	disk          ethdb.KeyValueStore
+	disk          sdcdb.KeyValueStore
 	preimages     map[common.Hash][]byte // Preimages of nodes from the secure trie
 	preimagesSize common.StorageSize     // Storage size of the preimages cache
 }
 
 // newPreimageStore initializes the store for caching preimages.
-func newPreimageStore(disk ethdb.KeyValueStore) *preimageStore {
+func newPreimageStore(disk sdcdb.KeyValueStore) *preimageStore {
 	return &preimageStore{
 		disk:      disk,
 		preimages: make(map[common.Hash][]byte),
@@ -41,7 +41,7 @@ func newPreimageStore(disk ethdb.KeyValueStore) *preimageStore {
 }
 
 // insertPreimage writes a new trie node pre-image to the memory database if it's
-// yet unknown. The method will NOT make a copy of the slice, only use if the
+// yet unknown. The msdcod will NOT make a copy of the slice, only use if the
 // preimage will NOT be changed later on.
 func (store *preimageStore) insertPreimage(preimages map[common.Hash][]byte) {
 	store.lock.Lock()
@@ -57,7 +57,7 @@ func (store *preimageStore) insertPreimage(preimages map[common.Hash][]byte) {
 }
 
 // preimage retrieves a cached trie node pre-image from memory. If it cannot be
-// found cached, the method queries the persistent database for the content.
+// found cached, the msdcod queries the persistent database for the content.
 func (store *preimageStore) preimage(hash common.Hash) []byte {
 	store.lock.RLock()
 	preimage := store.preimages[hash]

@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package abi
 
@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/sdcereum/go-sdcereum/accounts/abi"
 	fuzz "github.com/google/gofuzz"
 )
 
@@ -47,9 +47,9 @@ var (
 		"bytes32", "bytes"}
 )
 
-func unpackPack(abi abi.ABI, method string, input []byte) ([]interface{}, bool) {
-	if out, err := abi.Unpack(method, input); err == nil {
-		_, err := abi.Pack(method, out...)
+func unpackPack(abi abi.ABI, msdcod string, input []byte) ([]interface{}, bool) {
+	if out, err := abi.Unpack(msdcod, input); err == nil {
+		_, err := abi.Pack(msdcod, out...)
 		if err != nil {
 			// We have some false positives as we can unpack these type successfully, but not pack them
 			if err.Error() == "abi: cannot use []uint8 as type [0]int8 as argument" ||
@@ -63,10 +63,10 @@ func unpackPack(abi abi.ABI, method string, input []byte) ([]interface{}, bool) 
 	return nil, false
 }
 
-func packUnpack(abi abi.ABI, method string, input *[]interface{}) bool {
-	if packed, err := abi.Pack(method, input); err == nil {
+func packUnpack(abi abi.ABI, msdcod string, input *[]interface{}) bool {
+	if packed, err := abi.Pack(msdcod, input); err == nil {
 		outptr := reflect.New(reflect.TypeOf(input))
-		err := abi.UnpackIntoInterface(outptr.Interface(), method, packed)
+		err := abi.UnpackIntoInterface(outptr.Interface(), msdcod, packed)
 		if err != nil {
 			panic(err)
 		}

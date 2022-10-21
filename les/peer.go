@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -27,20 +27,20 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/forkid"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/les/flowcontrol"
-	"github.com/ethereum/go-ethereum/les/utils"
-	vfc "github.com/ethereum/go-ethereum/les/vflux/client"
-	vfs "github.com/ethereum/go-ethereum/les/vflux/server"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/forkid"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/les/flowcontrol"
+	"github.com/sdcereum/go-sdcereum/les/utils"
+	vfc "github.com/sdcereum/go-sdcereum/les/vflux/client"
+	vfs "github.com/sdcereum/go-sdcereum/les/vflux/server"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 var (
@@ -125,7 +125,7 @@ type peerCommons struct {
 	id           string    // Peer identity.
 	version      int       // Protocol version negotiated.
 	network      uint64    // Network ID being on.
-	frozen       uint32    // Flag whether the peer is frozen.
+	frozen       uint32    // Flag whsdcer the peer is frozen.
 	announceType uint64    // New block announcement type.
 	serving      uint32    // The status indicates the peer is served.
 	headInfo     blockInfo // Last announced block information.
@@ -147,7 +147,7 @@ func (p *peerCommons) isFrozen() bool {
 	return atomic.LoadUint32(&p.frozen) != 0
 }
 
-// canQueue returns an indicator whether the peer can queue an operation.
+// canQueue returns an indicator whsdcer the peer can queue an operation.
 func (p *peerCommons) canQueue() bool {
 	return p.sendQueue.CanQueue() && !p.isFrozen()
 }
@@ -163,10 +163,10 @@ func (p *peerCommons) String() string {
 	return fmt.Sprintf("Peer %s [%s]", p.id, fmt.Sprintf("les/%d", p.version))
 }
 
-// PeerInfo represents a short summary of the `eth` sub-protocol metadata known
+// PeerInfo represents a short summary of the `sdc` sub-protocol metadata known
 // about a connected peer.
 type PeerInfo struct {
-	Version    int      `json:"version"`    // Ethereum protocol version negotiated
+	Version    int      `json:"version"`    // sdcereum protocol version negotiated
 	Difficulty *big.Int `json:"difficulty"` // Total difficulty of the peer's blockchain
 	Head       string   `json:"head"`       // SHA3 hash of the peer's best owned block
 }
@@ -273,7 +273,7 @@ func (p *peerCommons) handshake(td *big.Int, head common.Hash, headNum uint64, g
 	send = send.add("genesisHash", genesis)
 
 	// If the protocol version is beyond les4, then pass the forkID
-	// as well. Check http://eips.ethereum.org/EIPS/eip-2124 for more
+	// as well. Check http://eips.sdcereum.org/EIPS/eip-2124 for more
 	// spec detail.
 	if p.version >= lpv4 {
 		send = send.add("forkID", forkID)
@@ -339,8 +339,8 @@ type serverPeer struct {
 	peerCommons
 
 	// Status fields
-	trusted                 bool   // The flag whether the server is selected as trusted server.
-	onlyAnnounce            bool   // The flag whether the server sends announcement only.
+	trusted                 bool   // The flag whsdcer the server is selected as trusted server.
+	onlyAnnounce            bool   // The flag whsdcer the server sends announcement only.
 	chainSince, chainRecent uint64 // The range of chain server peer can serve.
 	stateSince, stateRecent uint64 // The range of state server peer can serve.
 	txHistory               uint64 // The length of available tx history, 0 means all, 1 means disabled
@@ -360,7 +360,7 @@ type serverPeer struct {
 	updateTime  mclock.AbsTime
 
 	// Test callback hooks
-	hasBlockHook func(common.Hash, uint64, bool) bool // Used to determine whether the server has the specified block.
+	hasBlockHook func(common.Hash, uint64, bool) bool // Used to determine whsdcer the server has the specified block.
 }
 
 func newServerPeer(version int, network uint64, trusted bool, p *p2p.Peer, rw p2p.MsgReadWriter) *serverPeer {
@@ -472,7 +472,7 @@ func (p *serverPeer) requestProofs(reqID uint64, reqs []ProofReq) error {
 // requestHelperTrieProofs fetches a batch of HelperTrie merkle proofs from a remote node.
 func (p *serverPeer) requestHelperTrieProofs(reqID uint64, reqs []HelperTrieReq) error {
 	p.Log().Debug("Fetching batch of HelperTrie proofs", "count", len(reqs))
-	return p.sendRequest(GetHelperTrieProofsMsg, reqID, reqs, len(reqs))
+	return p.sendRequest(GsdcelperTrieProofsMsg, reqID, reqs, len(reqs))
 }
 
 // requestTxStatus fetches a batch of transaction status records from a remote node.
@@ -1022,7 +1022,7 @@ func (p *clientPeer) Handshake(td *big.Int, head common.Hash, headNum uint64, ge
 			*lists = (*lists).add("serveChainSince", uint64(0))
 			*lists = (*lists).add("serveStateSince", uint64(0))
 
-			// If local ethereum node is running in archive mode, advertise ourselves we have
+			// If local sdcereum node is running in archive mode, advertise ourselves we have
 			// all version state data. Otherwise only recent state is available.
 			stateRecent := uint64(core.TriesInMemory - blockSafetyMargin)
 			if server.archiveMode {
@@ -1095,7 +1095,7 @@ type serverPeerSubscriber interface {
 }
 
 // serverPeerSet represents the set of active server peers currently
-// participating in the Light Ethereum sub-protocol.
+// participating in the Light sdcereum sub-protocol.
 type serverPeerSet struct {
 	peers map[string]*serverPeer
 	// subscribers is a batch of subscribers and peerset will notify
@@ -1214,7 +1214,7 @@ func (ps *serverPeerSet) close() {
 }
 
 // clientPeerSet represents the set of active client peers currently
-// participating in the Light Ethereum sub-protocol.
+// participating in the Light sdcereum sub-protocol.
 type clientPeerSet struct {
 	peers  map[enode.ID]*clientPeer
 	lock   sync.RWMutex
@@ -1332,7 +1332,7 @@ func (ps *clientPeerSet) close() {
 // serverSet is a special set which contains all connected les servers.
 // Les servers will also be discovered by discovery protocol because they
 // also run the LES protocol. We can't drop them although they are useless
-// for us(server) but for other protocols(e.g. ETH) upon the devp2p they
+// for us(server) but for other protocols(e.g. sdc) upon the devp2p they
 // may be useful.
 type serverSet struct {
 	lock   sync.Mutex

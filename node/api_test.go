@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package node
 
@@ -25,12 +25,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/rpc"
 	"github.com/stretchr/testify/assert"
 )
 
 // This test uses the admin_startRPC and admin_startWS APIs,
-// checking whether the HTTP server is started correctly.
+// checking whsdcer the HTTP server is started correctly.
 func TestStartRPC(t *testing.T) {
 	type test struct {
 		name string
@@ -38,10 +38,10 @@ func TestStartRPC(t *testing.T) {
 		fn   func(*testing.T, *Node, *adminAPI)
 
 		// Checks. These run after the node is configured and all API calls have been made.
-		wantReachable bool // whether the HTTP server should be reachable at all
-		wantHandlers  bool // whether RegisterHandler handlers should be accessible
-		wantRPC       bool // whether JSON-RPC/HTTP should be accessible
-		wantWS        bool // whether JSON-RPC/WS should be accessible
+		wantReachable bool // whsdcer the HTTP server should be reachable at all
+		wantHandlers  bool // whsdcer RegisterHandler handlers should be accessible
+		wantRPC       bool // whsdcer JSON-RPC/HTTP should be accessible
+		wantWS        bool // whsdcer JSON-RPC/WS should be accessible
 	}
 
 	tests := []test{
@@ -310,7 +310,7 @@ func checkReachable(rawurl string) bool {
 	return true
 }
 
-// checkBodyOK checks whether the given HTTP URL responds with 200 OK and body "OK".
+// checkBodyOK checks whsdcer the given HTTP URL responds with 200 OK and body "OK".
 func checkBodyOK(url string) bool {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -328,7 +328,7 @@ func checkBodyOK(url string) bool {
 	return bytes.Equal(buf, []byte("OK"))
 }
 
-// checkRPC checks whether JSON-RPC works against the given URL.
+// checkRPC checks whsdcer JSON-RPC works against the given URL.
 func checkRPC(url string) bool {
 	c, err := rpc.Dial(url)
 	if err != nil {

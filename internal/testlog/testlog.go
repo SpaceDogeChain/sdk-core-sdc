@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package testlog provides a log handler for unit tests.
 package testlog
@@ -21,7 +21,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // Handler returns a log handler which logs to the unit test log of t.
@@ -40,7 +40,7 @@ func (h *handler) Log(r *log.Record) error {
 }
 
 // logger implements log.Logger such that all output goes to the unit test log via
-// t.Logf(). All methods in between logger.Trace, logger.Debug, etc. are marked as test
+// t.Logf(). All msdcods in between logger.Trace, logger.Debug, etc. are marked as test
 // helpers, so the file and line number in unit test output correspond to the call site
 // which emitted the log message.
 type logger struct {
@@ -68,7 +68,7 @@ func Logger(t *testing.T, level log.Lvl) log.Logger {
 		mu: new(sync.Mutex),
 		h:  &bufHandler{fmt: log.TerminalFormat(false)},
 	}
-	l.l.SetHandler(log.LvlFilterHandler(level, l.h))
+	l.l.Ssdcandler(log.LvlFilterHandler(level, l.h))
 	return l
 }
 
@@ -124,12 +124,12 @@ func (l *logger) New(ctx ...interface{}) log.Logger {
 	return &logger{l.t, l.l.New(ctx...), l.mu, l.h}
 }
 
-func (l *logger) GetHandler() log.Handler {
-	return l.l.GetHandler()
+func (l *logger) Gsdcandler() log.Handler {
+	return l.l.Gsdcandler()
 }
 
-func (l *logger) SetHandler(h log.Handler) {
-	l.l.SetHandler(h)
+func (l *logger) Ssdcandler(h log.Handler) {
+	l.l.Ssdcandler(h)
 }
 
 // flush writes all buffered messages and clears the buffer.

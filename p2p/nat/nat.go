@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package nat provides access to common network port mapping protocols.
 package nat
@@ -25,14 +25,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/log"
 	natpmp "github.com/jackpal/go-nat-pmp"
 )
 
 // Interface An implementation of nat.Interface can map local ports to ports
 // accessible from the Internet.
 type Interface interface {
-	// These methods manage a mapping between a port on the local
+	// These msdcods manage a mapping between a port on the local
 	// machine to a port that can be connected to from the internet.
 	//
 	// protocol is "UDP" or "TCP". Some implementations allow setting
@@ -45,7 +45,7 @@ type Interface interface {
 	// address of the gateway device.
 	ExternalIP() (net.IP, error)
 
-	// String should return name of the method. This is used for logging.
+	// String should return name of the msdcod. This is used for logging.
 	String() string
 }
 
@@ -141,7 +141,7 @@ func (ExtIP) DeleteMapping(string, int, int) error                     { return 
 // Any returns a port mapper that tries to discover any supported
 // mechanism on the local network.
 func Any() Interface {
-	// TODO: attempt to discover whether the local machine has an
+	// TODO: attempt to discover whsdcer the local machine has an
 	// Internet-class address. Return ExtIP in this case.
 	return startautodisc("UPnP or NAT-PMP", func() Interface {
 		found := make(chan Interface, 2)
@@ -173,8 +173,8 @@ func PMP(gateway net.IP) Interface {
 }
 
 // autodisc represents a port mapping mechanism that is still being
-// auto-discovered. Calls to the Interface methods on this type will
-// wait until the discovery is done and then call the method on the
+// auto-discovered. Calls to the Interface msdcods on this type will
+// wait until the discovery is done and then call the msdcod on the
 // discovered mechanism.
 //
 // This type is useful because discovery can take a while but we

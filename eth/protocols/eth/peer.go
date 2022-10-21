@@ -1,20 +1,20 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"math/big"
@@ -22,10 +22,10 @@ import (
 	"sync"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 const (
@@ -64,7 +64,7 @@ func max(a, b int) int {
 	return b
 }
 
-// Peer is a collection of relevant information we have about a `eth` peer.
+// Peer is a collection of relevant information we have about a `sdc` peer.
 type Peer struct {
 	id string // Unique ID for the peer, cached
 
@@ -133,7 +133,7 @@ func (p *Peer) ID() string {
 	return p.id
 }
 
-// Version retrieves the peer's negotiated `eth` protocol version.
+// Version retrieves the peer's negotiated `sdc` protocol version.
 func (p *Peer) Version() uint {
 	return p.version
 }
@@ -147,8 +147,8 @@ func (p *Peer) Head() (hash common.Hash, td *big.Int) {
 	return hash, new(big.Int).Set(p.td)
 }
 
-// SetHead updates the head hash and total difficulty of the peer.
-func (p *Peer) SetHead(hash common.Hash, td *big.Int) {
+// Ssdcead updates the head hash and total difficulty of the peer.
+func (p *Peer) Ssdcead(hash common.Hash, td *big.Int) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -156,12 +156,12 @@ func (p *Peer) SetHead(hash common.Hash, td *big.Int) {
 	p.td.Set(td)
 }
 
-// KnownBlock returns whether peer is known to already have a block.
+// KnownBlock returns whsdcer peer is known to already have a block.
 func (p *Peer) KnownBlock(hash common.Hash) bool {
 	return p.knownBlocks.Contains(hash)
 }
 
-// KnownTransaction returns whether peer is known to already have a transaction.
+// KnownTransaction returns whsdcer peer is known to already have a transaction.
 func (p *Peer) KnownTransaction(hash common.Hash) bool {
 	return p.knownTxs.Contains(hash)
 }
@@ -183,7 +183,7 @@ func (p *Peer) markTransaction(hash common.Hash) {
 // SendTransactions sends transactions to the peer and includes the hashes
 // in its transaction hash set for future reference.
 //
-// This method is a helper used by the async transaction sender. Don't call it
+// This msdcod is a helper used by the async transaction sender. Don't call it
 // directly as the queueing (memory) and transmission (bandwidth) costs should
 // not be managed directly.
 //
@@ -213,7 +213,7 @@ func (p *Peer) AsyncSendTransactions(hashes []common.Hash) {
 // sendPooledTransactionHashes sends transaction hashes to the peer and includes
 // them in its transaction hash set for future reference.
 //
-// This method is a helper used by the async transaction announcer. Don't call it
+// This msdcod is a helper used by the async transaction announcer. Don't call it
 // directly as the queueing (memory) and transmission (bandwidth) costs should
 // not be managed directly.
 func (p *Peer) sendPooledTransactionHashes(hashes []common.Hash) error {
@@ -235,7 +235,7 @@ func (p *Peer) AsyncSendPooledTransactionHashes(hashes []common.Hash) {
 	}
 }
 
-// ReplyPooledTransactionsRLP is the eth/66 version of SendPooledTransactionsRLP.
+// ReplyPooledTransactionsRLP is the sdc/66 version of SendPooledTransactionsRLP.
 func (p *Peer) ReplyPooledTransactionsRLP(id uint64, hashes []common.Hash, txs []rlp.RawValue) error {
 	// Mark all the transactions as known, but ensure we don't overflow our limits
 	p.knownTxs.Add(hashes...)
@@ -296,7 +296,7 @@ func (p *Peer) AsyncSendNewBlock(block *types.Block, td *big.Int) {
 	}
 }
 
-// ReplyBlockHeadersRLP is the eth/66 response to GetBlockHeaders.
+// ReplyBlockHeadersRLP is the sdc/66 response to GetBlockHeaders.
 func (p *Peer) ReplyBlockHeadersRLP(id uint64, headers []rlp.RawValue) error {
 	return p2p.Send(p.rw, BlockHeadersMsg, &BlockHeadersRLPPacket66{
 		RequestId:             id,
@@ -304,7 +304,7 @@ func (p *Peer) ReplyBlockHeadersRLP(id uint64, headers []rlp.RawValue) error {
 	})
 }
 
-// ReplyBlockBodiesRLP is the eth/66 response to GetBlockBodies.
+// ReplyBlockBodiesRLP is the sdc/66 response to GetBlockBodies.
 func (p *Peer) ReplyBlockBodiesRLP(id uint64, bodies []rlp.RawValue) error {
 	// Not packed into BlockBodiesPacket to avoid RLP decoding
 	return p2p.Send(p.rw, BlockBodiesMsg, &BlockBodiesRLPPacket66{
@@ -313,7 +313,7 @@ func (p *Peer) ReplyBlockBodiesRLP(id uint64, bodies []rlp.RawValue) error {
 	})
 }
 
-// ReplyNodeData is the eth/66 response to GetNodeData.
+// ReplyNodeData is the sdc/66 response to GetNodeData.
 func (p *Peer) ReplyNodeData(id uint64, data [][]byte) error {
 	return p2p.Send(p.rw, NodeDataMsg, &NodeDataPacket66{
 		RequestId:      id,
@@ -321,7 +321,7 @@ func (p *Peer) ReplyNodeData(id uint64, data [][]byte) error {
 	})
 }
 
-// ReplyReceiptsRLP is the eth/66 response to GetReceipts.
+// ReplyReceiptsRLP is the sdc/66 response to GetReceipts.
 func (p *Peer) ReplyReceiptsRLP(id uint64, receipts []rlp.RawValue) error {
 	return p2p.Send(p.rw, ReceiptsMsg, &ReceiptsRLPPacket66{
 		RequestId:         id,
@@ -511,7 +511,7 @@ func (k *knownCache) Add(hashes ...common.Hash) {
 	}
 }
 
-// Contains returns whether the given item is in the set.
+// Contains returns whsdcer the given item is in the set.
 func (k *knownCache) Contains(hash common.Hash) bool {
 	return k.hashes.Contains(hash)
 }

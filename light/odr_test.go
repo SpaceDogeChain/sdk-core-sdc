@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package light
 
@@ -24,18 +24,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 var (
@@ -55,12 +55,12 @@ var (
 type testOdr struct {
 	OdrBackend
 	indexerConfig *IndexerConfig
-	sdb, ldb      ethdb.Database
+	sdb, ldb      sdcdb.Database
 	serverState   state.Database
 	disable       bool
 }
 
-func (odr *testOdr) Database() ethdb.Database {
+func (odr *testOdr) Database() sdcdb.Database {
 	return odr.ldb
 }
 
@@ -108,11 +108,11 @@ func (odr *testOdr) IndexerConfig() *IndexerConfig {
 	return odr.indexerConfig
 }
 
-type odrTestFn func(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error)
+type odrTestFn func(ctx context.Context, db sdcdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error)
 
 func TestOdrGetBlockLes2(t *testing.T) { testChainOdr(t, 1, odrGetBlock) }
 
-func odrGetBlock(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrGetBlock(ctx context.Context, db sdcdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	var block *types.Block
 	if bc != nil {
 		block = bc.GetBlockByHash(bhash)
@@ -128,7 +128,7 @@ func odrGetBlock(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc
 
 func TestOdrGetReceiptsLes2(t *testing.T) { testChainOdr(t, 1, odrGetReceipts) }
 
-func odrGetReceipts(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrGetReceipts(ctx context.Context, db sdcdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	var receipts types.Receipts
 	if bc != nil {
 		number := rawdb.ReadHeaderNumber(db, bhash)
@@ -150,16 +150,16 @@ func odrGetReceipts(ctx context.Context, db ethdb.Database, bc *core.BlockChain,
 
 func TestOdrAccountsLes2(t *testing.T) { testChainOdr(t, 1, odrAccounts) }
 
-func odrAccounts(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrAccounts(ctx context.Context, db sdcdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	dummyAddr := common.HexToAddress("1234567812345678123456781234567812345678")
 	acc := []common.Address{testBankAddress, acc1Addr, acc2Addr, dummyAddr}
 
 	var st *state.StateDB
 	if bc == nil {
-		header := lc.GetHeaderByHash(bhash)
+		header := lc.GsdceaderByHash(bhash)
 		st = NewState(ctx, header, lc.Odr())
 	} else {
-		header := bc.GetHeaderByHash(bhash)
+		header := bc.GsdceaderByHash(bhash)
 		st, _ = state.New(header.Root, bc.StateCache(), nil)
 	}
 
@@ -180,7 +180,7 @@ type callmsg struct {
 
 func (callmsg) CheckNonce() bool { return false }
 
-func odrContractCall(ctx context.Context, db ethdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
+func odrContractCall(ctx context.Context, db sdcdb.Database, bc *core.BlockChain, lc *LightChain, bhash common.Hash) ([]byte, error) {
 	data := common.Hex2Bytes("60CD26850000000000000000000000000000000000000000000000000000000000000000")
 	config := params.TestChainConfig
 
@@ -195,11 +195,11 @@ func odrContractCall(ctx context.Context, db ethdb.Database, bc *core.BlockChain
 		)
 		if bc == nil {
 			chain = lc
-			header = lc.GetHeaderByHash(bhash)
+			header = lc.GsdceaderByHash(bhash)
 			st = NewState(ctx, header, lc.Odr())
 		} else {
 			chain = bc
-			header = bc.GetHeaderByHash(bhash)
+			header = bc.GsdceaderByHash(bhash)
 			st, _ = state.New(header.Root, bc.StateCache(), nil)
 		}
 
@@ -223,11 +223,11 @@ func testChainGen(i int, block *core.BlockGen) {
 	signer := types.HomesteadSigner{}
 	switch i {
 	case 0:
-		// In block 1, the test bank sends account #1 some ether.
+		// In block 1, the test bank sends account #1 some sdcer.
 		tx, _ := types.SignTx(types.NewTransaction(block.TxNonce(testBankAddress), acc1Addr, big.NewInt(10_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, testBankKey)
 		block.AddTx(tx)
 	case 1:
-		// In block 2, the test bank sends some more ether to account #1.
+		// In block 2, the test bank sends some more sdcer to account #1.
 		// acc1Addr passes it on to account #2.
 		// acc1Addr creates a test contract.
 		tx1, _ := types.SignTx(types.NewTransaction(block.TxNonce(testBankAddress), acc1Addr, big.NewInt(1_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, testBankKey)
@@ -271,15 +271,15 @@ func testChainOdr(t *testing.T, protocol int, fn odrTestFn) {
 		}
 	)
 	// Assemble the test environment
-	blockchain, _ := core.NewBlockChain(sdb, nil, gspec, nil, ethash.NewFullFaker(), vm.Config{}, nil, nil)
-	_, gchain, _ := core.GenerateChainWithGenesis(gspec, ethash.NewFaker(), 4, testChainGen)
+	blockchain, _ := core.NewBlockChain(sdb, nil, gspec, nil, sdcash.NewFullFaker(), vm.Config{}, nil, nil)
+	_, gchain, _ := core.GenerateChainWithGenesis(gspec, sdcash.NewFaker(), 4, testChainGen)
 	if _, err := blockchain.InsertChain(gchain); err != nil {
 		t.Fatal(err)
 	}
 
 	gspec.MustCommit(ldb)
 	odr := &testOdr{sdb: sdb, ldb: ldb, serverState: blockchain.StateCache(), indexerConfig: TestClientIndexerConfig}
-	lightchain, err := NewLightChain(odr, gspec.Config, ethash.NewFullFaker(), nil)
+	lightchain, err := NewLightChain(odr, gspec.Config, sdcash.NewFullFaker(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}

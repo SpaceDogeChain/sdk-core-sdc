@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package trie
 
@@ -26,13 +26,13 @@ import (
 	"time"
 
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 var (
@@ -68,7 +68,7 @@ var (
 // behind this split design is to provide read access to RPC handlers and sync
 // servers even while the trie is executing expensive garbage collection.
 type Database struct {
-	diskdb ethdb.KeyValueStore // Persistent storage for matured trie nodes
+	diskdb sdcdb.KeyValueStore // Persistent storage for matured trie nodes
 
 	cleans  *fastcache.Cache            // GC friendly memory cache of clean node RLPs
 	dirties map[common.Hash]*cachedNode // Data and references relationships of dirty trie nodes
@@ -267,20 +267,20 @@ func expandNode(hash hashNode, n node) node {
 type Config struct {
 	Cache     int    // Memory allowance (MB) to use for caching trie nodes in memory
 	Journal   string // Journal of clean cache to survive node restarts
-	Preimages bool   // Flag whether the preimage of trie key is recorded
+	Preimages bool   // Flag whsdcer the preimage of trie key is recorded
 }
 
 // NewDatabase creates a new trie database to store ephemeral trie content before
 // its written out to disk or garbage collected. No read cache is created, so all
 // data retrievals will hit the underlying disk database.
-func NewDatabase(diskdb ethdb.KeyValueStore) *Database {
+func NewDatabase(diskdb sdcdb.KeyValueStore) *Database {
 	return NewDatabaseWithConfig(diskdb, nil)
 }
 
 // NewDatabaseWithConfig creates a new trie database to store ephemeral trie content
 // before its written out to disk or garbage collected. It also acts as a read cache
 // for nodes loaded from disk.
-func NewDatabaseWithConfig(diskdb ethdb.KeyValueStore, config *Config) *Database {
+func NewDatabaseWithConfig(diskdb sdcdb.KeyValueStore, config *Config) *Database {
 	var cleans *fastcache.Cache
 	if config != nil && config.Cache > 0 {
 		if config.Journal == "" {
@@ -378,7 +378,7 @@ func (db *Database) node(hash common.Hash) node {
 }
 
 // Node retrieves an encoded cached trie node from memory. If it cannot be found
-// cached, the method queries the persistent database for the content.
+// cached, the msdcod queries the persistent database for the content.
 func (db *Database) Node(hash common.Hash) ([]byte, error) {
 	// It doesn't make sense to retrieve the metaroot
 	if hash == (common.Hash{}) {
@@ -418,7 +418,7 @@ func (db *Database) Node(hash common.Hash) ([]byte, error) {
 }
 
 // Nodes retrieves the hashes of all the nodes cached within the memory database.
-// This method is extremely expensive and should only be used to validate internal
+// This msdcod is extremely expensive and should only be used to validate internal
 // states in test code.
 func (db *Database) Nodes() []common.Hash {
 	db.lock.RLock()
@@ -436,7 +436,7 @@ func (db *Database) Nodes() []common.Hash {
 // Reference adds a new reference from a parent node to a child node.
 // This function is used to add reference between internal trie node
 // and external node(e.g. storage trie root), all internal trie nodes
-// are referenced together by database itself.
+// are referenced togsdcer by database itself.
 func (db *Database) Reference(child common.Hash, parent common.Hash) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -543,7 +543,7 @@ func (db *Database) dereference(child common.Hash, parent common.Hash) {
 // Cap iteratively flushes old but still referenced trie nodes until the total
 // memory usage goes below the given threshold.
 //
-// Note, this method is a non-synchronized mutator. It is unsafe to call this
+// Note, this msdcod is a non-synchronized mutator. It is unsafe to call this
 // concurrently with other mutators.
 func (db *Database) Cap(limit common.StorageSize) error {
 	// Create a database batch to flush persistent data out. It is important that
@@ -574,7 +574,7 @@ func (db *Database) Cap(limit common.StorageSize) error {
 		rawdb.WriteTrieNode(batch, oldest, node.rlp())
 
 		// If we exceeded the ideal batch size, commit and reset
-		if batch.ValueSize() >= ethdb.IdealBatchSize {
+		if batch.ValueSize() >= sdcdb.IdealBatchSize {
 			if err := batch.Write(); err != nil {
 				log.Error("Failed to write flush list to disk", "err", err)
 				return err
@@ -630,7 +630,7 @@ func (db *Database) Cap(limit common.StorageSize) error {
 // to disk, forcefully tearing down all references in both directions. As a side
 // effect, all pre-images accumulated up to this point are also written.
 //
-// Note, this method is a non-synchronized mutator. It is unsafe to call this
+// Note, this msdcod is a non-synchronized mutator. It is unsafe to call this
 // concurrently with other mutators.
 func (db *Database) Commit(node common.Hash, report bool, callback func(common.Hash)) error {
 	// Create a database batch to flush persistent data out. It is important that
@@ -687,7 +687,7 @@ func (db *Database) Commit(node common.Hash, report bool, callback func(common.H
 }
 
 // commit is the private locked version of Commit.
-func (db *Database) commit(hash common.Hash, batch ethdb.Batch, uncacher *cleaner, callback func(common.Hash)) error {
+func (db *Database) commit(hash common.Hash, batch sdcdb.Batch, uncacher *cleaner, callback func(common.Hash)) error {
 	// If the node does not exist, it's a previously committed node
 	node, ok := db.dirties[hash]
 	if !ok {
@@ -707,7 +707,7 @@ func (db *Database) commit(hash common.Hash, batch ethdb.Batch, uncacher *cleane
 	if callback != nil {
 		callback(hash)
 	}
-	if batch.ValueSize() >= ethdb.IdealBatchSize {
+	if batch.ValueSize() >= sdcdb.IdealBatchSize {
 		if err := batch.Write(); err != nil {
 			return err
 		}

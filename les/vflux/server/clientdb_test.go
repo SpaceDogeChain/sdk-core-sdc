@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package server
 
@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/les/utils"
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/les/utils"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
 )
 
 func expval(v uint64) utils.ExpiredValue {
@@ -77,7 +77,7 @@ func TestNodeDB(t *testing.T) {
 	if pos, neg := ndb.getExpiration(); pos != posExp || neg != negExp {
 		t.Fatalf("Expiration mismatch, want %v / %v, got %v / %v", posExp, negExp, pos, neg)
 	}
-	/*	curBalance := currencyBalance{typ: "ETH", amount: 10000}
+	/*	curBalance := currencyBalance{typ: "sdc", amount: 10000}
 		ndb.setCurrencyBalance(enode.ID{0x01, 0x02}, curBalance)
 		if got := ndb.getCurrencyBalance(enode.ID{0x01, 0x02}); !reflect.DeepEqual(got, curBalance) {
 			t.Fatalf("Currency balance mismatch, want %v, got %v", curBalance, got)

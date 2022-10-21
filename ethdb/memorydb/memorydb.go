@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package memorydb implements the key-value database layer based on memory maps.
 package memorydb
@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
 )
 
 var (
@@ -49,7 +49,7 @@ type Database struct {
 	lock sync.RWMutex
 }
 
-// New returns a wrapped map with all the required database interface methods
+// New returns a wrapped map with all the required database interface msdcods
 // implemented.
 func New() *Database {
 	return &Database{
@@ -58,7 +58,7 @@ func New() *Database {
 }
 
 // NewWithCap returns a wrapped map pre-allocated to the provided capacity with
-// all the required database interface methods implemented.
+// all the required database interface msdcods implemented.
 func NewWithCap(size int) *Database {
 	return &Database{
 		db: make(map[string][]byte, size),
@@ -127,14 +127,14 @@ func (db *Database) Delete(key []byte) error {
 
 // NewBatch creates a write-only key-value store that buffers changes to its host
 // database until a final write is called.
-func (db *Database) NewBatch() ethdb.Batch {
+func (db *Database) NewBatch() sdcdb.Batch {
 	return &batch{
 		db: db,
 	}
 }
 
 // NewBatchWithSize creates a write-only database batch with pre-allocated buffer.
-func (db *Database) NewBatchWithSize(size int) ethdb.Batch {
+func (db *Database) NewBatchWithSize(size int) sdcdb.Batch {
 	return &batch{
 		db: db,
 	}
@@ -143,7 +143,7 @@ func (db *Database) NewBatchWithSize(size int) ethdb.Batch {
 // NewIterator creates a binary-alphabetical iterator over a subset
 // of database content with a particular key prefix, starting at a particular
 // initial key (or after, if it does not exist).
-func (db *Database) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
+func (db *Database) NewIterator(prefix []byte, start []byte) sdcdb.Iterator {
 	db.lock.RLock()
 	defer db.lock.RUnlock()
 
@@ -178,7 +178,7 @@ func (db *Database) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
 // NewSnapshot creates a database snapshot based on the current state.
 // The created snapshot will not be affected by all following mutations
 // happened on the database.
-func (db *Database) NewSnapshot() (ethdb.Snapshot, error) {
+func (db *Database) NewSnapshot() (sdcdb.Snapshot, error) {
 	return newSnapshot(db), nil
 }
 
@@ -195,7 +195,7 @@ func (db *Database) Compact(start []byte, limit []byte) error {
 
 // Len returns the number of entries currently present in the memory database.
 //
-// Note, this method is only used for testing (i.e. not public in general) and
+// Note, this msdcod is only used for testing (i.e. not public in general) and
 // does not have explicit checks for closed-ness to allow simpler testing code.
 func (db *Database) Len() int {
 	db.lock.RLock()
@@ -261,7 +261,7 @@ func (b *batch) Reset() {
 }
 
 // Replay replays the batch contents.
-func (b *batch) Replay(w ethdb.KeyValueWriter) error {
+func (b *batch) Replay(w sdcdb.KeyValueWriter) error {
 	for _, keyvalue := range b.writes {
 		if keyvalue.delete {
 			if err := w.Delete(keyvalue.key); err != nil {
@@ -285,7 +285,7 @@ type iterator struct {
 	values [][]byte
 }
 
-// Next moves the iterator to the next key/value pair. It returns whether the
+// Next moves the iterator to the next key/value pair. It returns whsdcer the
 // iterator is exhausted.
 func (it *iterator) Next() bool {
 	// Short circuit if iterator is already exhausted in the forward direction.

@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -23,16 +23,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/beacon"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/beacon"
+	"github.com/sdcereum/go-sdcereum/consensus/clique"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // Tests that simple header verification works, for both good and bad blocks.
@@ -40,14 +40,14 @@ func TestHeaderVerification(t *testing.T) {
 	// Create a simple chain to verify
 	var (
 		gspec        = &Genesis{Config: params.TestChainConfig}
-		_, blocks, _ = GenerateChainWithGenesis(gspec, ethash.NewFaker(), 8, nil)
+		_, blocks, _ = GenerateChainWithGenesis(gspec, sdcash.NewFaker(), 8, nil)
 	)
 	headers := make([]*types.Header, len(blocks))
 	for i, block := range blocks {
 		headers[i] = block.Header()
 	}
 	// Run the header checker for blocks one-by-one, checking for both valid and invalid nonces
-	chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+	chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 	defer chain.Stop()
 
 	for i := 0; i < len(blocks); i++ {
@@ -55,10 +55,10 @@ func TestHeaderVerification(t *testing.T) {
 			var results <-chan error
 
 			if valid {
-				engine := ethash.NewFaker()
+				engine := sdcash.NewFaker()
 				_, results = engine.VerifyHeaders(chain, []*types.Header{headers[i]}, []bool{true})
 			} else {
-				engine := ethash.NewFakeFailer(headers[i].Number.Uint64())
+				engine := sdcash.NewFakeFailer(headers[i].Number.Uint64())
 				_, results = engine.VerifyHeaders(chain, []*types.Header{headers[i]}, []bool{true})
 			}
 			// Wait for the verification result
@@ -82,9 +82,9 @@ func TestHeaderVerification(t *testing.T) {
 }
 
 func TestHeaderVerificationForMergingClique(t *testing.T) { testHeaderVerificationForMerging(t, true) }
-func TestHeaderVerificationForMergingEthash(t *testing.T) { testHeaderVerificationForMerging(t, false) }
+func TestHeaderVerificationForMergingsdcash(t *testing.T) { testHeaderVerificationForMerging(t, false) }
 
-// Tests the verification for eth1/2 merging, including pre-merge and post-merge
+// Tests the verification for sdc1/2 merging, including pre-merge and post-merge
 func testHeaderVerificationForMerging(t *testing.T, isClique bool) {
 	var (
 		gspec      *Genesis
@@ -134,7 +134,7 @@ func testHeaderVerificationForMerging(t *testing.T, isClique bool) {
 	} else {
 		config := *params.TestChainConfig
 		gspec = &Genesis{Config: &config}
-		engine = beacon.New(ethash.NewFaker())
+		engine = beacon.New(sdcash.NewFaker())
 
 		td := 0
 		genDb, blocks, _ := GenerateChainWithGenesis(gspec, engine, 8, nil)
@@ -208,7 +208,7 @@ func testHeaderVerificationForMerging(t *testing.T, isClique bool) {
 			t.Fatalf("test %d: unexpected result returned: %v", i, result)
 		case <-time.After(25 * time.Millisecond):
 		}
-		chain.InsertBlockWithoutSetHead(postBlocks[i])
+		chain.InsertBlockWithoutSsdcead(postBlocks[i])
 	}
 
 	// Verify the blocks with pre-merge blocks and post-merge blocks
@@ -252,7 +252,7 @@ func testHeaderConcurrentVerification(t *testing.T, threads int) {
 	// Create a simple chain to verify
 	var (
 		gspec        = &Genesis{Config: params.TestChainConfig}
-		_, blocks, _ = GenerateChainWithGenesis(gspec, ethash.NewFaker(), 8, nil)
+		_, blocks, _ = GenerateChainWithGenesis(gspec, sdcash.NewFaker(), 8, nil)
 	)
 	headers := make([]*types.Header, len(blocks))
 	seals := make([]bool, len(blocks))
@@ -271,11 +271,11 @@ func testHeaderConcurrentVerification(t *testing.T, threads int) {
 		var results <-chan error
 
 		if valid {
-			chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+			chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 			_, results = chain.engine.VerifyHeaders(chain, headers, seals)
 			chain.Stop()
 		} else {
-			chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, ethash.NewFakeFailer(uint64(len(headers)-1)), vm.Config{}, nil, nil)
+			chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, sdcash.NewFakeFailer(uint64(len(headers)-1)), vm.Config{}, nil, nil)
 			_, results = chain.engine.VerifyHeaders(chain, headers, seals)
 			chain.Stop()
 		}
@@ -322,7 +322,7 @@ func testHeaderConcurrentAbortion(t *testing.T, threads int) {
 	// Create a simple chain to verify
 	var (
 		gspec        = &Genesis{Config: params.TestChainConfig}
-		_, blocks, _ = GenerateChainWithGenesis(gspec, ethash.NewFaker(), 1024, nil)
+		_, blocks, _ = GenerateChainWithGenesis(gspec, sdcash.NewFaker(), 1024, nil)
 	)
 	headers := make([]*types.Header, len(blocks))
 	seals := make([]bool, len(blocks))
@@ -336,7 +336,7 @@ func testHeaderConcurrentAbortion(t *testing.T, threads int) {
 	defer runtime.GOMAXPROCS(old)
 
 	// Start the verifications and immediately abort
-	chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, ethash.NewFakeDelayer(time.Millisecond), vm.Config{}, nil, nil)
+	chain, _ := NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, sdcash.NewFakeDelayer(time.Millisecond), vm.Config{}, nil, nil)
 	defer chain.Stop()
 
 	abort, results := chain.engine.VerifyHeaders(chain, headers, seals)

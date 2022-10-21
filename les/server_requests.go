@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -20,15 +20,15 @@ import (
 	"encoding/binary"
 	"encoding/json"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 // serverBackend defines the backend functions needed for serving LES requests
@@ -37,7 +37,7 @@ type serverBackend interface {
 	AddTxsSync() bool
 	BlockChain() *core.BlockChain
 	TxPool() *core.TxPool
-	GetHelperTrie(typ uint, index uint64) *trie.Trie
+	GsdcelperTrie(typ uint, index uint64) *trie.Trie
 }
 
 // Decoder is implemented by the messages passed to the handler functions
@@ -115,7 +115,7 @@ var Les3 = map[uint64]RequestType{
 		ServingTimeMeter: miscServingTimeTrieProofTimer,
 		Handle:           handleGetProofs,
 	},
-	GetHelperTrieProofsMsg: {
+	GsdcelperTrieProofsMsg: {
 		Name:             "helper trie proof request",
 		MaxCount:         MaxHelperTrieProofsFetch,
 		InPacketsMeter:   miscInHelperTriePacketsMeter,
@@ -123,7 +123,7 @@ var Les3 = map[uint64]RequestType{
 		OutPacketsMeter:  miscOutHelperTriePacketsMeter,
 		OutTrafficMeter:  miscOutHelperTrieTrafficMeter,
 		ServingTimeMeter: miscServingTimeHelperTrieTimer,
-		Handle:           handleGetHelperTrieProofs,
+		Handle:           handleGsdcelperTrieProofs,
 	},
 	SendTxV2Msg: {
 		Name:             "new transactions",
@@ -172,15 +172,15 @@ func handleGetBlockHeaders(msg Decoder) (serveRequestFn, uint64, uint64, error) 
 			var origin *types.Header
 			if hashMode {
 				if first {
-					origin = bc.GetHeaderByHash(r.Query.Origin.Hash)
+					origin = bc.GsdceaderByHash(r.Query.Origin.Hash)
 					if origin != nil {
 						r.Query.Origin.Number = origin.Number.Uint64()
 					}
 				} else {
-					origin = bc.GetHeader(r.Query.Origin.Hash, r.Query.Origin.Number)
+					origin = bc.Gsdceader(r.Query.Origin.Hash, r.Query.Origin.Number)
 				}
 			} else {
-				origin = bc.GetHeaderByNumber(r.Query.Origin.Number)
+				origin = bc.GsdceaderByNumber(r.Query.Origin.Number)
 			}
 			if origin == nil {
 				break
@@ -210,7 +210,7 @@ func handleGetBlockHeaders(msg Decoder) (serveRequestFn, uint64, uint64, error) 
 					p.Log().Warn("GetBlockHeaders skip overflow attack", "current", current, "skip", r.Query.Skip, "next", next, "attacker", string(infos))
 					unknown = true
 				} else {
-					if header := bc.GetHeaderByNumber(next); header != nil {
+					if header := bc.GsdceaderByNumber(next); header != nil {
 						nextHash := header.Hash()
 						expOldHash, _ := bc.GetAncestor(nextHash, next, r.Query.Skip+1, &maxNonCanonical)
 						if expOldHash == r.Query.Origin.Hash {
@@ -288,7 +288,7 @@ func handleGetCode(msg Decoder) (serveRequestFn, uint64, uint64, error) {
 				return nil
 			}
 			// Look up the root hash belonging to the request
-			header := bc.GetHeaderByHash(request.BHash)
+			header := bc.GsdceaderByHash(request.BHash)
 			if header == nil {
 				p.Log().Warn("Failed to retrieve associate header for code", "hash", request.BHash)
 				p.bumpInvalid()
@@ -347,7 +347,7 @@ func handleGetReceipts(msg Decoder) (serveRequestFn, uint64, uint64, error) {
 			// Retrieve the requested block's receipts, skipping if unknown to us
 			results := bc.GetReceiptsByHash(hash)
 			if results == nil {
-				if header := bc.GetHeaderByHash(hash); header == nil || header.ReceiptHash != types.EmptyRootHash {
+				if header := bc.GsdceaderByHash(hash); header == nil || header.ReceiptHash != types.EmptyRootHash {
 					p.bumpInvalid()
 					continue
 				}
@@ -388,7 +388,7 @@ func handleGetProofs(msg Decoder) (serveRequestFn, uint64, uint64, error) {
 			if request.BHash != lastBHash {
 				root, lastBHash = common.Hash{}, request.BHash
 
-				if header = bc.GetHeaderByHash(request.BHash); header == nil {
+				if header = bc.GsdceaderByHash(request.BHash); header == nil {
 					p.Log().Warn("Failed to retrieve header for proof", "hash", request.BHash)
 					p.bumpInvalid()
 					continue
@@ -447,9 +447,9 @@ func handleGetProofs(msg Decoder) (serveRequestFn, uint64, uint64, error) {
 	}, r.ReqID, uint64(len(r.Reqs)), nil
 }
 
-// handleGetHelperTrieProofs handles a helper trie proof request
-func handleGetHelperTrieProofs(msg Decoder) (serveRequestFn, uint64, uint64, error) {
-	var r GetHelperTrieProofsPacket
+// handleGsdcelperTrieProofs handles a helper trie proof request
+func handleGsdcelperTrieProofs(msg Decoder) (serveRequestFn, uint64, uint64, error) {
+	var r GsdcelperTrieProofsPacket
 	if err := msg.Decode(&r); err != nil {
 		return nil, 0, 0, err
 	}
@@ -469,7 +469,7 @@ func handleGetHelperTrieProofs(msg Decoder) (serveRequestFn, uint64, uint64, err
 			}
 			if auxTrie == nil || request.Type != lastType || request.TrieIdx != lastIdx {
 				lastType, lastIdx = request.Type, request.TrieIdx
-				auxTrie = backend.GetHelperTrie(request.Type, request.TrieIdx)
+				auxTrie = backend.GsdcelperTrie(request.Type, request.TrieIdx)
 			}
 			if auxTrie == nil {
 				return nil
@@ -484,7 +484,7 @@ func handleGetHelperTrieProofs(msg Decoder) (serveRequestFn, uint64, uint64, err
 				return nil
 			}
 			if request.Type == htCanonical && request.AuxReq == htAuxHeader && len(request.Key) == 8 {
-				header := bc.GetHeaderByNumber(binary.BigEndian.Uint64(request.Key))
+				header := bc.GsdceaderByNumber(binary.BigEndian.Uint64(request.Key))
 				data, err := rlp.EncodeToBytes(header)
 				if err != nil {
 					log.Error("Failed to encode header", "err", err)

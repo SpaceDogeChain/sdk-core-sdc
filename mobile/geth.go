@@ -1,47 +1,47 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains all the wrappers from the node package to support client side node
 // management on mobile platforms.
 
-package geth
+package gsdc
 
 import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/eth/filters"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/ethstats"
-	"github.com/ethereum/go-ethereum/internal/debug"
-	"github.com/ethereum/go-ethereum/les"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/sdc/filters"
+	"github.com/sdcereum/go-sdcereum/sdcclient"
+	"github.com/sdcereum/go-sdcereum/sdcstats"
+	"github.com/sdcereum/go-sdcereum/internal/debug"
+	"github.com/sdcereum/go-sdcereum/les"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/nat"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
-// NodeConfig represents the collection of configuration values to fine tune the Geth
+// NodeConfig represents the collection of configuration values to fine tune the Gsdc
 // node embedded into a mobile process. The available values are a subset of the
-// entire API provided by go-ethereum to reduce the maintenance surface and dev
+// entire API provided by go-sdcereum to reduce the maintenance surface and dev
 // complexity.
 type NodeConfig struct {
 	// Bootstrap nodes used to establish connectivity with the rest of the network.
@@ -51,26 +51,26 @@ type NodeConfig struct {
 	// set to zero, then only the configured static and trusted peers can connect.
 	MaxPeers int
 
-	// EthereumEnabled specifies whether the node should run the Ethereum protocol.
-	EthereumEnabled bool
+	// sdcereumEnabled specifies whsdcer the node should run the sdcereum protocol.
+	sdcereumEnabled bool
 
-	// EthereumNetworkID is the network identifier used by the Ethereum protocol to
+	// sdcereumNetworkID is the network identifier used by the sdcereum protocol to
 	// decide if remote peers should be accepted or not.
-	EthereumNetworkID int64 // uint64 in truth, but Java can't handle that...
+	sdcereumNetworkID int64 // uint64 in truth, but Java can't handle that...
 
-	// EthereumGenesis is the genesis JSON to use to seed the blockchain with. An
+	// sdcereumGenesis is the genesis JSON to use to seed the blockchain with. An
 	// empty genesis state is equivalent to using the mainnet's state.
-	EthereumGenesis string
+	sdcereumGenesis string
 
-	// EthereumDatabaseCache is the system memory in MB to allocate for database caching.
+	// sdcereumDatabaseCache is the system memory in MB to allocate for database caching.
 	// A minimum of 16MB is always reserved.
-	EthereumDatabaseCache int
+	sdcereumDatabaseCache int
 
-	// EthereumNetStats is a netstats connection string to use to report various
+	// sdcereumNetStats is a netstats connection string to use to report various
 	// chain, transaction and node stats to a monitoring server.
 	//
 	// It has the form "nodename:secret@host:port"
-	EthereumNetStats string
+	sdcereumNetStats string
 
 	// Listening address of pprof server.
 	PprofAddress string
@@ -81,9 +81,9 @@ type NodeConfig struct {
 var defaultNodeConfig = &NodeConfig{
 	BootstrapNodes:        FoundationBootnodes(),
 	MaxPeers:              25,
-	EthereumEnabled:       true,
-	EthereumNetworkID:     1,
-	EthereumDatabaseCache: 16,
+	sdcereumEnabled:       true,
+	sdcereumNetworkID:     1,
+	sdcereumDatabaseCache: 16,
 }
 
 // NewNodeConfig creates a new node option set, initialized to the default values.
@@ -108,12 +108,12 @@ func (conf *NodeConfig) String() string {
 	return encodeOrError(conf)
 }
 
-// Node represents a Geth Ethereum node instance.
+// Node represents a Gsdc sdcereum node instance.
 type Node struct {
 	node *node.Node
 }
 
-// NewNode creates and configures a new Geth node.
+// NewNode creates and configures a new Gsdc node.
 func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 	// If no or partial configurations were specified, use defaults
 	if config == nil {
@@ -154,65 +154,65 @@ func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 	debug.Memsize.Add("node", rawStack)
 
 	var genesis *core.Genesis
-	if config.EthereumGenesis != "" {
+	if config.sdcereumGenesis != "" {
 		// Parse the user supplied genesis spec if not mainnet
 		genesis = new(core.Genesis)
-		if err := json.Unmarshal([]byte(config.EthereumGenesis), genesis); err != nil {
+		if err := json.Unmarshal([]byte(config.sdcereumGenesis), genesis); err != nil {
 			rawStack.Close()
 			return nil, fmt.Errorf("invalid genesis spec: %v", err)
 		}
 		// If we have the Ropsten testnet, hard code the chain configs too
-		if config.EthereumGenesis == RopstenGenesis() {
+		if config.sdcereumGenesis == RopstenGenesis() {
 			genesis.Config = params.RopstenChainConfig
-			if config.EthereumNetworkID == 1 {
-				config.EthereumNetworkID = 3
+			if config.sdcereumNetworkID == 1 {
+				config.sdcereumNetworkID = 3
 			}
 		}
 		// If we have the Sepolia testnet, hard code the chain configs too
-		if config.EthereumGenesis == SepoliaGenesis() {
+		if config.sdcereumGenesis == SepoliaGenesis() {
 			genesis.Config = params.SepoliaChainConfig
-			if config.EthereumNetworkID == 1 {
-				config.EthereumNetworkID = 11155111
+			if config.sdcereumNetworkID == 1 {
+				config.sdcereumNetworkID = 11155111
 			}
 		}
 		// If we have the Rinkeby testnet, hard code the chain configs too
-		if config.EthereumGenesis == RinkebyGenesis() {
+		if config.sdcereumGenesis == RinkebyGenesis() {
 			genesis.Config = params.RinkebyChainConfig
-			if config.EthereumNetworkID == 1 {
-				config.EthereumNetworkID = 4
+			if config.sdcereumNetworkID == 1 {
+				config.sdcereumNetworkID = 4
 			}
 		}
 		// If we have the Goerli testnet, hard code the chain configs too
-		if config.EthereumGenesis == GoerliGenesis() {
+		if config.sdcereumGenesis == GoerliGenesis() {
 			genesis.Config = params.GoerliChainConfig
-			if config.EthereumNetworkID == 1 {
-				config.EthereumNetworkID = 5
+			if config.sdcereumNetworkID == 1 {
+				config.sdcereumNetworkID = 5
 			}
 		}
 	}
-	// Register the Ethereum protocol if requested
-	if config.EthereumEnabled {
-		ethConf := ethconfig.Defaults
-		ethConf.Genesis = genesis
-		ethConf.SyncMode = downloader.LightSync
-		ethConf.NetworkId = uint64(config.EthereumNetworkID)
-		ethConf.DatabaseCache = config.EthereumDatabaseCache
-		lesBackend, err := les.New(rawStack, &ethConf)
+	// Register the sdcereum protocol if requested
+	if config.sdcereumEnabled {
+		sdcConf := sdcconfig.Defaults
+		sdcConf.Genesis = genesis
+		sdcConf.SyncMode = downloader.LightSync
+		sdcConf.NetworkId = uint64(config.sdcereumNetworkID)
+		sdcConf.DatabaseCache = config.sdcereumDatabaseCache
+		lesBackend, err := les.New(rawStack, &sdcConf)
 		if err != nil {
 			rawStack.Close()
-			return nil, fmt.Errorf("ethereum init: %v", err)
+			return nil, fmt.Errorf("sdcereum init: %v", err)
 		}
 		// Register log filter RPC API.
 		filterSystem := filters.NewFilterSystem(lesBackend.ApiBackend, filters.Config{
-			LogCacheSize: ethConf.FilterLogCacheSize,
+			LogCacheSize: sdcConf.FilterLogCacheSize,
 		})
 		rawStack.RegisterAPIs([]rpc.API{{
-			Namespace: "eth",
+			Namespace: "sdc",
 			Service:   filters.NewFilterAPI(filterSystem, true),
 		}})
 		// If netstats reporting is requested, do it
-		if config.EthereumNetStats != "" {
-			if err := ethstats.New(rawStack, lesBackend.ApiBackend, lesBackend.Engine(), config.EthereumNetStats); err != nil {
+		if config.sdcereumNetStats != "" {
+			if err := sdcstats.New(rawStack, lesBackend.ApiBackend, lesBackend.Engine(), config.sdcereumNetStats); err != nil {
 				rawStack.Close()
 				return nil, fmt.Errorf("netstats init: %v", err)
 			}
@@ -233,13 +233,13 @@ func (n *Node) Start() error {
 	return n.node.Start()
 }
 
-// GetEthereumClient retrieves a client to access the Ethereum subsystem.
-func (n *Node) GetEthereumClient() (client *EthereumClient, _ error) {
+// GetsdcereumClient retrieves a client to access the sdcereum subsystem.
+func (n *Node) GetsdcereumClient() (client *sdcereumClient, _ error) {
 	rpc, err := n.node.Attach()
 	if err != nil {
 		return nil, err
 	}
-	return &EthereumClient{ethclient.NewClient(rpc)}, nil
+	return &sdcereumClient{sdcclient.NewClient(rpc)}, nil
 }
 
 // GetNodeInfo gathers and returns a collection of metadata known about the host.

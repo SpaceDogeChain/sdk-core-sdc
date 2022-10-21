@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // This file contains some shares testing functionality, common to multiple
 // different files and modules being tested. Client based network and Server
@@ -29,28 +29,28 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/contracts/checkpointoracle/contract"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/forkid"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/les/checkpointoracle"
-	"github.com/ethereum/go-ethereum/les/flowcontrol"
-	vfs "github.com/ethereum/go-ethereum/les/vflux/server"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/accounts/abi/bind"
+	"github.com/sdcereum/go-sdcereum/accounts/abi/bind/backends"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/contracts/checkpointoracle/contract"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/forkid"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/les/checkpointoracle"
+	"github.com/sdcereum/go-sdcereum/les/flowcontrol"
+	vfs "github.com/sdcereum/go-sdcereum/les/vflux/server"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 var (
@@ -122,7 +122,7 @@ func prepare(n int, backend *backends.SimulatedBackend) {
 			auth, _ := bind.NewKeyedTransactorWithChainID(bankKey, big.NewInt(1337))
 			oracleAddr, _, _, _ = contract.DeployCheckpointOracle(auth, backend, []common.Address{signerAddr}, sectionSize, processConfirms, big.NewInt(1))
 
-			// bankUser transfers some ether to user1
+			// bankUser transfers some sdcer to user1
 			nonce, _ := backend.PendingNonceAt(ctx, bankAddr)
 			tx, _ := types.SignTx(types.NewTransaction(nonce, userAddr1, big.NewInt(10_000_000_000_000_000), params.TxGas, big.NewInt(params.InitialBaseFee), nil), signer, bankKey)
 			backend.SendTransaction(ctx, tx)
@@ -134,11 +134,11 @@ func prepare(n int, backend *backends.SimulatedBackend) {
 			bankNonce, _ := backend.PendingNonceAt(ctx, bankAddr)
 			userNonce1, _ := backend.PendingNonceAt(ctx, userAddr1)
 
-			// bankUser transfers more ether to user1
+			// bankUser transfers more sdcer to user1
 			tx1, _ := types.SignTx(types.NewTransaction(bankNonce, userAddr1, big.NewInt(1_000_000_000_000_000), params.TxGas, big.NewInt(params.InitialBaseFee), nil), signer, bankKey)
 			backend.SendTransaction(ctx, tx1)
 
-			// user1 relays ether to user2
+			// user1 relays sdcer to user2
 			tx2, _ := types.SignTx(types.NewTransaction(userNonce1, userAddr2, big.NewInt(1_000_000_000_000_000), params.TxGas, big.NewInt(params.InitialBaseFee), nil), signer, userKey1)
 			backend.SendTransaction(ctx, tx2)
 
@@ -155,7 +155,7 @@ func prepare(n int, backend *backends.SimulatedBackend) {
 			//    number: 3
 			//    txs:    2
 
-			// bankUser transfer some ether to signer
+			// bankUser transfer some sdcer to signer
 			bankNonce, _ := backend.PendingNonceAt(ctx, bankAddr)
 			tx1, _ := types.SignTx(types.NewTransaction(bankNonce, signerAddr, big.NewInt(1000000000), params.TxGas, big.NewInt(params.InitialBaseFee), nil), signer, bankKey)
 			backend.SendTransaction(ctx, tx1)
@@ -180,7 +180,7 @@ func prepare(n int, backend *backends.SimulatedBackend) {
 }
 
 // testIndexers creates a set of indexers with specified params for testing purpose.
-func testIndexers(db ethdb.Database, odr light.OdrBackend, config *light.IndexerConfig, disablePruning bool) []*core.ChainIndexer {
+func testIndexers(db sdcdb.Database, odr light.OdrBackend, config *light.IndexerConfig, disablePruning bool) []*core.ChainIndexer {
 	var indexers [3]*core.ChainIndexer
 	indexers[0] = light.NewChtIndexer(db, odr, config.ChtSize, config.ChtConfirms, disablePruning)
 	indexers[1] = core.NewBloomIndexer(db, config.BloomSize, config.BloomConfirms)
@@ -190,12 +190,12 @@ func testIndexers(db ethdb.Database, odr light.OdrBackend, config *light.Indexer
 	return indexers[:]
 }
 
-func newTestClientHandler(backend *backends.SimulatedBackend, odr *LesOdr, indexers []*core.ChainIndexer, db ethdb.Database, peers *serverPeerSet, ulcServers []string, ulcFraction int) (*clientHandler, func()) {
+func newTestClientHandler(backend *backends.SimulatedBackend, odr *LesOdr, indexers []*core.ChainIndexer, db sdcdb.Database, peers *serverPeerSet, ulcServers []string, ulcFraction int) (*clientHandler, func()) {
 	var (
 		evmux  = new(event.TypeMux)
-		engine = ethash.NewFaker()
+		engine = sdcash.NewFaker()
 		gspec  = core.Genesis{
-			Config:   params.AllEthashProtocolChanges,
+			Config:   params.AllsdcashProtocolChanges,
 			Alloc:    core.GenesisAlloc{bankAddr: {Balance: bankFunds}},
 			GasLimit: 100000000,
 			BaseFee:  big.NewInt(params.InitialBaseFee),
@@ -222,11 +222,11 @@ func newTestClientHandler(backend *backends.SimulatedBackend, odr *LesOdr, index
 		}
 		oracle = checkpointoracle.New(checkpointConfig, getLocal)
 	}
-	client := &LightEthereum{
+	client := &Lightsdcereum{
 		lesCommons: lesCommons{
 			genesis:     genesis.Hash(),
-			config:      &ethconfig.Config{LightPeers: 100, NetworkId: NetworkId},
-			chainConfig: params.AllEthashProtocolChanges,
+			config:      &sdcconfig.Config{LightPeers: 100, NetworkId: NetworkId},
+			chainConfig: params.AllsdcashProtocolChanges,
 			iConfig:     light.TestClientIndexerConfig,
 			chainDb:     db,
 			oracle:      oracle,
@@ -253,10 +253,10 @@ func newTestClientHandler(backend *backends.SimulatedBackend, odr *LesOdr, index
 	}
 }
 
-func newTestServerHandler(blocks int, indexers []*core.ChainIndexer, db ethdb.Database, clock mclock.Clock) (*serverHandler, *backends.SimulatedBackend, func()) {
+func newTestServerHandler(blocks int, indexers []*core.ChainIndexer, db sdcdb.Database, clock mclock.Clock) (*serverHandler, *backends.SimulatedBackend, func()) {
 	var (
 		gspec = core.Genesis{
-			Config:   params.AllEthashProtocolChanges,
+			Config:   params.AllsdcashProtocolChanges,
 			Alloc:    core.GenesisAlloc{bankAddr: {Balance: bankFunds}},
 			GasLimit: 100000000,
 			BaseFee:  big.NewInt(params.InitialBaseFee),
@@ -293,8 +293,8 @@ func newTestServerHandler(blocks int, indexers []*core.ChainIndexer, db ethdb.Da
 	server := &LesServer{
 		lesCommons: lesCommons{
 			genesis:     genesis.Hash(),
-			config:      &ethconfig.Config{LightPeers: 100, NetworkId: NetworkId},
-			chainConfig: params.AllEthashProtocolChanges,
+			config:      &sdcconfig.Config{LightPeers: 100, NetworkId: NetworkId},
+			chainConfig: params.AllsdcashProtocolChanges,
 			iConfig:     light.TestServerIndexerConfig,
 			chainDb:     db,
 			chainReader: simulation.Blockchain(),
@@ -450,7 +450,7 @@ type indexerCallback func(*core.ChainIndexer, *core.ChainIndexer, *core.ChainInd
 // testClient represents a client object for testing with necessary auxiliary fields.
 type testClient struct {
 	clock   mclock.Clock
-	db      ethdb.Database
+	db      sdcdb.Database
 	peer    *testPeer
 	handler *clientHandler
 
@@ -514,7 +514,7 @@ func (client *testClient) newRawPeer(t *testing.T, name string, version int, rec
 type testServer struct {
 	clock   mclock.Clock
 	backend *backends.SimulatedBackend
-	db      ethdb.Database
+	db      sdcdb.Database
 	peer    *testPeer
 	handler *serverHandler
 

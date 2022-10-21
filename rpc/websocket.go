@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -28,7 +28,7 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/log"
 	"github.com/gorilla/websocket"
 )
 
@@ -43,11 +43,11 @@ const (
 
 var wsBufferPool = new(sync.Pool)
 
-// WebsocketHandler returns a handler that serves JSON-RPC to WebSocket connections.
+// Websocksdcandler returns a handler that serves JSON-RPC to WebSocket connections.
 //
 // allowedOrigins should be a comma-separated list of allowed origin URLs.
 // To allow connections with any origin, pass "*".
-func (s *Server) WebsocketHandler(allowedOrigins []string) http.Handler {
+func (s *Server) Websocksdcandler(allowedOrigins []string) http.Handler {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  wsReadBuffer,
 		WriteBufferSize: wsWriteBuffer,
@@ -191,7 +191,7 @@ func DialWebsocketWithDialer(ctx context.Context, endpoint, origin string, diale
 	cfg := new(clientConfig)
 	cfg.wsDialer = &dialer
 	if origin != "" {
-		cfg.setHeader("origin", origin)
+		cfg.ssdceader("origin", origin)
 	}
 	connect, err := newClientTransportWS(endpoint, cfg)
 	if err != nil {
@@ -208,7 +208,7 @@ func DialWebsocketWithDialer(ctx context.Context, endpoint, origin string, diale
 func DialWebsocket(ctx context.Context, endpoint, origin string) (*Client, error) {
 	cfg := new(clientConfig)
 	if origin != "" {
-		cfg.setHeader("origin", origin)
+		cfg.ssdceader("origin", origin)
 	}
 	connect, err := newClientTransportWS(endpoint, cfg)
 	if err != nil {

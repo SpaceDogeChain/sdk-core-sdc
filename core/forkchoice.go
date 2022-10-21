@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -22,14 +22,14 @@ import (
 	"math/big"
 	mrand "math/rand"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
-// ChainReader defines a small collection of methods needed to access the local
+// ChainReader defines a small collection of msdcods needed to access the local
 // blockchain during header verification. It's implemented by both blockchain
 // and lightchain.
 type ChainReader interface {
@@ -41,9 +41,9 @@ type ChainReader interface {
 }
 
 // ForkChoice is the fork chooser based on the highest total difficulty of the
-// chain(the fork choice used in the eth1) and the external fork choice (the fork
-// choice used in the eth2). This main goal of this ForkChoice is not only for
-// offering fork choice during the eth1/2 merge phase, but also keep the compatibility
+// chain(the fork choice used in the sdc1) and the external fork choice (the fork
+// choice used in the sdc2). This main goal of this ForkChoice is not only for
+// offering fork choice during the sdc1/2 merge phase, but also keep the compatibility
 // for all other proof-of-work networks.
 type ForkChoice struct {
 	chain ChainReader
@@ -69,7 +69,7 @@ func NewForkChoice(chainReader ChainReader, preserve func(header *types.Header) 
 	}
 }
 
-// ReorgNeeded returns whether the reorg should be applied
+// ReorgNeeded returns whsdcer the reorg should be applied
 // based on the given external header and local canonical chain.
 // In the td mode, the new head is chosen if the corresponding
 // total difficulty is higher. In the extern mode, the trusted

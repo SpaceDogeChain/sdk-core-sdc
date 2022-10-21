@@ -1,4 +1,4 @@
-# This is the official list of go-ethereum authors for copyright purposes.
+# This is the official list of go-sdcereum authors for copyright purposes.
 
 6543 <6543@obermui.de>
 a e r t h <aerth@users.noreply.github.com>
@@ -19,14 +19,14 @@ Alejandro Isaza <alejandro.isaza@gmail.com>
 Aleksey Smyrnov <i@soar.name>
 Ales Katona <ales@coinbase.com>
 Alex Beregszaszi <alex@rtfs.hu>
-Alex Leverington <alex@ethdev.com>
+Alex Leverington <alex@sdcdev.com>
 Alex Mazalov <mazalov@gmail.com>
 Alex Pozhilenkov <alex_pozhilenkov@adoriasoft.com>
 Alex Prut <1648497+alexprut@users.noreply.github.com>
 Alex Wu <wuyiding@gmail.com>
 Alexander van der Meij <alexandervdm@users.noreply.github.com>
 Alexander Yastrebov <yastrebov.alex@gmail.com>
-Alexandre Van de Sande <alex.vandesande@ethdev.com>
+Alexandre Van de Sande <alex.vandesande@sdcdev.com>
 Alexey Akhunov <akhounov@gmail.com>
 Alexey Shekhirin <a.shekhirin@gmail.com>
 alexwang <39109351+dipingxian2@users.noreply.github.com>
@@ -36,7 +36,7 @@ am2rican5 <am2rican5@gmail.com>
 AmitBRD <60668103+AmitBRD@users.noreply.github.com>
 Anatole <62328077+a2br@users.noreply.github.com>
 Andrea Franz <andrea@gravityblast.com>
-Andrei Maiboroda <andrei@ethereum.org>
+Andrei Maiboroda <andrei@sdcereum.org>
 Andrey Petrov <shazow@gmail.com>
 ANOTHEL <anothel1@naver.com>
 Antoine Rondelet <rondelet.antoine@gmail.com>
@@ -57,7 +57,7 @@ baizhenxuan <nkbai@163.com>
 Balaji Shetty Pachai <32358081+balajipachai@users.noreply.github.com>
 Balint Gabor <balint.g@gmail.com>
 baptiste-b-pegasys <85155432+baptiste-b-pegasys@users.noreply.github.com>
-Bas van Kervel <bas@ethdev.com>
+Bas van Kervel <bas@sdcdev.com>
 Benjamin Brent <benjamin@benjaminbrent.com>
 benma <mbencun@gmail.com>
 Benoit Verkindt <benoit.verkindt@gmail.com>
@@ -141,12 +141,12 @@ Enrique Ortiz <hi@enriqueortiz.dev>
 EOS Classic <info@eos-classic.io>
 Erichin <erichinbato@gmail.com>
 Ernesto del Toro <ernesto.deltoro@gmail.com>
-Ethan Buchman <ethan@coinculture.info>
-ethersphere <thesw@rm.eth>
+sdcan Buchman <sdcan@coinculture.info>
+sdcersphere <thesw@rm.sdc>
 Eugene Lepeico <eugenelepeico@gmail.com>
 Eugene Valeyev <evgen.povt@gmail.com>
 Evangelos Pappas <epappas@evalonlabs.com>
-Everton Fraga <ev@ethereum.org>
+Everton Fraga <ev@sdcereum.org>
 Evgeny <awesome.observer@yandex.com>
 Evgeny Danilenko <6655321@bk.ru>
 evgk <evgeniy.kamyshev@gmail.com>
@@ -188,9 +188,9 @@ Guruprasad Kamath <48196632+gurukamath@users.noreply.github.com>
 Gus <yo@soygus.com>
 Gustav Simonsson <gustav.simonsson@gmail.com>
 Gísli Kristjánsson <gislik@hamstur.is>
-Ha ĐANG <dvietha@gmail.com>
+Ha ĐANG <dvisdca@gmail.com>
 HackyMiner <hackyminer@gmail.com>
-hadv <dvietha@gmail.com>
+hadv <dvisdca@gmail.com>
 Hanjiang Yu <delacroix.yu@gmail.com>
 Hao Bryan Cheng <haobcheng@gmail.com>
 Hao Duan <duanhao0814@gmail.com>
@@ -237,7 +237,7 @@ Jeff Prestes <jeffprestes@gmail.com>
 Jeff R. Allen <jra@nella.org>
 Jeff Wentworth <jeff@curvegrid.com>
 Jeffery Robert Walsh <rlxrlps@gmail.com>
-Jeffrey Wilcke <jeffrey@ethereum.org>
+Jeffrey Wilcke <jeffrey@sdcereum.org>
 Jens Agerberg <github@agerberg.me>
 Jeremy McNevin <jeremy.mcnevin@optum.com>
 Jeremy Schlatter <jeremy.schlatter@gmail.com>
@@ -259,7 +259,7 @@ Jonathan Gimeno <jgimeno@gmail.com>
 JoranHonig <JoranHonig@users.noreply.github.com>
 Jordan Krage <jmank88@gmail.com>
 Jorropo <jorropo.pgm@gmail.com>
-Joseph Chow <ethereum@outlook.com>
+Joseph Chow <sdcereum@outlook.com>
 Joshua Colvin <jcolvin@offchainlabs.com>
 Joshua Gutow <jbgutow@gmail.com>
 jovijovi <mageyul@hotmail.com>
@@ -269,7 +269,7 @@ Julian Y <jyap808@users.noreply.github.com>
 Justin Clark-Casey <justincc@justincc.org>
 Justin Drake <drakefjustin@gmail.com>
 Justus <jus@gtsbr.org>
-Kawashima <91420903+sscodereth@users.noreply.github.com>
+Kawashima <91420903+sscodersdc@users.noreply.github.com>
 ken10100147 <sunhongping@kanjian.com>
 Kenji Siu <kenji@isuntv.com>
 Kenso Trabing <ktrabing@acm.org>
@@ -290,7 +290,7 @@ Kumar Anirudha <mail@anirudha.dev>
 Kurkó Mihály <kurkomisi@users.noreply.github.com>
 Kushagra Sharma <ksharm01@gmail.com>
 Kwuaint <34888408+kwuaint@users.noreply.github.com>
-Kyuntae Ethan Kim <ethan.kyuntae.kim@gmail.com>
+Kyuntae sdcan Kim <sdcan.kyuntae.kim@gmail.com>
 Lee Bousfield <ljbousfield@gmail.com>
 Lefteris Karapetsas <lefteris@refu.co>
 Leif Jurvetson <leijurv@gmail.com>
@@ -415,7 +415,7 @@ ploui <64719999+ploui@users.noreply.github.com>
 Preston Van Loon <preston@prysmaticlabs.com>
 Prince Sinha <sinhaprince013@gmail.com>
 Péter Szilágyi <peterke@gmail.com>
-qd-ethan <31876119+qdgogogo@users.noreply.github.com>
+qd-sdcan <31876119+qdgogogo@users.noreply.github.com>
 Qian Bin <cola.tin.com@gmail.com>
 Quest Henkart <qhenkart@gmail.com>
 Rachel Franks <nfranks@protonmail.com>

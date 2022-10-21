@@ -1,20 +1,20 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package tests implements execution of Ethereum JSON tests.
+// Package tests implements execution of sdcereum JSON tests.
 package tests
 
 import (
@@ -25,18 +25,18 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 // A BlockTest checks handling of entire blocks.
@@ -119,9 +119,9 @@ func (t *BlockTest) Run(snapshotter bool) error {
 	}
 	var engine consensus.Engine
 	if t.json.SealEngine == "NoProof" {
-		engine = ethash.NewFaker()
+		engine = sdcash.NewFaker()
 	} else {
-		engine = ethash.NewShared()
+		engine = sdcash.NewShared()
 	}
 	cache := &core.CacheConfig{TrieCleanLimit: 0}
 	if snapshotter {
@@ -176,9 +176,9 @@ func (t *BlockTest) genesis(config *params.ChainConfig) *core.Genesis {
 }
 
 /*
-See https://github.com/ethereum/tests/wiki/Blockchain-Tests-II
+See https://github.com/sdcereum/tests/wiki/Blockchain-Tests-II
 
-	Whether a block is valid or not is a bit subtle, it's defined by presence of
+	Whsdcer a block is valid or not is a bit subtle, it's defined by presence of
 	blockHeader, transactions and uncleHeaders fields. If they are missing, the block is
 	invalid and we must verify that we do not accept it.
 

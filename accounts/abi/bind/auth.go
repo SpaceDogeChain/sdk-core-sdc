@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package bind
 
@@ -23,13 +23,13 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/external"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/accounts/external"
+	"github.com/sdcereum/go-sdcereum/accounts/keystore"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // ErrNoChainID is returned whenever the user failed to specify a chain id.
@@ -38,7 +38,7 @@ var ErrNoChainID = errors.New("no chain id specified")
 // ErrNotAuthorized is returned when an account is not properly unlocked.
 var ErrNotAuthorized = errors.New("not authorized to sign this account")
 
-// NewTransactor is a utility method to easily create a transaction signer from
+// NewTransactor is a utility msdcod to easily create a transaction signer from
 // an encrypted json key stream and the associated passphrase.
 //
 // Deprecated: Use NewTransactorWithChainID instead.
@@ -55,7 +55,7 @@ func NewTransactor(keyin io.Reader, passphrase string) (*TransactOpts, error) {
 	return NewKeyedTransactor(key.PrivateKey), nil
 }
 
-// NewKeyStoreTransactor is a utility method to easily create a transaction signer from
+// NewKeyStoreTransactor is a utility msdcod to easily create a transaction signer from
 // an decrypted key from a keystore.
 //
 // Deprecated: Use NewKeyStoreTransactorWithChainID instead.
@@ -78,7 +78,7 @@ func NewKeyStoreTransactor(keystore *keystore.KeyStore, account accounts.Account
 	}, nil
 }
 
-// NewKeyedTransactor is a utility method to easily create a transaction signer
+// NewKeyedTransactor is a utility msdcod to easily create a transaction signer
 // from a single private key.
 //
 // Deprecated: Use NewKeyedTransactorWithChainID instead.
@@ -102,7 +102,7 @@ func NewKeyedTransactor(key *ecdsa.PrivateKey) *TransactOpts {
 	}
 }
 
-// NewTransactorWithChainID is a utility method to easily create a transaction signer from
+// NewTransactorWithChainID is a utility msdcod to easily create a transaction signer from
 // an encrypted json key stream and the associated passphrase.
 func NewTransactorWithChainID(keyin io.Reader, passphrase string, chainID *big.Int) (*TransactOpts, error) {
 	json, err := io.ReadAll(keyin)
@@ -116,7 +116,7 @@ func NewTransactorWithChainID(keyin io.Reader, passphrase string, chainID *big.I
 	return NewKeyedTransactorWithChainID(key.PrivateKey, chainID)
 }
 
-// NewKeyStoreTransactorWithChainID is a utility method to easily create a transaction signer from
+// NewKeyStoreTransactorWithChainID is a utility msdcod to easily create a transaction signer from
 // an decrypted key from a keystore.
 func NewKeyStoreTransactorWithChainID(keystore *keystore.KeyStore, account accounts.Account, chainID *big.Int) (*TransactOpts, error) {
 	if chainID == nil {
@@ -139,7 +139,7 @@ func NewKeyStoreTransactorWithChainID(keystore *keystore.KeyStore, account accou
 	}, nil
 }
 
-// NewKeyedTransactorWithChainID is a utility method to easily create a transaction signer
+// NewKeyedTransactorWithChainID is a utility msdcod to easily create a transaction signer
 // from a single private key.
 func NewKeyedTransactorWithChainID(key *ecdsa.PrivateKey, chainID *big.Int) (*TransactOpts, error) {
 	keyAddr := crypto.PubkeyToAddress(key.PublicKey)
@@ -163,7 +163,7 @@ func NewKeyedTransactorWithChainID(key *ecdsa.PrivateKey, chainID *big.Int) (*Tr
 	}, nil
 }
 
-// NewClefTransactor is a utility method to easily create a transaction signer
+// NewClefTransactor is a utility msdcod to easily create a transaction signer
 // with a clef backend.
 func NewClefTransactor(clef *external.ExternalSigner, account accounts.Account) *TransactOpts {
 	return &TransactOpts{

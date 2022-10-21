@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of go-sdcereum.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-sdcereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-sdcereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-sdcereum. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -25,12 +25,12 @@ import (
 	"testing"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/ethereum/go-ethereum/cmd/evm/internal/t8ntool"
-	"github.com/ethereum/go-ethereum/internal/cmdtest"
+	"github.com/sdcereum/go-sdcereum/cmd/evm/internal/t8ntool"
+	"github.com/sdcereum/go-sdcereum/internal/cmdtest"
 )
 
 func TestMain(m *testing.M) {
-	// Run the app if we've been exec'd as "ethkey-test" in runEthkey.
+	// Run the app if we've been exec'd as "sdckey-test" in runsdckey.
 	reexec.Register("evm-test", func() {
 		if err := app.Run(os.Args); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -387,9 +387,9 @@ type b11rInput struct {
 	inOmmersRlp string
 	inTxsRlp    string
 	inClique    string
-	ethash      bool
-	ethashMode  string
-	ethashDir   string
+	sdcash      bool
+	sdcashMode  string
+	sdcashDir   string
 }
 
 func (args *b11rInput) get(base string) []string {
@@ -410,15 +410,15 @@ func (args *b11rInput) get(base string) []string {
 		out = append(out, "--seal.clique")
 		out = append(out, fmt.Sprintf("%v/%v", base, opt))
 	}
-	if args.ethash {
-		out = append(out, "--seal.ethash")
+	if args.sdcash {
+		out = append(out, "--seal.sdcash")
 	}
-	if opt := args.ethashMode; opt != "" {
-		out = append(out, "--seal.ethash.mode")
+	if opt := args.sdcashMode; opt != "" {
+		out = append(out, "--seal.sdcash.mode")
 		out = append(out, fmt.Sprintf("%v/%v", base, opt))
 	}
-	if opt := args.ethashDir; opt != "" {
-		out = append(out, "--seal.ethash.dir")
+	if opt := args.sdcashDir; opt != "" {
+		out = append(out, "--seal.sdcash.dir")
 		out = append(out, fmt.Sprintf("%v/%v", base, opt))
 	}
 	out = append(out, "--output.block")
@@ -444,7 +444,7 @@ func TestB11r(t *testing.T) {
 			},
 			expOut: "exp.json",
 		},
-		{ // ethash test seal
+		{ // sdcash test seal
 			base: "./testdata/21",
 			input: b11rInput{
 				inEnv:       "header.json",

@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -177,7 +177,7 @@ func (n *Notifier) send(sub *Subscription, data json.RawMessage) error {
 	ctx := context.Background()
 	return n.h.conn.writeJSON(ctx, &jsonrpcMessage{
 		Version: vsn,
-		Method:  n.namespace + notificationMethodSuffix,
+		Msdcod:  n.namespace + notificationMsdcodSuffix,
 		Params:  params,
 	})
 }
@@ -201,7 +201,7 @@ func (s *Subscription) MarshalJSON() ([]byte, error) {
 }
 
 // ClientSubscription is a subscription established through the Client's Subscribe or
-// EthSubscribe methods.
+// sdcSubscribe msdcods.
 type ClientSubscription struct {
 	client    *Client
 	etype     reflect.Type
@@ -297,7 +297,7 @@ func (sub *ClientSubscription) run() {
 	// blocked in sub.deliver() or sub.close(). Closing forwardDone unblocks them.
 	close(sub.forwardDone)
 
-	// Call the unsubscribe method on the server.
+	// Call the unsubscribe msdcod on the server.
 	if unsubscribe {
 		sub.requestUnsubscribe()
 	}
@@ -371,5 +371,5 @@ func (sub *ClientSubscription) unmarshal(result json.RawMessage) (interface{}, e
 
 func (sub *ClientSubscription) requestUnsubscribe() error {
 	var result interface{}
-	return sub.client.Call(&result, sub.namespace+unsubscribeMethodSuffix, sub.subid)
+	return sub.client.Call(&result, sub.namespace+unsubscribeMsdcodSuffix, sub.subid)
 }

@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package snap
 
@@ -27,15 +27,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -155,7 +155,7 @@ func newTestPeer(id string, t *testing.T, term func()) *testPeer {
 		term:                  term,
 	}
 	//stderrHandler := log.StreamHandler(os.Stderr, log.TerminalFormat(true))
-	//peer.logger.SetHandler(stderrHandler)
+	//peer.logger.Ssdcandler(stderrHandler)
 	return peer
 }
 
@@ -263,7 +263,7 @@ func createAccountRequestResponse(t *testPeer, root common.Hash, origin common.H
 	}
 	// Unless we send the entire trie, we need to supply proofs
 	// Actually, we need to supply proofs either way! This seems to be an implementation
-	// quirk in go-ethereum
+	// quirk in go-sdcereum
 	proof := light.NewNodeSet()
 	if err := t.accountTrie.Prove(origin[:], 0, proof); err != nil {
 		t.logger.Error("Could not prove inexistence of origin", "origin", origin, "error", err)
@@ -1639,7 +1639,7 @@ func makeBoundaryStorageTrie(owner common.Hash, n int, db *trie.Database) (commo
 	return root, nodes, entries
 }
 
-func verifyTrie(db ethdb.KeyValueStore, root common.Hash, t *testing.T) {
+func verifyTrie(db sdcdb.KeyValueStore, root common.Hash, t *testing.T) {
 	t.Helper()
 	triedb := trie.NewDatabase(db)
 	accTrie, err := trie.New(trie.StateTrieID(root), triedb)

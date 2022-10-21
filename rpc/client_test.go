@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -33,7 +33,7 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 func TestClientRequest(t *testing.T) {
@@ -82,7 +82,7 @@ func TestClientErrorData(t *testing.T) {
 	}
 
 	// Check code.
-	// The method handler returns an error value which implements the rpc.Error
+	// The msdcod handler returns an error value which implements the rpc.Error
 	// interface, i.e. it has a custom error code. The server returns this error code.
 	expectedCode := testError{}.ErrorCode()
 	if e, ok := err.(Error); !ok {
@@ -107,17 +107,17 @@ func TestClientBatchRequest(t *testing.T) {
 
 	batch := []BatchElem{
 		{
-			Method: "test_echo",
+			Msdcod: "test_echo",
 			Args:   []interface{}{"hello", 10, &echoArgs{"world"}},
 			Result: new(echoResult),
 		},
 		{
-			Method: "test_echo",
+			Msdcod: "test_echo",
 			Args:   []interface{}{"hello2", 11, &echoArgs{"world"}},
 			Result: new(echoResult),
 		},
 		{
-			Method: "no_such_method",
+			Msdcod: "no_such_msdcod",
 			Args:   []interface{}{1, 2, 3},
 			Result: new(int),
 		},
@@ -127,20 +127,20 @@ func TestClientBatchRequest(t *testing.T) {
 	}
 	wantResult := []BatchElem{
 		{
-			Method: "test_echo",
+			Msdcod: "test_echo",
 			Args:   []interface{}{"hello", 10, &echoArgs{"world"}},
 			Result: &echoResult{"hello", 10, &echoArgs{"world"}},
 		},
 		{
-			Method: "test_echo",
+			Msdcod: "test_echo",
 			Args:   []interface{}{"hello2", 11, &echoArgs{"world"}},
 			Result: &echoResult{"hello2", 11, &echoArgs{"world"}},
 		},
 		{
-			Method: "no_such_method",
+			Msdcod: "no_such_msdcod",
 			Args:   []interface{}{1, 2, 3},
 			Result: new(int),
-			Error:  &jsonError{Code: -32601, Message: "the method no_such_method does not exist/is not available"},
+			Error:  &jsonError{Code: -32601, Message: "the msdcod no_such_msdcod does not exist/is not available"},
 		},
 	}
 	if !reflect.DeepEqual(batch, wantResult) {
@@ -264,17 +264,17 @@ func TestClientSubscribeInvalidArg(t *testing.T) {
 		defer func() {
 			err := recover()
 			if shouldPanic && err == nil {
-				t.Errorf("EthSubscribe should've panicked for %#v", arg)
+				t.Errorf("sdcSubscribe should've panicked for %#v", arg)
 			}
 			if !shouldPanic && err != nil {
-				t.Errorf("EthSubscribe shouldn't have panicked for %#v", arg)
+				t.Errorf("sdcSubscribe shouldn't have panicked for %#v", arg)
 				buf := make([]byte, 1024*1024)
 				buf = buf[:runtime.Stack(buf, false)]
 				t.Error(err)
 				t.Error(string(buf))
 			}
 		}()
-		client.EthSubscribe(context.Background(), arg, "foo_bar")
+		client.sdcSubscribe(context.Background(), arg, "foo_bar")
 	}
 	check(true, nil)
 	check(true, 1)
@@ -358,7 +358,7 @@ func TestClientSubscribeClose(t *testing.T) {
 	}
 }
 
-// This test reproduces https://github.com/ethereum/go-ethereum/issues/17837 where the
+// This test reproduces https://github.com/sdcereum/go-sdcereum/issues/17837 where the
 // client hangs during shutdown when Unsubscribe races with Client.Close.
 func TestClientCloseUnsubscribeRace(t *testing.T) {
 	server := newTestServer()
@@ -405,7 +405,7 @@ func (r *unsubscribeRecorder) readBatch() ([]*jsonrpcMessage, bool, error) {
 	return msgs, batch, err
 }
 
-// This checks that Client calls the _unsubscribe method on the server when Unsubscribe is
+// This checks that Client calls the _unsubscribe msdcod on the server when Unsubscribe is
 // called on a subscription.
 func TestClientSubscriptionUnsubscribeServer(t *testing.T) {
 	t.Parallel()
@@ -415,7 +415,7 @@ func TestClientSubscriptionUnsubscribeServer(t *testing.T) {
 	srv.RegisterName("nftest", new(notificationTestService))
 	p1, p2 := net.Pipe()
 	recorder := &unsubscribeRecorder{ServerCodec: NewCodec(p1)}
-	go srv.ServeCodec(recorder, OptionMethodInvocation|OptionSubscriptions)
+	go srv.ServeCodec(recorder, OptionMsdcodInvocation|OptionSubscriptions)
 	defer srv.Stop()
 
 	// Create the client on the other end of the pipe.
@@ -434,7 +434,7 @@ func TestClientSubscriptionUnsubscribeServer(t *testing.T) {
 	// Unsubscribe and check that unsubscribe was called.
 	sub.Unsubscribe()
 	if !recorder.unsubscribes[sub.subid] {
-		t.Fatal("client did not call unsubscribe method")
+		t.Fatal("client did not call unsubscribe msdcod")
 	}
 	if _, open := <-sub.Err(); open {
 		t.Fatal("subscription error channel not closed after unsubscribe")
@@ -442,13 +442,13 @@ func TestClientSubscriptionUnsubscribeServer(t *testing.T) {
 }
 
 // This checks that the subscribed channel can be closed after Unsubscribe.
-// It is the reproducer for https://github.com/ethereum/go-ethereum/issues/22322
+// It is the reproducer for https://github.com/sdcereum/go-sdcereum/issues/22322
 func TestClientSubscriptionChannelClose(t *testing.T) {
 	t.Parallel()
 
 	var (
 		srv     = NewServer()
-		httpsrv = httptest.NewServer(srv.WebsocketHandler(nil))
+		httpsrv = httptest.NewServer(srv.Websocksdcandler(nil))
 		wsURL   = "ws:" + strings.TrimPrefix(httpsrv.URL, "http:")
 	)
 	defer srv.Stop()
@@ -522,7 +522,7 @@ func TestClientNotificationStorm(t *testing.T) {
 	doTest(24000, true)
 }
 
-func TestClientSetHeader(t *testing.T) {
+func TestClientSsdceader(t *testing.T) {
 	var gotHeader bool
 	srv := newTestServer()
 	httpsrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -540,7 +540,7 @@ func TestClientSetHeader(t *testing.T) {
 	}
 	defer client.Close()
 
-	client.SetHeader("test", "ok")
+	client.Ssdceader("test", "ok")
 	if _, err := client.SupportedModules(); err != nil {
 		t.Fatal(err)
 	}
@@ -549,7 +549,7 @@ func TestClientSetHeader(t *testing.T) {
 	}
 
 	// Check that Content-Type can be replaced.
-	client.SetHeader("content-type", "application/x-garbage")
+	client.Ssdceader("content-type", "application/x-garbage")
 	_, err = client.SupportedModules()
 	if err == nil {
 		t.Fatal("no error for invalid content-type header")
@@ -609,7 +609,7 @@ func TestClientReconnect(t *testing.T) {
 		if err != nil {
 			t.Fatal("can't listen:", err)
 		}
-		go http.Serve(l, srv.WebsocketHandler([]string{"*"}))
+		go http.Serve(l, srv.Websocksdcandler([]string{"*"}))
 		return srv, l
 	}
 
@@ -643,7 +643,7 @@ func TestClientReconnect(t *testing.T) {
 	}
 
 	// Start it up again and call again. The connection should be reestablished.
-	// We spawn multiple calls here to check whether this hangs somehow.
+	// We spawn multiple calls here to check whsdcer this hangs somehow.
 	s2, l2 := startServer(l1.Addr().String())
 	defer l2.Close()
 	defer s2.Stop()
@@ -675,7 +675,7 @@ func httpTestClient(srv *Server, transport string, fl *flakeyListener) (*Client,
 	var hs *httptest.Server
 	switch transport {
 	case "ws":
-		hs = httptest.NewUnstartedServer(srv.WebsocketHandler([]string{"*"}))
+		hs = httptest.NewUnstartedServer(srv.Websocksdcandler([]string{"*"}))
 	case "http":
 		hs = httptest.NewUnstartedServer(srv)
 	default:
@@ -697,7 +697,7 @@ func httpTestClient(srv *Server, transport string, fl *flakeyListener) (*Client,
 
 func ipcTestClient(srv *Server, fl *flakeyListener) (*Client, net.Listener) {
 	// Listen on a random endpoint.
-	endpoint := fmt.Sprintf("go-ethereum-test-ipc-%d-%d", os.Getpid(), rand.Int63())
+	endpoint := fmt.Sprintf("go-sdcereum-test-ipc-%d-%d", os.Getpid(), rand.Int63())
 	if runtime.GOOS == "windows" {
 		endpoint = `\\.\pipe\` + endpoint
 	} else {

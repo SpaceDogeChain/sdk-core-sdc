@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rawdb
 
@@ -27,8 +27,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -53,7 +53,7 @@ func TestFreezerModify(t *testing.T) {
 	defer f.Close()
 
 	// Commit test data.
-	_, err := f.ModifyAncients(func(op ethdb.AncientWriteOp) error {
+	_, err := f.ModifyAncients(func(op sdcdb.AncientWriteOp) error {
 		for i := range valuesRaw {
 			if err := op.AppendRaw("raw", uint64(i), valuesRaw[i]); err != nil {
 				return err
@@ -97,7 +97,7 @@ func TestFreezerModifyRollback(t *testing.T) {
 	f, dir := newFreezerForTesting(t, freezerTestTableDef)
 
 	theError := errors.New("oops")
-	_, err := f.ModifyAncients(func(op ethdb.AncientWriteOp) error {
+	_, err := f.ModifyAncients(func(op sdcdb.AncientWriteOp) error {
 		// Append three items. This creates two files immediately,
 		// because the table size limit of the test freezer is 2048.
 		require.NoError(t, op.AppendRaw("test", 0, make([]byte, 2048)))
@@ -141,7 +141,7 @@ func TestFreezerConcurrentModifyRetrieve(t *testing.T) {
 		defer wg.Done()
 		defer close(written)
 		for item := uint64(0); item < 10000; item += writeBatchSize {
-			_, err := f.ModifyAncients(func(op ethdb.AncientWriteOp) error {
+			_, err := f.ModifyAncients(func(op sdcdb.AncientWriteOp) error {
 				for i := uint64(0); i < writeBatchSize; i++ {
 					item := item + i
 					value := getChunk(32, int(item))
@@ -195,7 +195,7 @@ func TestFreezerConcurrentModifyTruncate(t *testing.T) {
 		if err := f.TruncateHead(0); err != nil {
 			t.Fatal("truncate failed:", err)
 		}
-		_, err := f.ModifyAncients(func(op ethdb.AncientWriteOp) error {
+		_, err := f.ModifyAncients(func(op sdcdb.AncientWriteOp) error {
 			for i := uint64(0); i < 100; i++ {
 				if err := op.AppendRaw("test", i, item); err != nil {
 					return err
@@ -216,7 +216,7 @@ func TestFreezerConcurrentModifyTruncate(t *testing.T) {
 		)
 		wg.Add(3)
 		go func() {
-			_, modifyErr = f.ModifyAncients(func(op ethdb.AncientWriteOp) error {
+			_, modifyErr = f.ModifyAncients(func(op sdcdb.AncientWriteOp) error {
 				for i := uint64(100); i < 200; i++ {
 					if err := op.AppendRaw("test", i, item); err != nil {
 						return err

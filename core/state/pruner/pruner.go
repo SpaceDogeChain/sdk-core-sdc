@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package pruner
 
@@ -27,15 +27,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state/snapshot"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 const (
@@ -84,13 +84,13 @@ type Config struct {
 type Pruner struct {
 	config      Config
 	chainHeader *types.Header
-	db          ethdb.Database
+	db          sdcdb.Database
 	stateBloom  *stateBloom
 	snaptree    *snapshot.Tree
 }
 
 // NewPruner creates the pruner instance.
-func NewPruner(db ethdb.Database, config Config) (*Pruner, error) {
+func NewPruner(db sdcdb.Database, config Config) (*Pruner, error) {
 	headBlock := rawdb.ReadHeadBlock(db)
 	if headBlock == nil {
 		return nil, errors.New("failed to load head block")
@@ -123,7 +123,7 @@ func NewPruner(db ethdb.Database, config Config) (*Pruner, error) {
 	}, nil
 }
 
-func prune(snaptree *snapshot.Tree, root common.Hash, maindb ethdb.Database, stateBloom *stateBloom, bloomPath string, middleStateRoots map[common.Hash]struct{}, start time.Time) error {
+func prune(snaptree *snapshot.Tree, root common.Hash, maindb sdcdb.Database, stateBloom *stateBloom, bloomPath string, middleStateRoots map[common.Hash]struct{}, start time.Time) error {
 	// Delete all stale trie nodes in the disk. With the help of state bloom
 	// the trie nodes(and codes) belong to the active state will be filtered
 	// out. A very small part of stale tries will also be filtered because of
@@ -180,7 +180,7 @@ func prune(snaptree *snapshot.Tree, root common.Hash, maindb ethdb.Database, sta
 			}
 			// Recreate the iterator after every batch commit in order
 			// to allow the underlying compactor to delete the entries.
-			if batch.ValueSize() >= ethdb.IdealBatchSize {
+			if batch.ValueSize() >= sdcdb.IdealBatchSize {
 				batch.Write()
 				batch.Reset()
 
@@ -353,7 +353,7 @@ func (p *Pruner) Prune(root common.Hash) error {
 // pruning can be resumed. What's more if the bloom filter is constructed, the
 // pruning **has to be resumed**. Otherwise a lot of dangling nodes may be left
 // in the disk.
-func RecoverPruning(datadir string, db ethdb.Database, trieCachePath string) error {
+func RecoverPruning(datadir string, db sdcdb.Database, trieCachePath string) error {
 	stateBloomPath, stateBloomRoot, err := findBloomFilter(datadir)
 	if err != nil {
 		return err
@@ -418,7 +418,7 @@ func RecoverPruning(datadir string, db ethdb.Database, trieCachePath string) err
 
 // extractGenesis loads the genesis state and commits all the state entries
 // into the given bloomfilter.
-func extractGenesis(db ethdb.Database, stateBloom *stateBloom) error {
+func extractGenesis(db sdcdb.Database, stateBloom *stateBloom) error {
 	genesisHash := rawdb.ReadCanonicalHash(db, 0)
 	if genesisHash == (common.Hash{}) {
 		return errors.New("missing genesis hash")
@@ -508,10 +508,10 @@ const warningLog = `
 WARNING!
 
 The clean trie cache is not found. Please delete it by yourself after the 
-pruning. Remember don't start the Geth without deleting the clean trie cache
+pruning. Remember don't start the Gsdc without deleting the clean trie cache
 otherwise the entire database may be damaged!
 
-Check the command description "geth snapshot prune-state --help" for more details.
+Check the command description "gsdc snapshot prune-state --help" for more details.
 `
 
 func deleteCleanTrieCache(path string) {

@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -49,7 +49,7 @@ type httpConn struct {
 }
 
 // httpConn implements ServerCodec, but it is treated specially by Client
-// and some methods don't work. The panic() stubs here exist to ensure
+// and some msdcods don't work. The panic() stubs here exist to ensure
 // this special treatment is correct.
 
 func (hc *httpConn) writeJSON(context.Context, interface{}) error {
@@ -268,7 +268,7 @@ func (t *httpServerConn) SetWriteDeadline(time.Time) error { return nil }
 // ServeHTTP serves JSON-RPC requests over HTTP.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Permit dumb empty requests for remote health-checks (AWS)
-	if r.Method == http.MethodGet && r.ContentLength == 0 && r.URL.RawQuery == "" {
+	if r.Msdcod == http.MsdcodGet && r.ContentLength == 0 && r.URL.RawQuery == "" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
@@ -298,15 +298,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // validateRequest returns a non-zero response code and error message if the
 // request is invalid.
 func validateRequest(r *http.Request) (int, error) {
-	if r.Method == http.MethodPut || r.Method == http.MethodDelete {
-		return http.StatusMethodNotAllowed, errors.New("method not allowed")
+	if r.Msdcod == http.MsdcodPut || r.Msdcod == http.MsdcodDelete {
+		return http.StatusMsdcodNotAllowed, errors.New("msdcod not allowed")
 	}
 	if r.ContentLength > maxRequestContentLength {
 		err := fmt.Errorf("content length too large (%d>%d)", r.ContentLength, maxRequestContentLength)
 		return http.StatusRequestEntityTooLarge, err
 	}
 	// Allow OPTIONS (regardless of content-type)
-	if r.Method == http.MethodOptions {
+	if r.Msdcod == http.MsdcodOptions {
 		return 0, nil
 	}
 	// Check content-type

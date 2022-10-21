@@ -1,20 +1,20 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2014 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package core implements the Ethereum consensus protocol.
+// Package core implements the sdcereum consensus protocol.
 package core
 
 import (
@@ -29,23 +29,23 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/internal/syncx"
-	"github.com/ethereum/go-ethereum/internal/version"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/common/prque"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/state/snapshot"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/internal/syncx"
+	"github.com/sdcereum/go-sdcereum/internal/version"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/trie"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -130,14 +130,14 @@ type CacheConfig struct {
 	TrieCleanLimit      int           // Memory allowance (MB) to use for caching trie nodes in memory
 	TrieCleanJournal    string        // Disk journal for saving clean cache entries.
 	TrieCleanRejournal  time.Duration // Time interval to dump clean cache to disk periodically
-	TrieCleanNoPrefetch bool          // Whether to disable heuristic state prefetching for followup blocks
+	TrieCleanNoPrefetch bool          // Whsdcer to disable heuristic state prefetching for followup blocks
 	TrieDirtyLimit      int           // Memory limit (MB) at which to start flushing dirty trie nodes to disk
-	TrieDirtyDisabled   bool          // Whether to disable trie write caching and GC altogether (archive node)
+	TrieDirtyDisabled   bool          // Whsdcer to disable trie write caching and GC altogsdcer (archive node)
 	TrieTimeLimit       time.Duration // Time limit after which to flush the current in-memory trie to disk
 	SnapshotLimit       int           // Memory allowance (MB) to use for caching snapshot entries in memory
-	Preimages           bool          // Whether to store preimage of trie key to the disk
+	Preimages           bool          // Whsdcer to store preimage of trie key to the disk
 
-	SnapshotNoBuild bool // Whether the background generation is allowed
+	SnapshotNoBuild bool // Whsdcer the background generation is allowed
 	SnapshotWait    bool // Wait for snapshot construction on startup. TODO(karalabe): This is a dirty hack for testing, nuke it
 }
 
@@ -169,7 +169,7 @@ type BlockChain struct {
 	chainConfig *params.ChainConfig // Chain & network configuration
 	cacheConfig *CacheConfig        // Cache configuration for pruning
 
-	db     ethdb.Database // Low level persistent database to store final content in
+	db     sdcdb.Database // Low level persistent database to store final content in
 	snaps  *snapshot.Tree // Snapshot tree for fast trie leaf access
 	triegc *prque.Prque   // Priority queue mapping block numbers to tries to gc
 	gcproc time.Duration  // Accumulates canonical block processing for trie dumping
@@ -222,9 +222,9 @@ type BlockChain struct {
 }
 
 // NewBlockChain returns a fully initialised block chain using information
-// available in the database. It initialises the default Ethereum Validator
+// available in the database. It initialises the default sdcereum Validator
 // and Processor.
-func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, genesis *Genesis, overrides *ChainOverrides, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(header *types.Header) bool, txLookupLimit *uint64) (*BlockChain, error) {
+func NewBlockChain(db sdcdb.Database, cacheConfig *CacheConfig, genesis *Genesis, overrides *ChainOverrides, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(header *types.Header) bool, txLookupLimit *uint64) (*BlockChain, error) {
 	if cacheConfig == nil {
 		cacheConfig = defaultCacheConfig
 	}
@@ -292,7 +292,7 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, genesis *Genesis
 	bc.currentFinalizedBlock.Store(nilBlock)
 	bc.currentSafeBlock.Store(nilBlock)
 
-	// If Geth is initialized with an external ancient store, re-initialize the
+	// If Gsdc is initialized with an external ancient store, re-initialize the
 	// missing chain indexes and chain flags. This procedure can survive crash
 	// and can be resumed in next restart since chain flags are updated in last step.
 	if bc.empty() {
@@ -315,7 +315,7 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, genesis *Genesis
 		if diskRoot != (common.Hash{}) {
 			log.Warn("Head state missing, repairing", "number", head.Number(), "hash", head.Hash(), "snaproot", diskRoot)
 
-			snapDisk, err := bc.setHeadBeyondRoot(head.NumberU64(), diskRoot, true)
+			snapDisk, err := bc.ssdceadBeyondRoot(head.NumberU64(), diskRoot, true)
 			if err != nil {
 				return nil, err
 			}
@@ -325,13 +325,13 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, genesis *Genesis
 			}
 		} else {
 			log.Warn("Head state missing, repairing", "number", head.Number(), "hash", head.Hash())
-			if _, err := bc.setHeadBeyondRoot(head.NumberU64(), common.Hash{}, true); err != nil {
+			if _, err := bc.ssdceadBeyondRoot(head.NumberU64(), common.Hash{}, true); err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	// Ensure that a previous crash in SetHead doesn't leave extra ancients
+	// Ensure that a previous crash in Ssdcead doesn't leave extra ancients
 	if frozen, err := bc.db.Ancients(); err == nil && frozen > 0 {
 		var (
 			needRewind bool
@@ -357,25 +357,25 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, genesis *Genesis
 		}
 		if needRewind {
 			log.Error("Truncating ancient chain", "from", bc.CurrentHeader().Number.Uint64(), "to", low)
-			if err := bc.SetHead(low); err != nil {
+			if err := bc.Ssdcead(low); err != nil {
 				return nil, err
 			}
 		}
 	}
 	// The first thing the node will do is reconstruct the verification data for
-	// the head block (ethash cache or clique voting snapshot). Might as well do
+	// the head block (sdcash cache or clique voting snapshot). Might as well do
 	// it in advance.
 	bc.engine.VerifyHeader(bc, bc.CurrentHeader(), true)
 
 	// Check the current state of the block hashes and make sure that we do not have any of the bad blocks in our chain
 	for hash := range BadHashes {
-		if header := bc.GetHeaderByHash(hash); header != nil {
+		if header := bc.GsdceaderByHash(hash); header != nil {
 			// get the canonical block corresponding to the offending header's number
-			headerByNumber := bc.GetHeaderByNumber(header.Number.Uint64())
+			headerByNumber := bc.GsdceaderByNumber(header.Number.Uint64())
 			// make sure the headerByNumber (if present) is in our current canonical chain
 			if headerByNumber != nil && headerByNumber.Hash() == header.Hash() {
 				log.Error("Found bad hash, rewinding chain", "number", header.Number, "hash", header.ParentHash)
-				if err := bc.SetHead(header.Number.Uint64() - 1); err != nil {
+				if err := bc.Ssdcead(header.Number.Uint64() - 1); err != nil {
 					return nil, err
 				}
 				log.Error("Chain rewind was successful, resuming normal operation")
@@ -425,7 +425,7 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, genesis *Genesis
 	// Rewind the chain in case of an incompatible config upgrade.
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
 		log.Warn("Rewinding chain to upgrade configuration", "err", compat)
-		bc.SetHead(compat.RewindTo)
+		bc.Ssdcead(compat.RewindTo)
 		rawdb.WriteChainConfig(db, genesisHash, chainConfig)
 	}
 	// Start tx indexer/unindexer if required.
@@ -438,7 +438,7 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, genesis *Genesis
 	return bc, nil
 }
 
-// empty returns an indicator whether the blockchain is empty.
+// empty returns an indicator whsdcer the blockchain is empty.
 // Note, it's a special case that we connect a non-empty ancient
 // database with an empty node, so that we can plugin the ancient
 // into node seamlessly.
@@ -452,7 +452,7 @@ func (bc *BlockChain) empty() bool {
 	return true
 }
 
-// loadLastState loads the last known chain state from the database. This method
+// loadLastState loads the last known chain state from the database. This msdcod
 // assumes that the chain manager mutex is held.
 func (bc *BlockChain) loadLastState() error {
 	// Restore the last known head block
@@ -476,7 +476,7 @@ func (bc *BlockChain) loadLastState() error {
 	// Restore the last known head header
 	currentHeader := currentBlock.Header()
 	if head := rawdb.ReadHeadHeaderHash(bc.db); head != (common.Hash{}) {
-		if header := bc.GetHeaderByHash(head); header != nil {
+		if header := bc.GsdceaderByHash(head); header != nil {
 			currentHeader = header
 		}
 	}
@@ -526,11 +526,11 @@ func (bc *BlockChain) loadLastState() error {
 	return nil
 }
 
-// SetHead rewinds the local chain to a new head. Depending on whether the node
-// was fast synced or full synced and in which state, the method will try to
+// Ssdcead rewinds the local chain to a new head. Depending on whsdcer the node
+// was fast synced or full synced and in which state, the msdcod will try to
 // delete minimal data from disk whilst retaining chain consistency.
-func (bc *BlockChain) SetHead(head uint64) error {
-	_, err := bc.setHeadBeyondRoot(head, common.Hash{}, false)
+func (bc *BlockChain) Ssdcead(head uint64) error {
+	_, err := bc.ssdceadBeyondRoot(head, common.Hash{}, false)
 	return err
 }
 
@@ -556,15 +556,15 @@ func (bc *BlockChain) SetSafe(block *types.Block) {
 	}
 }
 
-// setHeadBeyondRoot rewinds the local chain to a new head with the extra condition
-// that the rewind must pass the specified state root. This method is meant to be
+// ssdceadBeyondRoot rewinds the local chain to a new head with the extra condition
+// that the rewind must pass the specified state root. This msdcod is meant to be
 // used when rewinding with snapshots enabled to ensure that we go back further than
-// persistent disk layer. Depending on whether the node was fast synced or full, and
-// in which state, the method will try to delete minimal data from disk whilst
+// persistent disk layer. Depending on whsdcer the node was fast synced or full, and
+// in which state, the msdcod will try to delete minimal data from disk whilst
 // retaining chain consistency.
 //
-// The method returns the block number where the requested root cap was found.
-func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bool) (uint64, error) {
+// The msdcod returns the block number where the requested root cap was found.
+func (bc *BlockChain) ssdceadBeyondRoot(head uint64, root common.Hash, repair bool) (uint64, error) {
 	if !bc.chainmu.TryLock() {
 		return 0, errChainStopped
 	}
@@ -578,9 +578,9 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bo
 	pivot := rawdb.ReadLastPivotNumber(bc.db)
 	frozen, _ := bc.db.Ancients()
 
-	updateFn := func(db ethdb.KeyValueWriter, header *types.Header) (uint64, bool) {
+	updateFn := func(db sdcdb.KeyValueWriter, header *types.Header) (uint64, bool) {
 		// Rewind the blockchain, ensuring we don't end up with a stateless head
-		// block. Note, depth equality is permitted to allow using SetHead as a
+		// block. Note, depth equality is permitted to allow using Ssdcead as a
 		// chain reparation mechanism without deleting any data!
 		if currentBlock := bc.CurrentBlock(); currentBlock != nil && header.Number.Uint64() <= currentBlock.NumberU64() {
 			newHeadBlock := bc.GetBlock(header.Hash(), header.Number.Uint64())
@@ -591,7 +591,7 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bo
 				// Block exists, keep rewinding until we find one with state,
 				// keeping rewinding until we exceed the optional threshold
 				// root hash
-				beyondRoot := (root == common.Hash{}) // Flag whether we're beyond the requested root (no root, always true)
+				beyondRoot := (root == common.Hash{}) // Flag whsdcer we're beyond the requested root (no root, always true)
 
 				for {
 					// If a root threshold was requested but not yet crossed, check
@@ -638,7 +638,7 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bo
 
 			// Degrade the chain markers if they are explicitly reverted.
 			// In theory we should update all in-memory markers in the
-			// last step, however the direction of SetHead is from high
+			// last step, however the direction of Ssdcead is from high
 			// to low, so it's safe to update in-memory markers directly.
 			bc.currentBlock.Store(newHeadBlock)
 			headBlockGauge.Update(int64(newHeadBlock.NumberU64()))
@@ -654,16 +654,16 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bo
 
 			// Degrade the chain markers if they are explicitly reverted.
 			// In theory we should update all in-memory markers in the
-			// last step, however the direction of SetHead is from high
+			// last step, however the direction of Ssdcead is from high
 			// to low, so it's safe the update in-memory markers directly.
 			bc.currentFastBlock.Store(newHeadFastBlock)
 			headFastBlockGauge.Update(int64(newHeadFastBlock.NumberU64()))
 		}
 		head := bc.CurrentBlock().NumberU64()
 
-		// If setHead underflown the freezer threshold and the block processing
+		// If ssdcead underflown the freezer threshold and the block processing
 		// intent afterwards is full block importing, delete the chain segment
-		// between the stateful-block and the sethead target.
+		// between the stateful-block and the ssdcead target.
 		var wipe bool
 		if head+1 < frozen {
 			wipe = pivot == nil || head >= *pivot
@@ -671,7 +671,7 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bo
 		return head, wipe // Only force wipe if full synced
 	}
 	// Rewind the header chain, deleting all block bodies until then
-	delFn := func(db ethdb.KeyValueWriter, hash common.Hash, num uint64) {
+	delFn := func(db sdcdb.KeyValueWriter, hash common.Hash, num uint64) {
 		// Ignore the error here since light client won't hit this path
 		frozen, _ := bc.db.Ancients()
 		if num+1 <= frozen {
@@ -685,23 +685,23 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bo
 		} else {
 			// Remove relative body and receipts from the active store.
 			// The header, total difficulty and canonical hash will be
-			// removed in the hc.SetHead function.
+			// removed in the hc.Ssdcead function.
 			rawdb.DeleteBody(db, hash, num)
 			rawdb.DeleteReceipts(db, hash, num)
 		}
 		// Todo(rjl493456442) txlookup, bloombits, etc
 	}
-	// If SetHead was only called as a chain reparation method, try to skip
-	// touching the header chain altogether, unless the freezer is broken
+	// If Ssdcead was only called as a chain reparation msdcod, try to skip
+	// touching the header chain altogsdcer, unless the freezer is broken
 	if repair {
 		if target, force := updateFn(bc.db, bc.CurrentBlock().Header()); force {
-			bc.hc.SetHead(target, updateFn, delFn)
+			bc.hc.Ssdcead(target, updateFn, delFn)
 		}
 	} else {
 		// Rewind the chain to the requested head and keep going backwards until a
 		// block with a state is found or fast sync pivot is passed
 		log.Warn("Rewinding blockchain", "target", head)
-		bc.hc.SetHead(head, updateFn, delFn)
+		bc.hc.Ssdcead(head, updateFn, delFn)
 	}
 	// Clear out any stale content from the caches
 	bc.bodyCache.Purge()
@@ -713,11 +713,11 @@ func (bc *BlockChain) setHeadBeyondRoot(head uint64, root common.Hash, repair bo
 
 	// Clear safe block, finalized block if needed
 	if safe := bc.CurrentSafeBlock(); safe != nil && head < safe.NumberU64() {
-		log.Warn("SetHead invalidated safe block")
+		log.Warn("Ssdcead invalidated safe block")
 		bc.SetSafe(nil)
 	}
 	if finalized := bc.CurrentFinalizedBlock(); finalized != nil && head < finalized.NumberU64() {
-		log.Error("SetHead invalidated finalized block")
+		log.Error("Ssdcead invalidated finalized block")
 		bc.SetFinalized(nil)
 	}
 
@@ -762,7 +762,7 @@ func (bc *BlockChain) Reset() error {
 // specified genesis state.
 func (bc *BlockChain) ResetWithGenesisBlock(genesis *types.Block) error {
 	// Dump the entire block chain and purge the caches
-	if err := bc.SetHead(0); err != nil {
+	if err := bc.Ssdcead(0); err != nil {
 		return err
 	}
 	if !bc.chainmu.TryLock() {
@@ -827,7 +827,7 @@ func (bc *BlockChain) ExportN(w io.Writer, first uint64, last uint64) error {
 	return nil
 }
 
-// writeHeadBlock injects a new head block into the current block chain. This method
+// writeHeadBlock injects a new head block into the current block chain. This msdcod
 // assumes that the block is indeed a true head. It will also reset the head
 // header and the head fast sync block to this very same block if they are older
 // or if they are on a different side chain.
@@ -857,10 +857,10 @@ func (bc *BlockChain) writeHeadBlock(block *types.Block) {
 }
 
 // stop stops the blockchain service. If any imports are currently in progress
-// it will abort them using the procInterrupt. This method stops all running
+// it will abort them using the procInterrupt. This msdcod stops all running
 // goroutines, but does not do all the post-stop work of persisting data.
-// OBS! It is generally recommended to use the Stop method!
-// This method has been exposed to allow tests to stop the blockchain while simulating
+// OBS! It is generally recommended to use the Stop msdcod!
+// This msdcod has been exposed to allow tests to stop the blockchain while simulating
 // a crash.
 func (bc *BlockChain) stopWithoutSaving() {
 	if !atomic.CompareAndSwapInt32(&bc.running, 0, 1) {
@@ -942,9 +942,9 @@ func (bc *BlockChain) Stop() {
 	log.Info("Blockchain stopped")
 }
 
-// StopInsert interrupts all insertion methods, causing them to return
+// StopInsert interrupts all insertion msdcods, causing them to return
 // errInsertionInterrupted as soon as possible. Insertion is permanently disabled after
-// calling this method.
+// calling this msdcod.
 func (bc *BlockChain) StopInsert() {
 	atomic.StoreInt32(&bc.procInterrupt, 1)
 }
@@ -1017,7 +1017,7 @@ func (bc *BlockChain) InsertReceiptChain(blockChain types.Blocks, receiptChain [
 	)
 
 	// updateHead updates the head fast sync block if the inserted blocks are better
-	// and returns an indicator whether the inserted blocks are canonical.
+	// and returns an indicator whsdcer the inserted blocks are canonical.
 	updateHead := func(head *types.Block) bool {
 		if !bc.chainmu.TryLock() {
 			return false
@@ -1085,7 +1085,7 @@ func (bc *BlockChain) InsertReceiptChain(blockChain types.Blocks, receiptChain [
 		// * If block number is large enough to be regarded as a recent block
 		// It means blocks below the ancientLimit-txlookupLimit won't be indexed.
 		//
-		// But if the `TxIndexTail` is not nil, e.g. Geth is initialized with
+		// But if the `TxIndexTail` is not nil, e.g. Gsdc is initialized with
 		// an external ancient database, during the setup, blockchain will start
 		// a background routine to re-indexed all indices in [ancients - txlookupLimit, ancients)
 		// range. In this case, all tx indices of newly imported blocks should be
@@ -1099,7 +1099,7 @@ func (bc *BlockChain) InsertReceiptChain(blockChain types.Blocks, receiptChain [
 			}
 			stats.processed++
 
-			if batch.ValueSize() > ethdb.IdealBatchSize || i == len(blockChain)-1 {
+			if batch.ValueSize() > sdcdb.IdealBatchSize || i == len(blockChain)-1 {
 				size += int64(batch.ValueSize())
 				if err = batch.Write(); err != nil {
 					fastBlock := bc.CurrentFastBlock().NumberU64()
@@ -1183,7 +1183,7 @@ func (bc *BlockChain) InsertReceiptChain(blockChain types.Blocks, receiptChain [
 			// Write everything belongs to the blocks into the database. So that
 			// we can ensure all components of body is completed(body, receipts,
 			// tx indexes)
-			if batch.ValueSize() >= ethdb.IdealBatchSize {
+			if batch.ValueSize() >= sdcdb.IdealBatchSize {
 				if err := batch.Write(); err != nil {
 					return 0, err
 				}
@@ -1327,7 +1327,7 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 				limit       = common.StorageSize(bc.cacheConfig.TrieDirtyLimit) * 1024 * 1024
 			)
 			if nodes > limit || imgs > 4*1024*1024 {
-				triedb.Cap(limit - ethdb.IdealBatchSize)
+				triedb.Cap(limit - sdcdb.IdealBatchSize)
 			}
 			// Find the next state trie we need to commit
 			chosen := current - TriesInMemory
@@ -1336,7 +1336,7 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 			if bc.gcproc > bc.cacheConfig.TrieTimeLimit {
 				// If the header is missing (canonical chain behind), we're reorging a low
 				// diff sidechain. Suspend committing until this operation is completed.
-				header := bc.GetHeaderByNumber(chosen)
+				header := bc.GsdceaderByNumber(chosen)
 				if header == nil {
 					log.Warn("Reorg in progress, trie commit postponed", "number", chosen)
 				} else {
@@ -1365,20 +1365,20 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	return nil
 }
 
-// WriteBlockAndSetHead writes the given block and all associated state to the database,
+// WriteBlockAndSsdcead writes the given block and all associated state to the database,
 // and applies the block as the new chain head.
-func (bc *BlockChain) WriteBlockAndSetHead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status WriteStatus, err error) {
+func (bc *BlockChain) WriteBlockAndSsdcead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status WriteStatus, err error) {
 	if !bc.chainmu.TryLock() {
 		return NonStatTy, errChainStopped
 	}
 	defer bc.chainmu.Unlock()
 
-	return bc.writeBlockAndSetHead(block, receipts, logs, state, emitHeadEvent)
+	return bc.writeBlockAndSsdcead(block, receipts, logs, state, emitHeadEvent)
 }
 
-// writeBlockAndSetHead is the internal implementation of WriteBlockAndSetHead.
+// writeBlockAndSsdcead is the internal implementation of WriteBlockAndSsdcead.
 // This function expects the chain mutex to be held.
-func (bc *BlockChain) writeBlockAndSetHead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status WriteStatus, err error) {
+func (bc *BlockChain) writeBlockAndSsdcead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status WriteStatus, err error) {
 	if err := bc.writeBlockWithState(block, receipts, state); err != nil {
 		return NonStatTy, err
 	}
@@ -1428,7 +1428,7 @@ func (bc *BlockChain) writeBlockAndSetHead(block *types.Block, receipts []*types
 // ahead and was not added.
 //
 // TODO after the transition, the future block shouldn't be kept. Because
-// it's not checked in the Geth side anymore.
+// it's not checked in the Gsdc side anymore.
 func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 	max := uint64(time.Now().Unix() + maxTimeFutureBlocks)
 	if block.Time() > max {
@@ -1447,7 +1447,7 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 // the index number of the failing block as well an error describing what went
 // wrong. After insertion is done, all accumulated events will be fired.
 func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
-	// Sanity check that we have something meaningful to import
+	// Sanity check that we have somsdcing meaningful to import
 	if len(chain) == 0 {
 		return 0, nil
 	}
@@ -1480,12 +1480,12 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 // insertChain is the internal implementation of InsertChain, which assumes that
 // 1) chains are contiguous, and 2) The chain mutex is held.
 //
-// This method is split out so that import batches that require re-injecting
+// This msdcod is split out so that import batches that require re-injecting
 // historical blocks can do so without releasing the lock, which could lead to
 // racey behaviour. If a sidechain import is in progress, and the historic state
 // is imported, but then new canon-head is added before the actual sidechain
 // completes, then the historic state could be pruned again
-func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool) (int, error) {
+func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, ssdcead bool) (int, error) {
 	// If the chain is terminating, don't even bother starting up.
 	if bc.insertStopped() {
 		return 0, nil
@@ -1538,7 +1538,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 			if reorg {
 				// Switch to import mode if the forker says the reorg is necessary
 				// and also the block is not on the canonical chain.
-				// In eth2 the forker always returns true for reorg decision (blindly trusting
+				// In sdc2 the forker always returns true for reorg decision (blindly trusting
 				// the external consensus engine), but in order to prevent the unnecessary
 				// reorgs when importing known blocks, the special case is handled here.
 				if block.NumberU64() > current.NumberU64() || bc.GetCanonicalHash(block.NumberU64()) != block.Hash() {
@@ -1572,7 +1572,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 	switch {
 	// First block is pruned
 	case errors.Is(err, consensus.ErrPrunedAncestor):
-		if setHead {
+		if ssdcead {
 			// First block is pruned, insert as sidechain and reorg only if TD grows enough
 			log.Debug("Pruned ancestor, inserting as sidechain", "number", block.Number(), "hash", block.Hash())
 			return bc.insertSideChain(block, it)
@@ -1673,7 +1673,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 		start := time.Now()
 		parent := it.previous()
 		if parent == nil {
-			parent = bc.GetHeader(block.ParentHash(), block.NumberU64()-1)
+			parent = bc.Gsdceader(block.ParentHash(), block.NumberU64()-1)
 		}
 		statedb, err := state.New(parent.Root, bc.stateCache, bc.snaps)
 		if err != nil {
@@ -1741,11 +1741,11 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 		// Write the block to the chain and get the status.
 		substart = time.Now()
 		var status WriteStatus
-		if !setHead {
+		if !ssdcead {
 			// Don't set the head, only insert the block
 			err = bc.writeBlockWithState(block, receipts, statedb)
 		} else {
-			status, err = bc.writeBlockAndSetHead(block, receipts, logs, statedb, false)
+			status, err = bc.writeBlockAndSsdcead(block, receipts, logs, statedb, false)
 		}
 		atomic.StoreUint32(&followupInterrupt, 1)
 		if err != nil {
@@ -1765,9 +1765,9 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 		stats.usedGas += usedGas
 
 		dirty, _ := bc.stateCache.TrieDB().Size()
-		stats.report(chain, it.index, dirty, setHead)
+		stats.report(chain, it.index, dirty, ssdcead)
 
-		if !setHead {
+		if !ssdcead {
 			return it.index, nil // Direct block insertion of a single block
 		}
 		switch status {
@@ -1821,7 +1821,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 // error, which happens when a sidechain with a sufficiently old fork-block is
 // found.
 //
-// The method writes all (header-and-body-valid) blocks to disk, then tries to
+// The msdcod writes all (header-and-body-valid) blocks to disk, then tries to
 // switch over to the new chain if the TD exceeded the current chain.
 // insertSideChain is only used pre-merge.
 func (bc *BlockChain) insertSideChain(block *types.Block, it *insertIterator) (int, error) {
@@ -1906,7 +1906,7 @@ func (bc *BlockChain) insertSideChain(block *types.Block, it *insertIterator) (i
 		hashes = append(hashes, parent.Hash())
 		numbers = append(numbers, parent.Number.Uint64())
 
-		parent = bc.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
+		parent = bc.Gsdceader(parent.ParentHash, parent.Number.Uint64()-1)
 	}
 	if parent == nil {
 		return it.index, errors.New("missing parent")
@@ -2176,12 +2176,12 @@ func (bc *BlockChain) reorg(oldBlock, newBlock *types.Block) error {
 	return nil
 }
 
-// InsertBlockWithoutSetHead executes the block, runs the necessary verification
+// InsertBlockWithoutSsdcead executes the block, runs the necessary verification
 // upon it and then persist the block and the associate state into the database.
 // The key difference between the InsertChain is it won't do the canonical chain
 // updating. It relies on the additional SetCanonical call to finalize the entire
 // procedure.
-func (bc *BlockChain) InsertBlockWithoutSetHead(block *types.Block) error {
+func (bc *BlockChain) InsertBlockWithoutSsdcead(block *types.Block) error {
 	if !bc.chainmu.TryLock() {
 		return errChainStopped
 	}
@@ -2279,7 +2279,7 @@ func (bc *BlockChain) skipBlock(err error, it *insertIterator) bool {
 	// Resolve parent block
 	if parent := it.previous(); parent != nil {
 		parentRoot = parent.Root
-	} else if parent = bc.GetHeaderByHash(header.ParentHash); parent != nil {
+	} else if parent = bc.GsdceaderByHash(header.ParentHash); parent != nil {
 		parentRoot = parent.Root
 	}
 	if parentRoot == (common.Hash{}) {
@@ -2338,7 +2338,7 @@ func (bc *BlockChain) indexBlocks(tail *uint64, head uint64, done chan struct{})
 // all tx indices will be reserved.
 //
 // The user can adjust the txlookuplimit value for each launch after sync,
-// Geth will automatically construct the missing indices or delete the extra
+// Gsdc will automatically construct the missing indices or delete the extra
 // indices.
 func (bc *BlockChain) maintainTxIndex() {
 	defer bc.wg.Done()
@@ -2408,7 +2408,7 @@ Receipts: %v
 // chain, possibly creating a reorg. If an error is returned, it will return the
 // index number of the failing header as well an error describing what went wrong.
 //
-// The verify parameter can be used to fine tune whether nonce verification
+// The verify parameter can be used to fine tune whsdcer nonce verification
 // should be done or not. The reason behind the optional check is because some
 // of the header retrieval mechanisms already need to verify nonces, as well as
 // because nonces can be verified sparsely, not needing to check each.
@@ -2430,8 +2430,8 @@ func (bc *BlockChain) InsertHeaderChain(chain []*types.Header, checkFreq int) (i
 }
 
 // SetBlockValidatorAndProcessorForTesting sets the current validator and processor.
-// This method can be used to force an invalid blockchain to be verified for tests.
-// This method is unsafe and should only be used before block import starts.
+// This msdcod can be used to force an invalid blockchain to be verified for tests.
+// This msdcod is unsafe and should only be used before block import starts.
 func (bc *BlockChain) SetBlockValidatorAndProcessorForTesting(v Validator, p Processor) {
 	bc.validator = v
 	bc.processor = p

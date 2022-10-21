@@ -1,20 +1,20 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package miner implements Ethereum block creation and mining.
+// Package miner implements sdcereum block creation and mining.
 package miner
 
 import (
@@ -22,17 +22,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/clique"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdcdb/memorydb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 type mockBackend struct {
@@ -201,9 +201,9 @@ func TestCloseMiner(t *testing.T) {
 	waitForMiningState(t, miner, false)
 }
 
-// TestMinerSetEtherbase checks that etherbase becomes set even if mining isn't
+// TestMinerSetsdcerbase checks that sdcerbase becomes set even if mining isn't
 // possible at the moment
-func TestMinerSetEtherbase(t *testing.T) {
+func TestMinerSetsdcerbase(t *testing.T) {
 	miner, mux, cleanup := createMiner(t)
 	defer cleanup(false)
 	// Start with a 'bad' mining address
@@ -241,9 +241,9 @@ func waitForMiningState(t *testing.T, m *Miner, mining bool) {
 }
 
 func createMiner(t *testing.T) (*Miner, *event.TypeMux, func(skipMiner bool)) {
-	// Create Ethash config
+	// Create sdcash config
 	config := Config{
-		Etherbase: common.HexToAddress("123456789"),
+		sdcerbase: common.HexToAddress("123456789"),
 	}
 	// Create chainConfig
 	memdb := memorydb.New()
@@ -255,7 +255,7 @@ func createMiner(t *testing.T) (*Miner, *event.TypeMux, func(skipMiner bool)) {
 	}
 	// Create consensus engine
 	engine := clique.New(chainConfig.Clique, chainDB)
-	// Create Ethereum backend
+	// Create sdcereum backend
 	bc, err := core.NewBlockChain(chainDB, nil, genesis, nil, engine, vm.Config{}, nil, nil)
 	if err != nil {
 		t.Fatalf("can't create new chain %v", err)

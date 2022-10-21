@@ -1,20 +1,20 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// This file contains a miner stress test for the eth1/2 transition
+// This file contains a miner stress test for the sdc1/2 transition
 package main
 
 import (
@@ -26,26 +26,26 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/fdlimit"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/beacon"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
-	ethcatalyst "github.com/ethereum/go-ethereum/eth/catalyst"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/les"
-	lescatalyst "github.com/ethereum/go-ethereum/les/catalyst"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/miner"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/accounts/keystore"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/fdlimit"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/beacon"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc"
+	sdccatalyst "github.com/sdcereum/go-sdcereum/sdc/catalyst"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/les"
+	lescatalyst "github.com/sdcereum/go-sdcereum/les/catalyst"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/miner"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 type nodetype int
@@ -53,9 +53,9 @@ type nodetype int
 const (
 	legacyMiningNode nodetype = iota
 	legacyNormalNode
-	eth2MiningNode
-	eth2NormalNode
-	eth2LightClient
+	sdc2MiningNode
+	sdc2NormalNode
+	sdc2LightClient
 )
 
 func (typ nodetype) String() string {
@@ -64,12 +64,12 @@ func (typ nodetype) String() string {
 		return "legacyMiningNode"
 	case legacyNormalNode:
 		return "legacyNormalNode"
-	case eth2MiningNode:
-		return "eth2MiningNode"
-	case eth2NormalNode:
-		return "eth2NormalNode"
-	case eth2LightClient:
-		return "eth2LightClient"
+	case sdc2MiningNode:
+		return "sdc2MiningNode"
+	case sdc2NormalNode:
+		return "sdc2NormalNode"
+	case sdc2LightClient:
+		return "sdc2LightClient"
 	default:
 		return "undefined"
 	}
@@ -79,7 +79,7 @@ var (
 	// transitionDifficulty is the target total difficulty for transition
 	transitionDifficulty = new(big.Int).Mul(big.NewInt(20), params.MinimumDifficulty)
 
-	// blockInterval is the time interval for creating a new eth2 block
+	// blockInterval is the time interval for creating a new sdc2 block
 	blockInterval    = time.Second * 3
 	blockIntervalInt = 3
 
@@ -87,30 +87,30 @@ var (
 	finalizationDist = 10
 )
 
-type ethNode struct {
+type sdcNode struct {
 	typ        nodetype
 	stack      *node.Node
 	enode      *enode.Node
-	api        *ethcatalyst.ConsensusAPI
-	ethBackend *eth.Ethereum
+	api        *sdccatalyst.ConsensusAPI
+	sdcBackend *sdc.sdcereum
 	lapi       *lescatalyst.ConsensusAPI
-	lesBackend *les.LightEthereum
+	lesBackend *les.Lightsdcereum
 }
 
-func newNode(typ nodetype, genesis *core.Genesis, enodes []*enode.Node) *ethNode {
+func newNode(typ nodetype, genesis *core.Genesis, enodes []*enode.Node) *sdcNode {
 	var (
 		err        error
-		api        *ethcatalyst.ConsensusAPI
+		api        *sdccatalyst.ConsensusAPI
 		lapi       *lescatalyst.ConsensusAPI
 		stack      *node.Node
-		ethBackend *eth.Ethereum
-		lesBackend *les.LightEthereum
+		sdcBackend *sdc.sdcereum
+		lesBackend *les.Lightsdcereum
 	)
 	// Start the node and wait until it's up
-	if typ == eth2LightClient {
+	if typ == sdc2LightClient {
 		stack, lesBackend, lapi, err = makeLightNode(genesis)
 	} else {
-		stack, ethBackend, api, err = makeFullNode(genesis)
+		stack, sdcBackend, api, err = makeFullNode(genesis)
 	}
 	if err != nil {
 		panic(err)
@@ -130,10 +130,10 @@ func newNode(typ nodetype, genesis *core.Genesis, enodes []*enode.Node) *ethNode
 	if _, err := store.NewAccount(""); err != nil {
 		panic(err)
 	}
-	return &ethNode{
+	return &sdcNode{
 		typ:        typ,
 		api:        api,
-		ethBackend: ethBackend,
+		sdcBackend: sdcBackend,
 		lapi:       lapi,
 		lesBackend: lesBackend,
 		stack:      stack,
@@ -141,8 +141,8 @@ func newNode(typ nodetype, genesis *core.Genesis, enodes []*enode.Node) *ethNode
 	}
 }
 
-func (n *ethNode) assembleBlock(parentHash common.Hash, parentTimestamp uint64) (*beacon.ExecutableDataV1, error) {
-	if n.typ != eth2MiningNode {
+func (n *sdcNode) assembleBlock(parentHash common.Hash, parentTimestamp uint64) (*beacon.ExecutableDataV1, error) {
+	if n.typ != sdc2MiningNode {
 		return nil, errors.New("invalid node type")
 	}
 	timestamp := uint64(time.Now().Unix())
@@ -166,12 +166,12 @@ func (n *ethNode) assembleBlock(parentHash common.Hash, parentTimestamp uint64) 
 	return n.api.GetPayloadV1(*payload.PayloadID)
 }
 
-func (n *ethNode) insertBlock(eb beacon.ExecutableDataV1) error {
-	if !eth2types(n.typ) {
+func (n *sdcNode) insertBlock(eb beacon.ExecutableDataV1) error {
+	if !sdc2types(n.typ) {
 		return errors.New("invalid node type")
 	}
 	switch n.typ {
-	case eth2NormalNode, eth2MiningNode:
+	case sdc2NormalNode, sdc2MiningNode:
 		newResp, err := n.api.NewPayloadV1(eb)
 		if err != nil {
 			return err
@@ -179,7 +179,7 @@ func (n *ethNode) insertBlock(eb beacon.ExecutableDataV1) error {
 			return errors.New("failed to insert block")
 		}
 		return nil
-	case eth2LightClient:
+	case sdc2LightClient:
 		newResp, err := n.lapi.ExecutePayloadV1(eb)
 		if err != nil {
 			return err
@@ -192,8 +192,8 @@ func (n *ethNode) insertBlock(eb beacon.ExecutableDataV1) error {
 	}
 }
 
-func (n *ethNode) insertBlockAndSetHead(parent *types.Header, ed beacon.ExecutableDataV1) error {
-	if !eth2types(n.typ) {
+func (n *sdcNode) insertBlockAndSsdcead(parent *types.Header, ed beacon.ExecutableDataV1) error {
+	if !sdc2types(n.typ) {
 		return errors.New("invalid node type")
 	}
 	if err := n.insertBlock(ed); err != nil {
@@ -209,12 +209,12 @@ func (n *ethNode) insertBlockAndSetHead(parent *types.Header, ed beacon.Executab
 		FinalizedBlockHash: common.Hash{},
 	}
 	switch n.typ {
-	case eth2NormalNode, eth2MiningNode:
+	case sdc2NormalNode, sdc2MiningNode:
 		if _, err := n.api.ForkchoiceUpdatedV1(fcState, nil); err != nil {
 			return err
 		}
 		return nil
-	case eth2LightClient:
+	case sdc2LightClient:
 		if _, err := n.lapi.ForkchoiceUpdatedV1(fcState, nil); err != nil {
 			return err
 		}
@@ -227,7 +227,7 @@ func (n *ethNode) insertBlockAndSetHead(parent *types.Header, ed beacon.Executab
 type nodeManager struct {
 	genesis      *core.Genesis
 	genesisBlock *types.Block
-	nodes        []*ethNode
+	nodes        []*sdcNode
 	enodes       []*enode.Node
 	close        chan struct{}
 }
@@ -246,8 +246,8 @@ func (mgr *nodeManager) createNode(typ nodetype) {
 	mgr.enodes = append(mgr.enodes, node.enode)
 }
 
-func (mgr *nodeManager) getNodes(typ nodetype) []*ethNode {
-	var ret []*ethNode
+func (mgr *nodeManager) getNodes(typ nodetype) []*sdcNode {
+	var ret []*sdcNode
 	for _, node := range mgr.nodes {
 		if node.typ == typ {
 			ret = append(ret, node)
@@ -257,8 +257,8 @@ func (mgr *nodeManager) getNodes(typ nodetype) []*ethNode {
 }
 
 func (mgr *nodeManager) startMining() {
-	for _, node := range append(mgr.getNodes(eth2MiningNode), mgr.getNodes(legacyMiningNode)...) {
-		if err := node.ethBackend.StartMining(1); err != nil {
+	for _, node := range append(mgr.getNodes(sdc2MiningNode), mgr.getNodes(legacyMiningNode)...) {
+		if err := node.sdcBackend.StartMining(1); err != nil {
 			panic(err)
 		}
 	}
@@ -275,7 +275,7 @@ func (mgr *nodeManager) run() {
 	if len(mgr.nodes) == 0 {
 		return
 	}
-	chain := mgr.nodes[0].ethBackend.BlockChain()
+	chain := mgr.nodes[0].sdcBackend.BlockChain()
 	sink := make(chan core.ChainHeadEvent, 1024)
 	sub := chain.SubscribeChainHeadEvent(sink)
 	defer sub.Unsubscribe()
@@ -313,9 +313,9 @@ func (mgr *nodeManager) run() {
 		if int(distance) < finalizationDist {
 			return
 		}
-		nodes := mgr.getNodes(eth2MiningNode)
-		nodes = append(nodes, mgr.getNodes(eth2NormalNode)...)
-		nodes = append(nodes, mgr.getNodes(eth2LightClient)...)
+		nodes := mgr.getNodes(sdc2MiningNode)
+		nodes = append(nodes, mgr.getNodes(sdc2NormalNode)...)
+		nodes = append(nodes, mgr.getNodes(sdc2LightClient)...)
 		for _, node := range nodes {
 			fcState := beacon.ForkchoiceStateV1{
 				HeadBlockHash:      oldest.Hash(),
@@ -327,7 +327,7 @@ func (mgr *nodeManager) run() {
 			_ = node
 			//node.api.ForkchoiceUpdatedV1(fcState, nil)
 		}
-		log.Info("Finalised eth2 block", "number", oldest.NumberU64(), "hash", oldest.Hash())
+		log.Info("Finalised sdc2 block", "number", oldest.NumberU64(), "hash", oldest.Hash())
 		waitFinalise = waitFinalise[1:]
 	}
 
@@ -350,7 +350,7 @@ func (mgr *nodeManager) run() {
 			log.Info("Transition difficulty reached", "td", td, "target", transitionDifficulty, "number", ev.Block.NumberU64(), "hash", ev.Block.Hash())
 
 		case <-timer.C:
-			producers := mgr.getNodes(eth2MiningNode)
+			producers := mgr.getNodes(sdc2MiningNode)
 			if len(producers) == 0 {
 				continue
 			}
@@ -365,15 +365,15 @@ func (mgr *nodeManager) run() {
 			}
 			block, _ := beacon.ExecutableDataToBlock(*ed)
 
-			nodes := mgr.getNodes(eth2MiningNode)
-			nodes = append(nodes, mgr.getNodes(eth2NormalNode)...)
-			nodes = append(nodes, mgr.getNodes(eth2LightClient)...)
+			nodes := mgr.getNodes(sdc2MiningNode)
+			nodes = append(nodes, mgr.getNodes(sdc2NormalNode)...)
+			nodes = append(nodes, mgr.getNodes(sdc2LightClient)...)
 			for _, node := range nodes {
-				if err := node.insertBlockAndSetHead(parentBlock.Header(), *ed); err != nil {
+				if err := node.insertBlockAndSsdcead(parentBlock.Header(), *ed); err != nil {
 					log.Error("Failed to insert block", "type", node.typ, "err", err)
 				}
 			}
-			log.Info("Create and insert eth2 block", "number", ed.Number)
+			log.Info("Create and insert sdc2 block", "number", ed.Number)
 			parentBlock = block
 			waitFinalise = append(waitFinalise, block)
 			timer.Reset(blockInterval)
@@ -382,7 +382,7 @@ func (mgr *nodeManager) run() {
 }
 
 func main() {
-	log.Root().SetHandler(log.LvlFilterHandler(log.LvlInfo, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlInfo, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	fdlimit.Raise(2048)
 
 	// Generate a batch of accounts to seal and fund with
@@ -390,19 +390,19 @@ func main() {
 	for i := 0; i < len(faucets); i++ {
 		faucets[i], _ = crypto.GenerateKey()
 	}
-	// Pre-generate the ethash mining DAG so we don't race
-	ethash.MakeDataset(1, filepath.Join(os.Getenv("HOME"), ".ethash"))
+	// Pre-generate the sdcash mining DAG so we don't race
+	sdcash.MakeDataset(1, filepath.Join(os.Getenv("HOME"), ".sdcash"))
 
-	// Create an Ethash network based off of the Ropsten config
+	// Create an sdcash network based off of the Ropsten config
 	genesis := makeGenesis(faucets)
 	manager := newNodeManager(genesis)
 	defer manager.shutdown()
 
-	manager.createNode(eth2NormalNode)
-	manager.createNode(eth2MiningNode)
+	manager.createNode(sdc2NormalNode)
+	manager.createNode(sdc2MiningNode)
 	manager.createNode(legacyMiningNode)
 	manager.createNode(legacyNormalNode)
-	manager.createNode(eth2LightClient)
+	manager.createNode(sdc2LightClient)
 
 	// Iterate over all the nodes and start mining
 	time.Sleep(3 * time.Second)
@@ -416,7 +416,7 @@ func main() {
 	nonces := make([]uint64, len(faucets))
 	for {
 		// Pick a random mining node
-		nodes := manager.getNodes(eth2MiningNode)
+		nodes := manager.getNodes(sdc2MiningNode)
 
 		index := rand.Intn(len(faucets))
 		node := nodes[index%len(nodes)]
@@ -426,19 +426,19 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		if err := node.ethBackend.TxPool().AddLocal(tx); err != nil {
+		if err := node.sdcBackend.TxPool().AddLocal(tx); err != nil {
 			panic(err)
 		}
 		nonces[index]++
 
 		// Wait if we're too saturated
-		if pend, _ := node.ethBackend.TxPool().Stats(); pend > 2048 {
+		if pend, _ := node.sdcBackend.TxPool().Stats(); pend > 2048 {
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
 }
 
-// makeGenesis creates a custom Ethash genesis block based on some pre-defined
+// makeGenesis creates a custom sdcash genesis block based on some pre-defined
 // faucet accounts.
 func makeGenesis(faucets []*ecdsa.PrivateKey) *core.Genesis {
 	genesis := core.DefaultRopstenGenesisBlock()
@@ -446,7 +446,7 @@ func makeGenesis(faucets []*ecdsa.PrivateKey) *core.Genesis {
 	genesis.GasLimit = 25000000
 
 	genesis.BaseFee = big.NewInt(params.InitialBaseFee)
-	genesis.Config = params.AllEthashProtocolChanges
+	genesis.Config = params.AllsdcashProtocolChanges
 	genesis.Config.TerminalTotalDifficulty = transitionDifficulty
 
 	genesis.Alloc = core.GenesisAlloc{}
@@ -458,12 +458,12 @@ func makeGenesis(faucets []*ecdsa.PrivateKey) *core.Genesis {
 	return genesis
 }
 
-func makeFullNode(genesis *core.Genesis) (*node.Node, *eth.Ethereum, *ethcatalyst.ConsensusAPI, error) {
-	// Define the basic configurations for the Ethereum node
+func makeFullNode(genesis *core.Genesis) (*node.Node, *sdc.sdcereum, *sdccatalyst.ConsensusAPI, error) {
+	// Define the basic configurations for the sdcereum node
 	datadir, _ := os.MkdirTemp("", "")
 
 	config := &node.Config{
-		Name:    "geth",
+		Name:    "gsdc",
 		Version: params.Version,
 		DataDir: datadir,
 		P2P: p2p.Config{
@@ -473,20 +473,20 @@ func makeFullNode(genesis *core.Genesis) (*node.Node, *eth.Ethereum, *ethcatalys
 		},
 		UseLightweightKDF: true,
 	}
-	// Create the node and configure a full Ethereum node on it
+	// Create the node and configure a full sdcereum node on it
 	stack, err := node.New(config)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	econfig := &ethconfig.Config{
+	econfig := &sdcconfig.Config{
 		Genesis:         genesis,
 		NetworkId:       genesis.Config.ChainID.Uint64(),
 		SyncMode:        downloader.FullSync,
 		DatabaseCache:   256,
 		DatabaseHandles: 256,
 		TxPool:          core.DefaultTxPoolConfig,
-		GPO:             ethconfig.Defaults.GPO,
-		Ethash:          ethconfig.Defaults.Ethash,
+		GPO:             sdcconfig.Defaults.GPO,
+		sdcash:          sdcconfig.Defaults.sdcash,
 		Miner: miner.Config{
 			GasFloor: genesis.GasLimit * 9 / 10,
 			GasCeil:  genesis.GasLimit * 11 / 10,
@@ -497,24 +497,24 @@ func makeFullNode(genesis *core.Genesis) (*node.Node, *eth.Ethereum, *ethcatalys
 		LightPeers:       10,
 		LightNoSyncServe: true,
 	}
-	ethBackend, err := eth.New(stack, econfig)
+	sdcBackend, err := sdc.New(stack, econfig)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	_, err = les.NewLesServer(stack, ethBackend, econfig)
+	_, err = les.NewLesServer(stack, sdcBackend, econfig)
 	if err != nil {
 		log.Crit("Failed to create the LES server", "err", err)
 	}
 	err = stack.Start()
-	return stack, ethBackend, ethcatalyst.NewConsensusAPI(ethBackend), err
+	return stack, sdcBackend, sdccatalyst.NewConsensusAPI(sdcBackend), err
 }
 
-func makeLightNode(genesis *core.Genesis) (*node.Node, *les.LightEthereum, *lescatalyst.ConsensusAPI, error) {
-	// Define the basic configurations for the Ethereum node
+func makeLightNode(genesis *core.Genesis) (*node.Node, *les.Lightsdcereum, *lescatalyst.ConsensusAPI, error) {
+	// Define the basic configurations for the sdcereum node
 	datadir, _ := os.MkdirTemp("", "")
 
 	config := &node.Config{
-		Name:    "geth",
+		Name:    "gsdc",
 		Version: params.Version,
 		DataDir: datadir,
 		P2P: p2p.Config{
@@ -524,20 +524,20 @@ func makeLightNode(genesis *core.Genesis) (*node.Node, *les.LightEthereum, *lesc
 		},
 		UseLightweightKDF: true,
 	}
-	// Create the node and configure a full Ethereum node on it
+	// Create the node and configure a full sdcereum node on it
 	stack, err := node.New(config)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	lesBackend, err := les.New(stack, &ethconfig.Config{
+	lesBackend, err := les.New(stack, &sdcconfig.Config{
 		Genesis:         genesis,
 		NetworkId:       genesis.Config.ChainID.Uint64(),
 		SyncMode:        downloader.LightSync,
 		DatabaseCache:   256,
 		DatabaseHandles: 256,
 		TxPool:          core.DefaultTxPoolConfig,
-		GPO:             ethconfig.Defaults.GPO,
-		Ethash:          ethconfig.Defaults.Ethash,
+		GPO:             sdcconfig.Defaults.GPO,
+		sdcash:          sdcconfig.Defaults.sdcash,
 		LightPeers:      10,
 	})
 	if err != nil {
@@ -547,8 +547,8 @@ func makeLightNode(genesis *core.Genesis) (*node.Node, *les.LightEthereum, *lesc
 	return stack, lesBackend, lescatalyst.NewConsensusAPI(lesBackend), err
 }
 
-func eth2types(typ nodetype) bool {
-	if typ == eth2LightClient || typ == eth2NormalNode || typ == eth2MiningNode {
+func sdc2types(typ nodetype) bool {
+	if typ == sdc2LightClient || typ == sdc2NormalNode || typ == sdc2MiningNode {
 		return true
 	}
 	return false

@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package state
 
@@ -29,9 +29,9 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
 )
 
 // Tests that updating a state trie does not leak any database writes prior to
@@ -146,7 +146,7 @@ func TestIntermediateLeaks(t *testing.T) {
 
 // TestCopy tests that copying a StateDB object indeed makes the original and
 // the copy independent of each other. This test is a regression test against
-// https://github.com/ethereum/go-ethereum/pull/15549.
+// https://github.com/sdcereum/go-sdcereum/pull/15549.
 func TestCopy(t *testing.T) {
 	// Create a random state test to copy and modify "independently"
 	orig, _ := New(common.Hash{}, NewDatabase(rawdb.NewMemoryDatabase()), nil)
@@ -230,8 +230,8 @@ func TestSnapshotRandom(t *testing.T) {
 // A new state is created and all actions are applied to it. Several snapshots are taken
 // in between actions. The test then reverts each snapshot. For each snapshot the actions
 // leading up to it are replayed on a fresh, empty state. The behaviour of all public
-// accessor methods on the reverted state must match the return value of the equivalent
-// methods on the replayed state.
+// accessor msdcods on the reverted state must match the return value of the equivalent
+// msdcods on the replayed state.
 type snapshotTest struct {
 	addrs     []common.Address // all account addresses
 	actions   []testAction     // modifications to the state
@@ -426,7 +426,7 @@ func (test *snapshotTest) run() bool {
 	return true
 }
 
-// checkEqual checks that methods of state and checkstate return the same values.
+// checkEqual checks that msdcods of state and checkstate return the same values.
 func (test *snapshotTest) checkEqual(state, checkstate *StateDB) error {
 	for _, addr := range test.addrs {
 		var err error
@@ -437,7 +437,7 @@ func (test *snapshotTest) checkEqual(state, checkstate *StateDB) error {
 			}
 			return true
 		}
-		// Check basic accessor methods.
+		// Check basic accessor msdcods.
 		checkeq("Exist", state.Exist(addr), checkstate.Exist(addr))
 		checkeq("HasSuicided", state.HasSuicided(addr), checkstate.HasSuicided(addr))
 		checkeq("GetBalance", state.GetBalance(addr), checkstate.GetBalance(addr))
@@ -489,7 +489,7 @@ func TestTouchDelete(t *testing.T) {
 }
 
 // TestCopyOfCopy tests that modified objects are carried over to the copy, and the copy of the copy.
-// See https://github.com/ethereum/go-ethereum/pull/15225#issuecomment-380191512
+// See https://github.com/sdcereum/go-sdcereum/pull/15225#issuecomment-380191512
 func TestCopyOfCopy(t *testing.T) {
 	state, _ := New(common.Hash{}, NewDatabase(rawdb.NewMemoryDatabase()), nil)
 	addr := common.HexToAddress("aaaa")
@@ -506,7 +506,7 @@ func TestCopyOfCopy(t *testing.T) {
 // Tests a regression where committing a copy lost some internal meta information,
 // leading to corrupted subsequent copies.
 //
-// See https://github.com/ethereum/go-ethereum/issues/20106.
+// See https://github.com/sdcereum/go-sdcereum/issues/20106.
 func TestCopyCommitCopy(t *testing.T) {
 	state, _ := New(common.Hash{}, NewDatabase(rawdb.NewMemoryDatabase()), nil)
 
@@ -578,7 +578,7 @@ func TestCopyCommitCopy(t *testing.T) {
 // Tests a regression where committing a copy lost some internal meta information,
 // leading to corrupted subsequent copies.
 //
-// See https://github.com/ethereum/go-ethereum/issues/20106.
+// See https://github.com/sdcereum/go-sdcereum/issues/20106.
 func TestCopyCopyCommitCopy(t *testing.T) {
 	state, _ := New(common.Hash{}, NewDatabase(rawdb.NewMemoryDatabase()), nil)
 

@@ -1,30 +1,30 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package remotedb implements the key-value database layer based on a remote geth
-// node. Under the hood, it utilises the `debug_dbGet` method to implement a
+// Package remotedb implements the key-value database layer based on a remote gsdc
+// node. Under the hood, it utilises the `debug_dbGet` msdcod to implement a
 // read-only database.
-// There really are no guarantees in this database, since the local geth does not
+// There really are no guarantees in this database, since the local gsdc does not
 // exclusive access, but it can be used for basic diagnostics of a remote node.
 package remotedb
 
 import (
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 // Database is a key-value lookup for a remote database via debug_dbGet.
@@ -82,7 +82,7 @@ func (db *Database) AncientSize(kind string) (uint64, error) {
 	panic("not supported")
 }
 
-func (db *Database) ReadAncients(fn func(op ethdb.AncientReaderOp) error) (err error) {
+func (db *Database) ReadAncients(fn func(op sdcdb.AncientReaderOp) error) (err error) {
 	return fn(db)
 }
 
@@ -94,7 +94,7 @@ func (db *Database) Delete(key []byte) error {
 	panic("not supported")
 }
 
-func (db *Database) ModifyAncients(f func(ethdb.AncientWriteOp) error) (int64, error) {
+func (db *Database) ModifyAncients(f func(sdcdb.AncientWriteOp) error) (int64, error) {
 	panic("not supported")
 }
 
@@ -114,15 +114,15 @@ func (db *Database) MigrateTable(s string, f func([]byte) ([]byte, error)) error
 	panic("not supported")
 }
 
-func (db *Database) NewBatch() ethdb.Batch {
+func (db *Database) NewBatch() sdcdb.Batch {
 	panic("not supported")
 }
 
-func (db *Database) NewBatchWithSize(size int) ethdb.Batch {
+func (db *Database) NewBatchWithSize(size int) sdcdb.Batch {
 	panic("not supported")
 }
 
-func (db *Database) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
+func (db *Database) NewIterator(prefix []byte, start []byte) sdcdb.Iterator {
 	panic("not supported")
 }
 
@@ -138,7 +138,7 @@ func (db *Database) Compact(start []byte, limit []byte) error {
 	return nil
 }
 
-func (db *Database) NewSnapshot() (ethdb.Snapshot, error) {
+func (db *Database) NewSnapshot() (sdcdb.Snapshot, error) {
 	panic("not supported")
 }
 
@@ -147,7 +147,7 @@ func (db *Database) Close() error {
 	return nil
 }
 
-func New(client *rpc.Client) ethdb.Database {
+func New(client *rpc.Client) sdcdb.Database {
 	return &Database{
 		remote: client,
 	}

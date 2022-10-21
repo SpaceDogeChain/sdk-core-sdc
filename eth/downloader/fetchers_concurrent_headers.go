@@ -1,27 +1,27 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package downloader
 
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // headerQueue implements typedQueue and is a type adapter between the generic
@@ -73,15 +73,15 @@ func (q *headerQueue) unreserve(peer string) int {
 
 // request is responsible for converting a generic fetch request into a header
 // one and sending it to the remote peer for fulfillment.
-func (q *headerQueue) request(peer *peerConnection, req *fetchRequest, resCh chan *eth.Response) (*eth.Request, error) {
+func (q *headerQueue) request(peer *peerConnection, req *fetchRequest, resCh chan *sdc.Response) (*sdc.Request, error) {
 	peer.log.Trace("Requesting new batch of headers", "from", req.From)
 	return peer.peer.RequestHeadersByNumber(req.From, MaxHeaderFetch, 0, false, resCh)
 }
 
 // deliver is responsible for taking a generic response packet from the concurrent
 // fetcher, unpacking the header data and delivering it to the downloader's queue.
-func (q *headerQueue) deliver(peer *peerConnection, packet *eth.Response) (int, error) {
-	headers := *packet.Res.(*eth.BlockHeadersPacket)
+func (q *headerQueue) deliver(peer *peerConnection, packet *sdc.Response) (int, error) {
+	headers := *packet.Res.(*sdc.BlockHeadersPacket)
 	hashes := packet.Meta.([]common.Hash)
 
 	accepted, err := q.queue.DeliverHeaders(peer.id, headers, hashes, q.headerProcCh)

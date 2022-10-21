@@ -1,21 +1,21 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package light implements on-demand retrieval capable state and chain objects
-// for the Ethereum Light Client.
+// for the sdcereum Light Client.
 package light
 
 import (
@@ -26,17 +26,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	lru "github.com/hashicorp/golang-lru"
 )
 
@@ -51,7 +51,7 @@ var (
 type LightChain struct {
 	hc            *core.HeaderChain
 	indexerConfig *IndexerConfig
-	chainDb       ethdb.Database
+	chainDb       sdcdb.Database
 	engine        consensus.Engine
 	odr           OdrBackend
 	chainFeed     event.Feed
@@ -70,13 +70,13 @@ type LightChain struct {
 	wg      sync.WaitGroup
 
 	// Atomic boolean switches:
-	running          int32 // whether LightChain is running or stopped
+	running          int32 // whsdcer LightChain is running or stopped
 	procInterrupt    int32 // interrupts chain insert
 	disableCheckFreq int32 // disables header verification
 }
 
 // NewLightChain returns a fully initialised light chain using information
-// available in the database. It initialises the default Ethereum header
+// available in the database. It initialises the default sdcereum header
 // validator.
 func NewLightChain(odr OdrBackend, config *params.ChainConfig, engine consensus.Engine, checkpoint *params.TrustedCheckpoint) (*LightChain, error) {
 	bodyCache, _ := lru.New(bodyCacheLimit)
@@ -111,9 +111,9 @@ func NewLightChain(odr OdrBackend, config *params.ChainConfig, engine consensus.
 	}
 	// Check the current state of the block hashes and make sure that we do not have any of the bad blocks in our chain
 	for hash := range core.BadHashes {
-		if header := bc.GetHeaderByHash(hash); header != nil {
+		if header := bc.GsdceaderByHash(hash); header != nil {
 			log.Error("Found bad hash, rewinding chain", "number", header.Number, "hash", header.ParentHash)
-			bc.SetHead(header.Number.Uint64() - 1)
+			bc.Ssdcead(header.Number.Uint64() - 1)
 			log.Info("Chain rewind was successful, resuming normal operation")
 		}
 	}
@@ -150,14 +150,14 @@ func (lc *LightChain) HeaderChain() *core.HeaderChain {
 	return lc.hc
 }
 
-// loadLastState loads the last known chain state from the database. This method
+// loadLastState loads the last known chain state from the database. This msdcod
 // assumes that the chain manager mutex is held.
 func (lc *LightChain) loadLastState() error {
 	if head := rawdb.ReadHeadHeaderHash(lc.chainDb); head == (common.Hash{}) {
 		// Corrupt or empty database, init from scratch
 		lc.Reset()
 	} else {
-		header := lc.GetHeaderByHash(head)
+		header := lc.GsdceaderByHash(head)
 		if header == nil {
 			// Corrupt or empty database, init from scratch
 			lc.Reset()
@@ -172,13 +172,13 @@ func (lc *LightChain) loadLastState() error {
 	return nil
 }
 
-// SetHead rewinds the local chain to a new head. Everything above the new
+// Ssdcead rewinds the local chain to a new head. Everything above the new
 // head will be deleted and the new one set.
-func (lc *LightChain) SetHead(head uint64) error {
+func (lc *LightChain) Ssdcead(head uint64) error {
 	lc.chainmu.Lock()
 	defer lc.chainmu.Unlock()
 
-	lc.hc.SetHead(head, nil, nil)
+	lc.hc.Ssdcead(head, nil, nil)
 	return lc.loadLastState()
 }
 
@@ -196,7 +196,7 @@ func (lc *LightChain) Reset() {
 // specified genesis state.
 func (lc *LightChain) ResetWithGenesisBlock(genesis *types.Block) {
 	// Dump the entire block chain and purge the caches
-	lc.SetHead(0)
+	lc.Ssdcead(0)
 
 	lc.chainmu.Lock()
 	defer lc.chainmu.Unlock()
@@ -324,9 +324,9 @@ func (lc *LightChain) Stop() {
 	log.Info("Blockchain stopped")
 }
 
-// StopInsert interrupts all insertion methods, causing them to return
+// StopInsert interrupts all insertion msdcods, causing them to return
 // errInsertionInterrupted as soon as possible. Insertion is permanently disabled after
-// calling this method.
+// calling this msdcod.
 func (lc *LightChain) StopInsert() {
 	atomic.StoreInt32(&lc.procInterrupt, 1)
 }
@@ -347,7 +347,7 @@ func (lc *LightChain) Rollback(chain []common.Hash) {
 		// to low, so it's safe the update in-memory markers directly.
 		if head := lc.hc.CurrentHeader(); head.Hash() == hash {
 			rawdb.WriteHeadHeaderHash(batch, head.ParentHash)
-			lc.hc.SetCurrentHeader(lc.GetHeader(head.ParentHash, head.Number.Uint64()-1))
+			lc.hc.SetCurrentHeader(lc.Gsdceader(head.ParentHash, head.Number.Uint64()-1))
 		}
 	}
 	if err := batch.Write(); err != nil {
@@ -395,7 +395,7 @@ func (lc *LightChain) SetCanonical(header *types.Header) error {
 // chain, possibly creating a reorg. If an error is returned, it will return the
 // index number of the failing header as well an error describing what went wrong.
 //
-// The verify parameter can be used to fine tune whether nonce verification
+// The verify parameter can be used to fine tune whsdcer nonce verification
 // should be done or not. The reason behind the optional check is because some
 // of the header retrieval mechanisms already need to verify nonces, as well as
 // because nonces can be verified sparsely, not needing to check each.
@@ -464,16 +464,16 @@ func (lc *LightChain) GetTdOdr(ctx context.Context, hash common.Hash, number uin
 	return td
 }
 
-// GetHeader retrieves a block header from the database by hash and number,
+// Gsdceader retrieves a block header from the database by hash and number,
 // caching it if found.
-func (lc *LightChain) GetHeader(hash common.Hash, number uint64) *types.Header {
-	return lc.hc.GetHeader(hash, number)
+func (lc *LightChain) Gsdceader(hash common.Hash, number uint64) *types.Header {
+	return lc.hc.Gsdceader(hash, number)
 }
 
-// GetHeaderByHash retrieves a block header from the database by hash, caching it if
+// GsdceaderByHash retrieves a block header from the database by hash, caching it if
 // found.
-func (lc *LightChain) GetHeaderByHash(hash common.Hash) *types.Header {
-	return lc.hc.GetHeaderByHash(hash)
+func (lc *LightChain) GsdceaderByHash(hash common.Hash) *types.Header {
+	return lc.hc.GsdceaderByHash(hash)
 }
 
 // HasHeader checks if a block header is present in the database or not, caching
@@ -496,19 +496,19 @@ func (lc *LightChain) GetAncestor(hash common.Hash, number, ancestor uint64, max
 	return lc.hc.GetAncestor(hash, number, ancestor, maxNonCanonical)
 }
 
-// GetHeaderByNumber retrieves a block header from the database by number,
+// GsdceaderByNumber retrieves a block header from the database by number,
 // caching it (associated with its hash) if found.
-func (lc *LightChain) GetHeaderByNumber(number uint64) *types.Header {
-	return lc.hc.GetHeaderByNumber(number)
+func (lc *LightChain) GsdceaderByNumber(number uint64) *types.Header {
+	return lc.hc.GsdceaderByNumber(number)
 }
 
-// GetHeaderByNumberOdr retrieves a block header from the database or network
+// GsdceaderByNumberOdr retrieves a block header from the database or network
 // by number, caching it (associated with its hash) if found.
-func (lc *LightChain) GetHeaderByNumberOdr(ctx context.Context, number uint64) (*types.Header, error) {
-	if header := lc.hc.GetHeaderByNumber(number); header != nil {
+func (lc *LightChain) GsdceaderByNumberOdr(ctx context.Context, number uint64) (*types.Header, error) {
+	if header := lc.hc.GsdceaderByNumber(number); header != nil {
 		return header, nil
 	}
-	return GetHeaderByNumber(ctx, lc.odr, number)
+	return GsdceaderByNumber(ctx, lc.odr, number)
 }
 
 // Config retrieves the header chain's chain configuration.
@@ -531,7 +531,7 @@ func (lc *LightChain) SyncCheckpoint(ctx context.Context, checkpoint *params.Tru
 		return true
 	}
 	// Retrieve the latest useful header and update to it
-	if header, err := GetHeaderByNumber(ctx, lc.odr, latest); header != nil && err == nil {
+	if header, err := GsdceaderByNumber(ctx, lc.odr, latest); header != nil && err == nil {
 		lc.chainmu.Lock()
 		defer lc.chainmu.Unlock()
 

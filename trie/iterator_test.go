@@ -1,18 +1,18 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2014 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package trie
 
@@ -23,11 +23,11 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb/memorydb"
 )
 
 func TestEmptyIterator(t *testing.T) {
@@ -48,12 +48,12 @@ func TestIterator(t *testing.T) {
 	trie := NewEmpty(db)
 	vals := []struct{ k, v string }{
 		{"do", "verb"},
-		{"ether", "wookiedoo"},
+		{"sdcer", "wookiedoo"},
 		{"horse", "stallion"},
 		{"shaman", "horse"},
 		{"doge", "coin"},
 		{"dog", "puppy"},
-		{"somethingveryoddindeedthis is", "myothernodedata"},
+		{"somsdcingveryoddindeedthis is", "myothernodedata"},
 	}
 	all := make(map[string]string)
 	for _, val := range vals {
@@ -480,7 +480,7 @@ func checkIteratorNoDups(t *testing.T, it NodeIterator, seen map[string]bool) in
 
 type loggingDb struct {
 	getCount uint64
-	backend  ethdb.KeyValueStore
+	backend  sdcdb.KeyValueStore
 }
 
 func (l *loggingDb) Has(key []byte) (bool, error) {
@@ -500,19 +500,19 @@ func (l *loggingDb) Delete(key []byte) error {
 	return l.backend.Delete(key)
 }
 
-func (l *loggingDb) NewBatch() ethdb.Batch {
+func (l *loggingDb) NewBatch() sdcdb.Batch {
 	return l.backend.NewBatch()
 }
 
-func (l *loggingDb) NewBatchWithSize(size int) ethdb.Batch {
+func (l *loggingDb) NewBatchWithSize(size int) sdcdb.Batch {
 	return l.backend.NewBatchWithSize(size)
 }
 
-func (l *loggingDb) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
+func (l *loggingDb) NewIterator(prefix []byte, start []byte) sdcdb.Iterator {
 	return l.backend.NewIterator(prefix, start)
 }
 
-func (l *loggingDb) NewSnapshot() (ethdb.Snapshot, error) {
+func (l *loggingDb) NewSnapshot() (sdcdb.Snapshot, error) {
 	return l.backend.NewSnapshot()
 }
 
@@ -573,12 +573,12 @@ func TestIteratorNodeBlob(t *testing.T) {
 	)
 	vals := []struct{ k, v string }{
 		{"do", "verb"},
-		{"ether", "wookiedoo"},
+		{"sdcer", "wookiedoo"},
 		{"horse", "stallion"},
 		{"shaman", "horse"},
 		{"doge", "coin"},
 		{"dog", "puppy"},
-		{"somethingveryoddindeedthis is", "myothernodedata"},
+		{"somsdcingveryoddindeedthis is", "myothernodedata"},
 	}
 	all := make(map[string]string)
 	for _, val := range vals {

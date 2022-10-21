@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package downloader
 
@@ -24,12 +24,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // scratchHeaders is the number of headers to store in a scratch space to allow
@@ -65,7 +65,7 @@ var errSyncMerged = errors.New("sync merged")
 var errSyncReorged = errors.New("sync reorged")
 
 // errTerminated is returned if the sync mechanism was terminated for this run of
-// the process. This is usually the case when Geth is shutting down and some events
+// the process. This is usually the case when Gsdc is shutting down and some events
 // might still be propagating.
 var errTerminated = errors.New("terminated")
 
@@ -89,7 +89,7 @@ func init() {
 // The subchains use the exact same database namespace and are not disjoint from
 // each other. As such, extending one to overlap the other entails reducing the
 // second one first. This combined buffer model is used to avoid having to move
-// data on disk when two subchains are joined together.
+// data on disk when two subchains are joined togsdcer.
 type subchain struct {
 	Head uint64      // Block number of the newest header in the subchain
 	Tail uint64      // Block number of the oldest header in the subchain
@@ -105,11 +105,11 @@ type skeletonProgress struct {
 }
 
 // headUpdate is a notification that the beacon sync should switch to a new target.
-// The update might request whether to forcefully change the target, or only try to
+// The update might request whsdcer to forcefully change the target, or only try to
 // extend it and fail if it's not possible.
 type headUpdate struct {
 	header *types.Header // Header to update the sync target to
-	force  bool          // Whether to force the update or only extend if possible
+	force  bool          // Whsdcer to force the update or only extend if possible
 	errc   chan error    // Channel to signal acceptance of the new head
 }
 
@@ -150,7 +150,7 @@ type backfiller interface {
 	// gracefully handle multiple consecutive suspends without a resume, even
 	// on initial startup.
 	//
-	// The method should return the last block header that has been successfully
+	// The msdcod should return the last block header that has been successfully
 	// backfilled, or nil if the backfiller was not resumed.
 	suspend() *types.Header
 
@@ -164,14 +164,14 @@ type backfiller interface {
 // skeleton represents a header chain synchronized after the merge where blocks
 // aren't validated any more via PoW in a forward fashion, rather are dictated
 // and extended at the head via the beacon chain and backfilled on the original
-// Ethereum block sync protocol.
+// sdcereum block sync protocol.
 //
 // Since the skeleton is grown backwards from head to genesis, it is handled as
 // a separate entity, not mixed in with the logical sequential transition of the
 // blocks. Once the skeleton is connected to an existing, validated chain, the
 // headers will be moved into the main downloader for filling and execution.
 //
-// Opposed to the original Ethereum block synchronization which is trustless (and
+// Opposed to the original sdcereum block synchronization which is trustless (and
 // uses a master peer to minimize the attack surface), post-merge block sync starts
 // from a trusted head. As such, there is no need for a master peer any more and
 // headers can be requested fully concurrently (though some batches might be
@@ -180,7 +180,7 @@ type backfiller interface {
 // Although a skeleton is part of a sync cycle, it is not recreated, rather stays
 // alive throughout the lifetime of the downloader. This allows it to be extended
 // concurrently with the sync cycle, since extensions arrive from an API surface,
-// not from within (vs. legacy Ethereum sync).
+// not from within (vs. legacy sdcereum sync).
 //
 // Since the skeleton tracks the entire header chain until it is consumed by the
 // forward block filling, it needs 0.5KB/block storage. At current mainnet sizes
@@ -189,7 +189,7 @@ type backfiller interface {
 // is wasted disk IO, but it's a price we're going to pay to keep things simple
 // for now.
 type skeleton struct {
-	db     ethdb.Database // Database backing the skeleton
+	db     sdcdb.Database // Database backing the skeleton
 	filler backfiller     // Chain syncer suspended/resumed by head events
 
 	peers *peerSet                   // Set of peers we can sync from
@@ -217,7 +217,7 @@ type skeleton struct {
 
 // newSkeleton creates a new sync skeleton that tracks a potentially dangling
 // header chain until it's linked into an existing set of blocks.
-func newSkeleton(db ethdb.Database, peers *peerSet, drop peerDropFn, filler backfiller) *skeleton {
+func newSkeleton(db sdcdb.Database, peers *peerSet, drop peerDropFn, filler backfiller) *skeleton {
 	sk := &skeleton{
 		db:         db,
 		filler:     filler,
@@ -247,7 +247,7 @@ func (s *skeleton) startup() {
 	for {
 		select {
 		case errc := <-s.terminate:
-			// No head was announced but Geth is shutting down
+			// No head was announced but Gsdc is shutting down
 			errc <- nil
 			return
 
@@ -293,7 +293,7 @@ func (s *skeleton) startup() {
 
 				default:
 					// Sync either successfully terminated or failed with an unhandled
-					// error. Abort and wait until Geth requests a termination.
+					// error. Abort and wait until Gsdc requests a termination.
 					errc := <-s.terminate
 					errc <- err
 					return
@@ -319,7 +319,7 @@ func (s *skeleton) Terminate() error {
 // header chain starting at the head and leading towards genesis to an available
 // ancestor.
 //
-// This method does not block, rather it just waits until the syncer receives the
+// This msdcod does not block, rather it just waits until the syncer receives the
 // fed header. What the syncer does with it is the syncer's problem.
 func (s *skeleton) Sync(head *types.Header, force bool) error {
 	log.Trace("New skeleton head announced", "number", head.Number, "hash", head.Hash(), "force", force)
@@ -366,7 +366,7 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 	}
 	defer func() {
 		if filled := s.filler.suspend(); filled != nil {
-			// If something was filled, try to delete stale sync helpers. If
+			// If somsdcing was filled, try to delete stale sync helpers. If
 			// unsuccessful, warn the user, but not much else we can do (it's
 			// a programming error, just let users report an issue and don't
 			// choke in the meantime).
@@ -376,7 +376,7 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 		}
 	}()
 	// Create a set of unique channels for this sync cycle. We need these to be
-	// ephemeral so a data race doesn't accidentally deliver something stale on
+	// ephemeral so a data race doesn't accidentally deliver somsdcing stale on
 	// a persistent channel across syncs (yup, this happened)
 	var (
 		requestFails = make(chan *headerRequest)
@@ -387,7 +387,7 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 
 	log.Debug("Starting reverse header sync cycle", "head", head.Number, "hash", head.Hash(), "cont", s.scratchHead)
 
-	// Whether sync completed or not, disregard any future packets
+	// Whsdcer sync completed or not, disregard any future packets
 	defer func() {
 		log.Debug("Terminating reverse header sync cycle", "head", head.Number, "hash", head.Hash(), "cont", s.scratchHead)
 		s.requests = make(map[uint64]*headerRequest)
@@ -408,11 +408,11 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 		s.syncStarting()
 	}
 	for {
-		// Something happened, try to assign new tasks to any idle peers
+		// Somsdcing happened, try to assign new tasks to any idle peers
 		if !linked {
 			s.assignTasks(responses, requestFails, cancel)
 		}
-		// Wait for something to happen
+		// Wait for somsdcing to happen
 		select {
 		case event := <-peering:
 			// A peer joined or left, the tasks queue and allocations need to be
@@ -466,7 +466,7 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 			// sync and restart with the merged subchains.
 			//
 			// If we managed to link to the existing local chain or genesis block,
-			// abort sync altogether.
+			// abort sync altogsdcer.
 			linked, merged := s.processResponse(res)
 			if linked {
 				log.Debug("Beacon sync linked to local chain")
@@ -483,7 +483,7 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 
 // initSync attempts to get the skeleton sync into a consistent state wrt any
 // past state on disk and the newly requested head to sync to. If the new head
-// is nil, the method will return and continue from the previous head.
+// is nil, the msdcod will return and continue from the previous head.
 func (s *skeleton) initSync(head *types.Header) {
 	// Extract the head number, we'll need it all over
 	number := head.Number.Uint64()
@@ -506,7 +506,7 @@ func (s *skeleton) initSync(head *types.Header) {
 				Next: head.ParentHash,
 			}
 			for len(s.progress.Subchains) > 0 {
-				// If the last chain is above the new head, delete altogether
+				// If the last chain is above the new head, delete altogsdcer
 				lastchain := s.progress.Subchains[0]
 				if lastchain.Tail >= headchain.Tail {
 					log.Debug("Dropping skeleton subchain", "head", lastchain.Head, "tail", lastchain.Tail)
@@ -578,7 +578,7 @@ func (s *skeleton) initSync(head *types.Header) {
 }
 
 // saveSyncStatus marshals the remaining sync tasks into leveldb.
-func (s *skeleton) saveSyncStatus(db ethdb.KeyValueWriter) {
+func (s *skeleton) saveSyncStatus(db sdcdb.KeyValueWriter) {
 	status, err := json.Marshal(s.progress)
 	if err != nil {
 		panic(err) // This can only fail during implementation
@@ -649,7 +649,7 @@ func (s *skeleton) assignTasks(success chan *headerResponse, fail chan *headerRe
 	targetTTL := s.peers.rates.TargetTimeout()
 	for _, peer := range s.idles {
 		idlers.peers = append(idlers.peers, peer)
-		idlers.caps = append(idlers.caps, s.peers.rates.Capacity(peer.id, eth.BlockHeadersMsg, targetTTL))
+		idlers.caps = append(idlers.caps, s.peers.rates.Capacity(peer.id, sdc.BlockHeadersMsg, targetTTL))
 	}
 	if len(idlers.peers) == 0 {
 		return
@@ -710,11 +710,11 @@ func (s *skeleton) assignTasks(success chan *headerResponse, fail chan *headerRe
 }
 
 // executeTask executes a single fetch request, blocking until either a result
-// arrives or a timeouts / cancellation is triggered. The method should be run
+// arrives or a timeouts / cancellation is triggered. The msdcod should be run
 // on its own goroutine and will deliver on the requested channels.
 func (s *skeleton) executeTask(peer *peerConnection, req *headerRequest) {
 	start := time.Now()
-	resCh := make(chan *eth.Response)
+	resCh := make(chan *sdc.Response)
 
 	// Figure out how many headers to fetch. Usually this will be a full batch,
 	// but for the very tail of the chain, trim the request to the number left.
@@ -748,7 +748,7 @@ func (s *skeleton) executeTask(peer *peerConnection, req *headerRequest) {
 		// Header retrieval timed out, update the metrics
 		peer.log.Warn("Header request timed out, dropping peer", "elapsed", ttl)
 		headerTimeoutMeter.Mark(1)
-		s.peers.rates.Update(peer.id, eth.BlockHeadersMsg, 0, 0)
+		s.peers.rates.Update(peer.id, sdc.BlockHeadersMsg, 0, 0)
 		s.scheduleRevertRequest(req)
 
 		// At this point we either need to drop the offending peer, or we need a
@@ -764,10 +764,10 @@ func (s *skeleton) executeTask(peer *peerConnection, req *headerRequest) {
 
 	case res := <-resCh:
 		// Headers successfully retrieved, update the metrics
-		headers := *res.Res.(*eth.BlockHeadersPacket)
+		headers := *res.Res.(*sdc.BlockHeadersPacket)
 
 		headerReqTimer.Update(time.Since(start))
-		s.peers.rates.Update(peer.id, eth.BlockHeadersMsg, res.Time, len(headers))
+		s.peers.rates.Update(peer.id, sdc.BlockHeadersMsg, res.Time, len(headers))
 
 		// Cross validate the headers with the requests
 		switch {
@@ -879,7 +879,7 @@ func (s *skeleton) revertRequest(req *headerRequest) {
 func (s *skeleton) processResponse(res *headerResponse) (linked bool, merged bool) {
 	res.peer.log.Trace("Processing header response", "head", res.headers[0].Number, "hash", res.headers[0].Hash(), "count", len(res.headers))
 
-	// Whether the response is valid, we can mark the peer as idle and notify
+	// Whsdcer the response is valid, we can mark the peer as idle and notify
 	// the scheduler to assign a new task. If the response is invalid, we'll
 	// drop the peer in a bit.
 	s.idles[res.peer.id] = res.peer
@@ -1084,7 +1084,7 @@ func (s *skeleton) cleanStales(filled *types.Header) error {
 	number := filled.Number.Uint64()
 	log.Trace("Cleaning stale beacon headers", "filled", number, "hash", filled.Hash())
 
-	// If the filled header is below the linked subchain, something's
+	// If the filled header is below the linked subchain, somsdcing's
 	// corrupted internally. Report and error and refuse to do anything.
 	if number < s.progress.Subchains[0].Tail {
 		return fmt.Errorf("filled header below beacon header tail: %d < %d", number, s.progress.Subchains[0].Tail)
@@ -1121,7 +1121,7 @@ func (s *skeleton) cleanStales(filled *types.Header) error {
 		// The catch is that the sync metadata needs to reflect the actually
 		// flushed state, so temporarily change the subchain progress and
 		// revert after the flush.
-		if batch.ValueSize() >= ethdb.IdealBatchSize {
+		if batch.ValueSize() >= sdcdb.IdealBatchSize {
 			tmpTail := s.progress.Subchains[0].Tail
 			tmpNext := s.progress.Subchains[0].Next
 
@@ -1147,14 +1147,14 @@ func (s *skeleton) cleanStales(filled *types.Header) error {
 }
 
 // Bounds retrieves the current head and tail tracked by the skeleton syncer.
-// This method is used by the backfiller, whose life cycle is controlled by the
+// This msdcod is used by the backfiller, whose life cycle is controlled by the
 // skeleton syncer.
 //
-// Note, the method will not use the internal state of the skeleton, but will
+// Note, the msdcod will not use the internal state of the skeleton, but will
 // rather blindly pull stuff from the database. This is fine, because the back-
 // filler will only run when the skeleton chain is fully downloaded and stable.
 // There might be new heads appended, but those are atomic from the perspective
-// of this method. Any head reorg will first tear down the backfiller and only
+// of this msdcod. Any head reorg will first tear down the backfiller and only
 // then make the modification.
 func (s *skeleton) Bounds() (head *types.Header, tail *types.Header, err error) {
 	// Read the current sync progress from disk and figure out the current head.
@@ -1175,11 +1175,11 @@ func (s *skeleton) Bounds() (head *types.Header, tail *types.Header, err error) 
 	return head, tail, nil
 }
 
-// Header retrieves a specific header tracked by the skeleton syncer. This method
+// Header retrieves a specific header tracked by the skeleton syncer. This msdcod
 // is meant to be used by the backfiller, whose life cycle is controlled by the
 // skeleton syncer.
 //
-// Note, outside the permitted runtimes, this method might return nil results and
+// Note, outside the permitted runtimes, this msdcod might return nil results and
 // subsequent calls might return headers from different chains.
 func (s *skeleton) Header(number uint64) *types.Header {
 	return rawdb.ReadSkeletonHeader(s.db, number)

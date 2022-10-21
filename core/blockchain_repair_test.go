@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Tests that abnormal program termination (i.e.crash) and restart doesn't leave
 // the database in some strange state with gaps in the chain, nor with block data
@@ -25,12 +25,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // Tests a recovery for a short canonical chain where a recent block was already
@@ -61,7 +61,7 @@ func testShortRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 8,
@@ -101,7 +101,7 @@ func testShortSnapSyncedRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -141,7 +141,7 @@ func testShortSnapSyncingRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -184,7 +184,7 @@ func testShortOldForkedRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 8,
@@ -231,7 +231,7 @@ func testShortOldForkedSnapSyncedRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -278,7 +278,7 @@ func testShortOldForkedSnapSyncingRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -321,7 +321,7 @@ func testShortNewlyForkedRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    6,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 8,
@@ -368,7 +368,7 @@ func testShortNewlyForkedSnapSyncedRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    6,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -415,7 +415,7 @@ func testShortNewlyForkedSnapSyncingRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    6,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -457,7 +457,7 @@ func testShortReorgedRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    10,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 8,
@@ -503,7 +503,7 @@ func testShortReorgedSnapSyncedRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    10,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -549,7 +549,7 @@ func testShortReorgedSnapSyncingRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    8,
 		sidechainBlocks:    10,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 8,
@@ -594,7 +594,7 @@ func testLongShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 18,
@@ -638,7 +638,7 @@ func testLongDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 4,
@@ -687,7 +687,7 @@ func testLongSnapSyncedShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -731,7 +731,7 @@ func testLongSnapSyncedDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 4,
@@ -781,7 +781,7 @@ func testLongSnapSyncingShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -827,7 +827,7 @@ func testLongSnapSyncingDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    0,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 24,
@@ -879,7 +879,7 @@ func testLongOldForkedShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 18,
@@ -926,7 +926,7 @@ func testLongOldForkedDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 4,
@@ -978,7 +978,7 @@ func testLongOldForkedSnapSyncedShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -1029,7 +1029,7 @@ func testLongOldForkedSnapSyncedDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 4,
@@ -1081,7 +1081,7 @@ func testLongOldForkedSnapSyncingShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -1133,7 +1133,7 @@ func testLongOldForkedSnapSyncingDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    3,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 24,
@@ -1185,7 +1185,7 @@ func testLongNewerForkedShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    12,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 18,
@@ -1232,7 +1232,7 @@ func testLongNewerForkedDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    12,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 4,
@@ -1284,7 +1284,7 @@ func testLongNewerForkedSnapSyncedShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    12,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -1335,7 +1335,7 @@ func testLongNewerForkedSnapSyncedDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    12,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 4,
@@ -1387,7 +1387,7 @@ func testLongNewerForkedSnapSyncingShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    12,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -1439,7 +1439,7 @@ func testLongNewerForkedSnapSyncingDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    12,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 24,
@@ -1486,7 +1486,7 @@ func testLongReorgedShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    26,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 18,
@@ -1532,7 +1532,7 @@ func testLongReorgedDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    26,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         nil,
 		expCanonicalBlocks: 4,
@@ -1584,7 +1584,7 @@ func testLongReorgedSnapSyncedShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    26,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -1634,7 +1634,7 @@ func testLongReorgedSnapSyncedDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    26,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        4,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 4,
@@ -1685,7 +1685,7 @@ func testLongReorgedSnapSyncingShallowRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    18,
 		sidechainBlocks:    26,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 18,
@@ -1736,7 +1736,7 @@ func testLongReorgedSnapSyncingDeepRepair(t *testing.T, snapshots bool) {
 	testRepair(t, &rewindTest{
 		canonicalBlocks:    24,
 		sidechainBlocks:    26,
-		freezeThreshold:    16,
+		freezsdcreshold:    16,
 		commitBlock:        0,
 		pivotBlock:         uint64ptr(4),
 		expCanonicalBlocks: 24,
@@ -1750,7 +1750,7 @@ func testLongReorgedSnapSyncingDeepRepair(t *testing.T, snapshots bool) {
 
 func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 	// It's hard to follow the test case, visualize the input
-	//log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	//log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump(true))
 
 	// Create a temporary persistent database
@@ -1766,9 +1766,9 @@ func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 	var (
 		gspec = &Genesis{
 			BaseFee: big.NewInt(params.InitialBaseFee),
-			Config:  params.AllEthashProtocolChanges,
+			Config:  params.AllsdcashProtocolChanges,
 		}
-		engine = ethash.NewFullFaker()
+		engine = sdcash.NewFullFaker()
 		config = &CacheConfig{
 			TrieCleanLimit: 256,
 			TrieDirtyLimit: 256,
@@ -1818,7 +1818,7 @@ func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 		Freeze(threshold uint64) error
 		Ancients() (uint64, error)
 	}
-	db.(freezer).Freeze(tt.freezeThreshold)
+	db.(freezer).Freeze(tt.freezsdcreshold)
 
 	// Set the simulated pivot block
 	if tt.pivotBlock != nil {
@@ -1863,7 +1863,7 @@ func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 	}
 }
 
-// TestIssue23496 tests scenario described in https://github.com/ethereum/go-ethereum/pull/23496#issuecomment-926393893
+// TestIssue23496 tests scenario described in https://github.com/sdcereum/go-sdcereum/pull/23496#issuecomment-926393893
 // Credits to @zzyalbert for finding the issue.
 //
 // Local chain owns these blocks:
@@ -1879,7 +1879,7 @@ func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 // state.
 func TestIssue23496(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	//log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	//log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 
 	// Create a temporary persistent database
 	datadir := t.TempDir()
@@ -1896,7 +1896,7 @@ func TestIssue23496(t *testing.T) {
 			Config:  params.TestChainConfig,
 			BaseFee: big.NewInt(params.InitialBaseFee),
 		}
-		engine = ethash.NewFullFaker()
+		engine = sdcash.NewFullFaker()
 		config = &CacheConfig{
 			TrieCleanLimit: 256,
 			TrieDirtyLimit: 256,

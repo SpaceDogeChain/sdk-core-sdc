@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package bind
 
@@ -24,34 +24,34 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/accounts/abi"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/event"
 )
 
 const basefeeWiggleMultiplier = 2
 
-// SignerFn is a signer function callback when a contract requires a method to
+// SignerFn is a signer function callback when a contract requires a msdcod to
 // sign the transaction before submission.
 type SignerFn func(common.Address, *types.Transaction) (*types.Transaction, error)
 
 // CallOpts is the collection of options to fine tune a contract call request.
 type CallOpts struct {
-	Pending     bool            // Whether to operate on the pending state or the last known one
+	Pending     bool            // Whsdcer to operate on the pending state or the last known one
 	From        common.Address  // Optional the sender address, otherwise the first account is used
 	BlockNumber *big.Int        // Optional the block number on which the call should be performed
 	Context     context.Context // Network context to support cancellation and timeouts (nil = no timeout)
 }
 
 // TransactOpts is the collection of authorization data required to create a
-// valid Ethereum transaction.
+// valid sdcereum transaction.
 type TransactOpts struct {
-	From   common.Address // Ethereum account to send the transaction from
+	From   common.Address // sdcereum account to send the transaction from
 	Nonce  *big.Int       // Nonce to use for the transaction execution (nil = use pending state)
-	Signer SignerFn       // Method to use for signing the transaction (mandatory)
+	Signer SignerFn       // Msdcod to use for signing the transaction (mandatory)
 
 	Value     *big.Int // Funds to transfer along the transaction (nil = 0 = no funds)
 	GasPrice  *big.Int // Gas price to use for the transaction execution (nil = gas price oracle)
@@ -104,11 +104,11 @@ func (m *MetaData) GetAbi() (*abi.ABI, error) {
 }
 
 // BoundContract is the base wrapper object that reflects a contract on the
-// Ethereum network. It contains a collection of methods that are used by the
+// sdcereum network. It contains a collection of msdcods that are used by the
 // higher level contract bindings to operate.
 type BoundContract struct {
-	address    common.Address     // Deployment address of the contract on the Ethereum blockchain
-	abi        abi.ABI            // Reflect based ABI to access the correct Ethereum methods
+	address    common.Address     // Deployment address of the contract on the sdcereum blockchain
+	abi        abi.ABI            // Reflect based ABI to access the correct sdcereum msdcods
 	caller     ContractCaller     // Read interface to interact with the blockchain
 	transactor ContractTransactor // Write interface to interact with the blockchain
 	filterer   ContractFilterer   // Event filtering to interact with the blockchain
@@ -126,7 +126,7 @@ func NewBoundContract(address common.Address, abi abi.ABI, caller ContractCaller
 	}
 }
 
-// DeployContract deploys a contract onto the Ethereum blockchain and binds the
+// DeployContract deploys a contract onto the sdcereum blockchain and binds the
 // deployment address with a Go wrapper.
 func DeployContract(opts *TransactOpts, abi abi.ABI, bytecode []byte, backend ContractBackend, params ...interface{}) (common.Address, *types.Transaction, *BoundContract, error) {
 	// Otherwise try to deploy the contract
@@ -144,11 +144,11 @@ func DeployContract(opts *TransactOpts, abi abi.ABI, bytecode []byte, backend Co
 	return c.address, tx, c, nil
 }
 
-// Call invokes the (constant) contract method with params as input values and
+// Call invokes the (constant) contract msdcod with params as input values and
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (c *BoundContract) Call(opts *CallOpts, results *[]interface{}, method string, params ...interface{}) error {
+func (c *BoundContract) Call(opts *CallOpts, results *[]interface{}, msdcod string, params ...interface{}) error {
 	// Don't crash on a lazy user
 	if opts == nil {
 		opts = new(CallOpts)
@@ -157,12 +157,12 @@ func (c *BoundContract) Call(opts *CallOpts, results *[]interface{}, method stri
 		results = new([]interface{})
 	}
 	// Pack the input, call and unpack the results
-	input, err := c.abi.Pack(method, params...)
+	input, err := c.abi.Pack(msdcod, params...)
 	if err != nil {
 		return err
 	}
 	var (
-		msg    = ethereum.CallMsg{From: opts.From, To: &c.address, Data: input}
+		msg    = sdcereum.CallMsg{From: opts.From, To: &c.address, Data: input}
 		ctx    = ensureContext(opts.Context)
 		code   []byte
 		output []byte
@@ -200,22 +200,22 @@ func (c *BoundContract) Call(opts *CallOpts, results *[]interface{}, method stri
 	}
 
 	if len(*results) == 0 {
-		res, err := c.abi.Unpack(method, output)
+		res, err := c.abi.Unpack(msdcod, output)
 		*results = res
 		return err
 	}
 	res := *results
-	return c.abi.UnpackIntoInterface(res[0], method, output)
+	return c.abi.UnpackIntoInterface(res[0], msdcod, output)
 }
 
-// Transact invokes the (paid) contract method with params as input values.
-func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+// Transact invokes the (paid) contract msdcod with params as input values.
+func (c *BoundContract) Transact(opts *TransactOpts, msdcod string, params ...interface{}) (*types.Transaction, error) {
 	// Otherwise pack up the parameters and invoke the contract
-	input, err := c.abi.Pack(method, params...)
+	input, err := c.abi.Pack(msdcod, params...)
 	if err != nil {
 		return nil, err
 	}
-	// todo(rjl493456442) check the method is payable or not,
+	// todo(rjl493456442) check the msdcod is payable or not,
 	// reject invalid transaction at the first place
 	return c.transact(opts, &c.address, input)
 }
@@ -223,13 +223,13 @@ func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...in
 // RawTransact initiates a transaction with the given raw calldata as the input.
 // It's usually used to initiate transactions for invoking **Fallback** function.
 func (c *BoundContract) RawTransact(opts *TransactOpts, calldata []byte) (*types.Transaction, error) {
-	// todo(rjl493456442) check the method is payable or not,
+	// todo(rjl493456442) check the msdcod is payable or not,
 	// reject invalid transaction at the first place
 	return c.transact(opts, &c.address, calldata)
 }
 
 // Transfer initiates a plain transaction to move funds to the contract, calling
-// its default method if one is available.
+// its default msdcod if one is available.
 func (c *BoundContract) Transfer(opts *TransactOpts) (*types.Transaction, error) {
 	// todo(rjl493456442) check the payable fallback or receive is defined
 	// or not, reject invalid transaction at the first place
@@ -333,14 +333,14 @@ func (c *BoundContract) createLegacyTx(opts *TransactOpts, contract *common.Addr
 
 func (c *BoundContract) estimateGasLimit(opts *TransactOpts, contract *common.Address, input []byte, gasPrice, gasTipCap, gasFeeCap, value *big.Int) (uint64, error) {
 	if contract != nil {
-		// Gas estimation cannot succeed without code for method invocations.
+		// Gas estimation cannot succeed without code for msdcod invocations.
 		if code, err := c.transactor.PendingCodeAt(ensureContext(opts.Context), c.address); err != nil {
 			return 0, err
 		} else if len(code) == 0 {
 			return 0, ErrNoCode
 		}
 	}
-	msg := ethereum.CallMsg{
+	msg := sdcereum.CallMsg{
 		From:      opts.From,
 		To:        contract,
 		GasPrice:  gasPrice,
@@ -421,7 +421,7 @@ func (c *BoundContract) FilterLogs(opts *FilterOpts, name string, query ...[]int
 	// Start the background filtering
 	logs := make(chan types.Log, 128)
 
-	config := ethereum.FilterQuery{
+	config := sdcereum.FilterQuery{
 		Addresses: []common.Address{c.address},
 		Topics:    topics,
 		FromBlock: new(big.Int).SetUint64(opts.Start),
@@ -429,7 +429,7 @@ func (c *BoundContract) FilterLogs(opts *FilterOpts, name string, query ...[]int
 	if opts.End != nil {
 		config.ToBlock = new(big.Int).SetUint64(*opts.End)
 	}
-	/* TODO(karalabe): Replace the rest of the method below with this when supported
+	/* TODO(karalabe): Replace the rest of the msdcod below with this when supported
 	sub, err := c.filterer.SubscribeFilterLogs(ensureContext(opts.Context), config, logs)
 	*/
 	buff, err := c.filterer.FilterLogs(ensureContext(opts.Context), config)
@@ -470,7 +470,7 @@ func (c *BoundContract) WatchLogs(opts *WatchOpts, name string, query ...[]inter
 	// Start the background filtering
 	logs := make(chan types.Log, 128)
 
-	config := ethereum.FilterQuery{
+	config := sdcereum.FilterQuery{
 		Addresses: []common.Address{c.address},
 		Topics:    topics,
 	}
@@ -522,7 +522,7 @@ func (c *BoundContract) UnpackLogIntoMap(out map[string]interface{}, event strin
 	return abi.ParseTopicsIntoMap(out, indexed, log.Topics[1:])
 }
 
-// ensureContext is a helper method to ensure a context is not nil, even if the
+// ensureContext is a helper msdcod to ensure a context is not nil, even if the
 // user specified it as such.
 func ensureContext(ctx context.Context) context.Context {
 	if ctx == nil {

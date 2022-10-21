@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains the active peer-set of the downloader, maintaining both failures
 // as well as reputation metrics to prioritize the block retrievals.
@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/msgrate"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/p2p/msgrate"
 )
 
 const (
@@ -50,41 +50,41 @@ type peerConnection struct {
 
 	peer Peer
 
-	version uint       // Eth protocol version number to switch strategies
+	version uint       // sdc protocol version number to switch strategies
 	log     log.Logger // Contextual logger to add extra infos to peer logs
 	lock    sync.RWMutex
 }
 
-// LightPeer encapsulates the methods required to synchronise with a remote light peer.
+// LightPeer encapsulates the msdcods required to synchronise with a remote light peer.
 type LightPeer interface {
 	Head() (common.Hash, *big.Int)
-	RequestHeadersByHash(common.Hash, int, int, bool, chan *eth.Response) (*eth.Request, error)
-	RequestHeadersByNumber(uint64, int, int, bool, chan *eth.Response) (*eth.Request, error)
+	RequestHeadersByHash(common.Hash, int, int, bool, chan *sdc.Response) (*sdc.Request, error)
+	RequestHeadersByNumber(uint64, int, int, bool, chan *sdc.Response) (*sdc.Request, error)
 }
 
-// Peer encapsulates the methods required to synchronise with a remote full peer.
+// Peer encapsulates the msdcods required to synchronise with a remote full peer.
 type Peer interface {
 	LightPeer
-	RequestBodies([]common.Hash, chan *eth.Response) (*eth.Request, error)
-	RequestReceipts([]common.Hash, chan *eth.Response) (*eth.Request, error)
+	RequestBodies([]common.Hash, chan *sdc.Response) (*sdc.Request, error)
+	RequestReceipts([]common.Hash, chan *sdc.Response) (*sdc.Request, error)
 }
 
-// lightPeerWrapper wraps a LightPeer struct, stubbing out the Peer-only methods.
+// lightPeerWrapper wraps a LightPeer struct, stubbing out the Peer-only msdcods.
 type lightPeerWrapper struct {
 	peer LightPeer
 }
 
 func (w *lightPeerWrapper) Head() (common.Hash, *big.Int) { return w.peer.Head() }
-func (w *lightPeerWrapper) RequestHeadersByHash(h common.Hash, amount int, skip int, reverse bool, sink chan *eth.Response) (*eth.Request, error) {
+func (w *lightPeerWrapper) RequestHeadersByHash(h common.Hash, amount int, skip int, reverse bool, sink chan *sdc.Response) (*sdc.Request, error) {
 	return w.peer.RequestHeadersByHash(h, amount, skip, reverse, sink)
 }
-func (w *lightPeerWrapper) RequestHeadersByNumber(i uint64, amount int, skip int, reverse bool, sink chan *eth.Response) (*eth.Request, error) {
+func (w *lightPeerWrapper) RequestHeadersByNumber(i uint64, amount int, skip int, reverse bool, sink chan *sdc.Response) (*sdc.Request, error) {
 	return w.peer.RequestHeadersByNumber(i, amount, skip, reverse, sink)
 }
-func (w *lightPeerWrapper) RequestBodies([]common.Hash, chan *eth.Response) (*eth.Request, error) {
+func (w *lightPeerWrapper) RequestBodies([]common.Hash, chan *sdc.Response) (*sdc.Request, error) {
 	panic("RequestBodies not supported in light client mode sync")
 }
-func (w *lightPeerWrapper) RequestReceipts([]common.Hash, chan *eth.Response) (*eth.Request, error) {
+func (w *lightPeerWrapper) RequestReceipts([]common.Hash, chan *sdc.Response) (*sdc.Request, error) {
 	panic("RequestReceipts not supported in light client mode sync")
 }
 
@@ -110,25 +110,25 @@ func (p *peerConnection) Reset() {
 // UpdateHeaderRate updates the peer's estimated header retrieval throughput with
 // the current measurement.
 func (p *peerConnection) UpdateHeaderRate(delivered int, elapsed time.Duration) {
-	p.rates.Update(eth.BlockHeadersMsg, elapsed, delivered)
+	p.rates.Update(sdc.BlockHeadersMsg, elapsed, delivered)
 }
 
 // UpdateBodyRate updates the peer's estimated body retrieval throughput with the
 // current measurement.
 func (p *peerConnection) UpdateBodyRate(delivered int, elapsed time.Duration) {
-	p.rates.Update(eth.BlockBodiesMsg, elapsed, delivered)
+	p.rates.Update(sdc.BlockBodiesMsg, elapsed, delivered)
 }
 
 // UpdateReceiptRate updates the peer's estimated receipt retrieval throughput
 // with the current measurement.
 func (p *peerConnection) UpdateReceiptRate(delivered int, elapsed time.Duration) {
-	p.rates.Update(eth.ReceiptsMsg, elapsed, delivered)
+	p.rates.Update(sdc.ReceiptsMsg, elapsed, delivered)
 }
 
 // HeaderCapacity retrieves the peer's header download allowance based on its
 // previously discovered throughput.
 func (p *peerConnection) HeaderCapacity(targetRTT time.Duration) int {
-	cap := p.rates.Capacity(eth.BlockHeadersMsg, targetRTT)
+	cap := p.rates.Capacity(sdc.BlockHeadersMsg, targetRTT)
 	if cap > MaxHeaderFetch {
 		cap = MaxHeaderFetch
 	}
@@ -138,7 +138,7 @@ func (p *peerConnection) HeaderCapacity(targetRTT time.Duration) int {
 // BodyCapacity retrieves the peer's body download allowance based on its
 // previously discovered throughput.
 func (p *peerConnection) BodyCapacity(targetRTT time.Duration) int {
-	cap := p.rates.Capacity(eth.BlockBodiesMsg, targetRTT)
+	cap := p.rates.Capacity(sdc.BlockBodiesMsg, targetRTT)
 	if cap > MaxBlockFetch {
 		cap = MaxBlockFetch
 	}
@@ -148,7 +148,7 @@ func (p *peerConnection) BodyCapacity(targetRTT time.Duration) int {
 // ReceiptCapacity retrieves the peers receipt download allowance based on its
 // previously discovered throughput.
 func (p *peerConnection) ReceiptCapacity(targetRTT time.Duration) int {
-	cap := p.rates.Capacity(eth.ReceiptsMsg, targetRTT)
+	cap := p.rates.Capacity(sdc.ReceiptsMsg, targetRTT)
 	if cap > MaxReceiptFetch {
 		cap = MaxReceiptFetch
 	}
@@ -171,8 +171,8 @@ func (p *peerConnection) MarkLacking(hash common.Hash) {
 	p.lacking[hash] = struct{}{}
 }
 
-// Lacks retrieves whether the hash of a blockchain item is on the peers lacking
-// list (i.e. whether we know that the peer does not have it).
+// Lacks retrieves whsdcer the hash of a blockchain item is on the peers lacking
+// list (i.e. whsdcer we know that the peer does not have it).
 func (p *peerConnection) Lacks(hash common.Hash) bool {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
@@ -202,7 +202,7 @@ type peerSet struct {
 func newPeerSet() *peerSet {
 	return &peerSet{
 		peers: make(map[string]*peerConnection),
-		rates: msgrate.NewTrackers(log.New("proto", "eth")),
+		rates: msgrate.NewTrackers(log.New("proto", "sdc")),
 	}
 }
 
@@ -225,7 +225,7 @@ func (ps *peerSet) Reset() {
 // Register injects a new peer into the working set, or returns an error if the
 // peer is already known.
 //
-// The method also sets the starting throughput values of the new peer to the
+// The msdcod also sets the starting throughput values of the new peer to the
 // average of all existing peers, to give it a realistic chance of being used
 // for data retrievals.
 func (ps *peerSet) Register(p *peerConnection) error {

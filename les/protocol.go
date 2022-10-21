@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -23,12 +23,12 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	vfc "github.com/ethereum/go-ethereum/les/vflux/client"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	vfc "github.com/sdcereum/go-sdcereum/les/vflux/client"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 // Constants to match up protocol versions and messages
@@ -74,7 +74,7 @@ const (
 	// Protocol messages introduced in LPV2
 	GetProofsV2Msg         = 0x0f
 	ProofsV2Msg            = 0x10
-	GetHelperTrieProofsMsg = 0x11
+	GsdcelperTrieProofsMsg = 0x11
 	HelperTrieProofsMsg    = 0x12
 	SendTxV2Msg            = 0x13
 	GetTxStatusMsg         = 0x14
@@ -122,8 +122,8 @@ type GetProofsPacket struct {
 	Reqs  []ProofReq
 }
 
-// GetHelperTrieProofsPacket represents a helper trie proof request
-type GetHelperTrieProofsPacket struct {
+// GsdcelperTrieProofsPacket represents a helper trie proof request
+type GsdcelperTrieProofsPacket struct {
 	ReqID uint64
 	Reqs  []HelperTrieReq
 }
@@ -163,7 +163,7 @@ var (
 		GetReceiptsMsg:         {"GetReceipts", MaxReceiptFetch, 1, 0},
 		GetCodeMsg:             {"GetCode", MaxCodeFetch, 1, 0},
 		GetProofsV2Msg:         {"GetProofsV2", MaxProofsFetch, 10, 0},
-		GetHelperTrieProofsMsg: {"GetHelperTrieProofs", MaxHelperTrieProofsFetch, 10, 100},
+		GsdcelperTrieProofsMsg: {"GsdcelperTrieProofs", MaxHelperTrieProofsFetch, 10, 100},
 		SendTxV2Msg:            {"SendTxV2", MaxTxSend, 1, 0},
 		GetTxStatusMsg:         {"GetTxStatus", MaxTxStatus, 10, 0},
 	}

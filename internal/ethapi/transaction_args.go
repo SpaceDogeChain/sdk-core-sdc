@@ -1,20 +1,20 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ethapi
+package sdcapi
 
 import (
 	"bytes"
@@ -23,12 +23,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 // TransactionArgs represents the arguments to construct a new transaction
@@ -45,7 +45,7 @@ type TransactionArgs struct {
 
 	// We accept "data" and "input" for backwards-compatibility reasons.
 	// "input" is the newer name and should be preferred by clients.
-	// Issue detail: https://github.com/ethereum/go-ethereum/issues/15628
+	// Issue detail: https://github.com/sdcereum/go-sdcereum/issues/15628
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
 
@@ -138,7 +138,7 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b Backend) erro
 	}
 	// If the tx has completely specified a fee mechanism, no default is needed. This allows users
 	// who are not yet synced past London to get defaults for other tx values. See
-	// https://github.com/ethereum/go-ethereum/pull/23274 for more information.
+	// https://github.com/sdcereum/go-sdcereum/pull/23274 for more information.
 	eip1559ParamsSet := args.MaxFeePerGas != nil && args.MaxPriorityFeePerGas != nil
 	if (args.GasPrice != nil && !eip1559ParamsSet) || (args.GasPrice == nil && eip1559ParamsSet) {
 		// Sanity check the EIP-1559 fee parameters if present.
@@ -147,7 +147,7 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b Backend) erro
 		}
 		return nil
 	}
-	// Now attempt to fill in default value depending on whether London is active or not.
+	// Now attempt to fill in default value depending on whsdcer London is active or not.
 	head := b.CurrentHeader()
 	if b.ChainConfig().IsLondon(head.Number) {
 		// London is active, set maxPriorityFeePerGas and maxFeePerGas.
@@ -197,7 +197,7 @@ func (args *TransactionArgs) setLondonFeeDefaults(ctx context.Context, head *typ
 }
 
 // ToMessage converts the transaction arguments to the Message type used by the
-// core evm. This method is used in calls and traces that do not require a real
+// core evm. This msdcod is used in calls and traces that do not require a real
 // live transaction.
 func (args *TransactionArgs) ToMessage(globalGasCap uint64, baseFee *big.Int) (types.Message, error) {
 	// Reject invalid combinations of pre- and post-1559 fee styles

@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package bind_test
 
@@ -24,14 +24,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/accounts/abi"
+	"github.com/sdcereum/go-sdcereum/accounts/abi/bind"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,7 +67,7 @@ func (mt *mockTransactor) SuggestGasTipCap(ctx context.Context) (*big.Int, error
 	return mt.gasTipCap, nil
 }
 
-func (mt *mockTransactor) EstimateGas(ctx context.Context, call ethereum.CallMsg) (gas uint64, err error) {
+func (mt *mockTransactor) EstimateGas(ctx context.Context, call sdcereum.CallMsg) (gas uint64, err error) {
 	return 0, nil
 }
 
@@ -89,7 +89,7 @@ func (mc *mockCaller) CodeAt(ctx context.Context, contract common.Address, block
 	return mc.codeAtBytes, mc.codeAtErr
 }
 
-func (mc *mockCaller) CallContract(ctx context.Context, call ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (mc *mockCaller) CallContract(ctx context.Context, call sdcereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	mc.callContractBlockNumber = blockNumber
 	return mc.callContractBytes, mc.callContractErr
 }
@@ -109,7 +109,7 @@ func (mc *mockPendingCaller) PendingCodeAt(ctx context.Context, contract common.
 	return mc.pendingCodeAtBytes, mc.pendingCodeAtErr
 }
 
-func (mc *mockPendingCaller) PendingCallContract(ctx context.Context, call ethereum.CallMsg) ([]byte, error) {
+func (mc *mockPendingCaller) PendingCallContract(ctx context.Context, call sdcereum.CallMsg) ([]byte, error) {
 	mc.pendingCallContractCalled = true
 	return mc.pendingCallContractBytes, mc.pendingCallContractErr
 }
@@ -122,9 +122,9 @@ func TestPassingBlockNumber(t *testing.T) {
 	}
 
 	bc := bind.NewBoundContract(common.HexToAddress("0x0"), abi.ABI{
-		Methods: map[string]abi.Method{
-			"something": {
-				Name:    "something",
+		Msdcods: map[string]abi.Msdcod{
+			"somsdcing": {
+				Name:    "somsdcing",
 				Outputs: abi.Arguments{},
 			},
 		},
@@ -132,7 +132,7 @@ func TestPassingBlockNumber(t *testing.T) {
 
 	blockNumber := big.NewInt(42)
 
-	bc.Call(&bind.CallOpts{BlockNumber: blockNumber}, nil, "something")
+	bc.Call(&bind.CallOpts{BlockNumber: blockNumber}, nil, "somsdcing")
 
 	if mc.callContractBlockNumber != blockNumber {
 		t.Fatalf("CallContract() was not passed the block number")
@@ -142,7 +142,7 @@ func TestPassingBlockNumber(t *testing.T) {
 		t.Fatalf("CodeAt() was not passed the block number")
 	}
 
-	bc.Call(&bind.CallOpts{}, nil, "something")
+	bc.Call(&bind.CallOpts{}, nil, "somsdcing")
 
 	if mc.callContractBlockNumber != nil {
 		t.Fatalf("CallContract() was passed a block number when it should not have been")
@@ -152,7 +152,7 @@ func TestPassingBlockNumber(t *testing.T) {
 		t.Fatalf("CodeAt() was passed a block number when it should not have been")
 	}
 
-	bc.Call(&bind.CallOpts{BlockNumber: blockNumber, Pending: true}, nil, "something")
+	bc.Call(&bind.CallOpts{BlockNumber: blockNumber, Pending: true}, nil, "somsdcing")
 
 	if !mc.pendingCallContractCalled {
 		t.Fatalf("CallContract() was not passed the block number")
@@ -360,9 +360,9 @@ func newMockLog(topics []common.Hash, txHash common.Hash) types.Log {
 }
 
 func TestCall(t *testing.T) {
-	var method, methodWithArg = "something", "somethingArrrrg"
+	var msdcod, msdcodWithArg = "somsdcing", "somsdcingArrrrg"
 	tests := []struct {
-		name, method string
+		name, msdcod string
 		opts         *bind.CallOpts
 		mc           bind.ContractCaller
 		results      *[]interface{}
@@ -373,7 +373,7 @@ func TestCall(t *testing.T) {
 		mc: &mockCaller{
 			codeAtBytes: []byte{0},
 		},
-		method: method,
+		msdcod: msdcod,
 	}, {
 		name: "ok pending",
 		mc: &mockPendingCaller{
@@ -382,11 +382,11 @@ func TestCall(t *testing.T) {
 		opts: &bind.CallOpts{
 			Pending: true,
 		},
-		method: method,
+		msdcod: msdcod,
 	}, {
-		name:    "pack error, no method",
+		name:    "pack error, no msdcod",
 		mc:      new(mockCaller),
-		method:  "else",
+		msdcod:  "else",
 		wantErr: true,
 	}, {
 		name: "interface error, pending but not a PendingContractCaller",
@@ -394,7 +394,7 @@ func TestCall(t *testing.T) {
 		opts: &bind.CallOpts{
 			Pending: true,
 		},
-		method:       method,
+		msdcod:       msdcod,
 		wantErrExact: bind.ErrNoPendingState,
 	}, {
 		name: "pending call canceled",
@@ -404,7 +404,7 @@ func TestCall(t *testing.T) {
 		opts: &bind.CallOpts{
 			Pending: true,
 		},
-		method:       method,
+		msdcod:       msdcod,
 		wantErrExact: context.DeadlineExceeded,
 	}, {
 		name: "pending code at error",
@@ -414,7 +414,7 @@ func TestCall(t *testing.T) {
 		opts: &bind.CallOpts{
 			Pending: true,
 		},
-		method:  method,
+		msdcod:  msdcod,
 		wantErr: true,
 	}, {
 		name: "no pending code at",
@@ -422,57 +422,57 @@ func TestCall(t *testing.T) {
 		opts: &bind.CallOpts{
 			Pending: true,
 		},
-		method:       method,
+		msdcod:       msdcod,
 		wantErrExact: bind.ErrNoCode,
 	}, {
 		name: "call contract error",
 		mc: &mockCaller{
 			callContractErr: context.DeadlineExceeded,
 		},
-		method:       method,
+		msdcod:       msdcod,
 		wantErrExact: context.DeadlineExceeded,
 	}, {
 		name: "code at error",
 		mc: &mockCaller{
 			codeAtErr: errors.New(""),
 		},
-		method:  method,
+		msdcod:  msdcod,
 		wantErr: true,
 	}, {
 		name:         "no code at",
 		mc:           new(mockCaller),
-		method:       method,
+		msdcod:       msdcod,
 		wantErrExact: bind.ErrNoCode,
 	}, {
 		name: "unpack error missing arg",
 		mc: &mockCaller{
 			codeAtBytes: []byte{0},
 		},
-		method:  methodWithArg,
+		msdcod:  msdcodWithArg,
 		wantErr: true,
 	}, {
 		name: "interface unpack error",
 		mc: &mockCaller{
 			codeAtBytes: []byte{0},
 		},
-		method:  method,
+		msdcod:  msdcod,
 		results: &[]interface{}{0},
 		wantErr: true,
 	}}
 	for _, test := range tests {
 		bc := bind.NewBoundContract(common.HexToAddress("0x0"), abi.ABI{
-			Methods: map[string]abi.Method{
-				method: {
-					Name:    method,
+			Msdcods: map[string]abi.Msdcod{
+				msdcod: {
+					Name:    msdcod,
 					Outputs: abi.Arguments{},
 				},
-				methodWithArg: {
-					Name:    methodWithArg,
+				msdcodWithArg: {
+					Name:    msdcodWithArg,
 					Outputs: abi.Arguments{abi.Argument{}},
 				},
 			},
 		}, test.mc, nil, nil)
-		err := bc.Call(test.opts, test.results, test.method)
+		err := bc.Call(test.opts, test.results, test.msdcod)
 		if test.wantErr || test.wantErrExact != nil {
 			if err == nil {
 				t.Fatalf("%q expected error", test.name)

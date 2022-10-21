@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains the block download scheduler to collect download tasks and schedule
 // them in an ordered, and throttled way.
@@ -26,11 +26,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/prque"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
 )
 
 const (
@@ -180,7 +180,7 @@ func (q *queue) Reset(blockCacheLimit int, thresholdInitialSize int) {
 	q.receiptPendPool = make(map[string]*fetchRequest)
 
 	q.resultCache = newResultStore(blockCacheLimit)
-	q.resultCache.SetThrottleThreshold(uint64(thresholdInitialSize))
+	q.resultCache.SetThrottlsdcreshold(uint64(thresholdInitialSize))
 }
 
 // Close marks the end of the sync, unblocking Results.
@@ -216,7 +216,7 @@ func (q *queue) PendingReceipts() int {
 	return q.receiptTaskQueue.Size()
 }
 
-// InFlightBlocks retrieves whether there are block fetch requests currently in
+// InFlightBlocks retrieves whsdcer there are block fetch requests currently in
 // flight.
 func (q *queue) InFlightBlocks() bool {
 	q.lock.Lock()
@@ -225,7 +225,7 @@ func (q *queue) InFlightBlocks() bool {
 	return len(q.blockPendPool) > 0
 }
 
-// InFlightReceipts retrieves whether there are receipt fetch requests currently
+// InFlightReceipts retrieves whsdcer there are receipt fetch requests currently
 // in flight.
 func (q *queue) InFlightReceipts() bool {
 	q.lock.Lock()
@@ -376,8 +376,8 @@ func (q *queue) Results(block bool) []*fetchResult {
 	}
 	// Using the newly calibrated resultsize, figure out the new throttle limit
 	// on the result cache
-	throttleThreshold := uint64((common.StorageSize(blockCacheMemory) + q.resultSize - 1) / q.resultSize)
-	throttleThreshold = q.resultCache.SetThrottleThreshold(throttleThreshold)
+	throttlsdcreshold := uint64((common.StorageSize(blockCacheMemory) + q.resultSize - 1) / q.resultSize)
+	throttlsdcreshold = q.resultCache.SetThrottlsdcreshold(throttlsdcreshold)
 
 	// With results removed from the cache, wake throttled fetchers
 	for _, ch := range []chan bool{q.blockWakeCh, q.receiptWakeCh} {
@@ -390,7 +390,7 @@ func (q *queue) Results(block bool) []*fetchResult {
 	if time.Since(q.lastStatLog) > 60*time.Second {
 		q.lastStatLog = time.Now()
 		info := q.Stats()
-		info = append(info, "throttle", throttleThreshold)
+		info = append(info, "throttle", throttlsdcreshold)
 		log.Info("Downloader queue stats", info...)
 	}
 	return results
@@ -417,7 +417,7 @@ func (q *queue) ReserveHeaders(p *peerConnection, count int) *fetchRequest {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	// Short circuit if the peer's already downloading something (sanity check to
+	// Short circuit if the peer's already downloading somsdcing (sanity check to
 	// not corrupt state)
 	if _, ok := q.headerPendPool[p.id]; ok {
 		return nil
@@ -453,7 +453,7 @@ func (q *queue) ReserveHeaders(p *peerConnection, count int) *fetchRequest {
 
 // ReserveBodies reserves a set of body fetches for the given peer, skipping any
 // previously failed downloads. Beside the next batch of needed fetches, it also
-// returns a flag whether empty blocks were queued requiring processing.
+// returns a flag whsdcer empty blocks were queued requiring processing.
 func (q *queue) ReserveBodies(p *peerConnection, count int) (*fetchRequest, bool, bool) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
@@ -463,7 +463,7 @@ func (q *queue) ReserveBodies(p *peerConnection, count int) (*fetchRequest, bool
 
 // ReserveReceipts reserves a set of receipt fetches for the given peer, skipping
 // any previously failed downloads. Beside the next batch of needed fetches, it
-// also returns a flag whether empty receipts were queued requiring importing.
+// also returns a flag whsdcer empty receipts were queued requiring importing.
 func (q *queue) ReserveReceipts(p *peerConnection, count int) (*fetchRequest, bool, bool) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
@@ -472,22 +472,22 @@ func (q *queue) ReserveReceipts(p *peerConnection, count int) (*fetchRequest, bo
 }
 
 // reserveHeaders reserves a set of data download operations for a given peer,
-// skipping any previously failed ones. This method is a generic version used
+// skipping any previously failed ones. This msdcod is a generic version used
 // by the individual special reservation functions.
 //
-// Note, this method expects the queue lock to be already held for writing. The
+// Note, this msdcod expects the queue lock to be already held for writing. The
 // reason the lock is not obtained in here is because the parameters already need
 // to access the queue, so they already need a lock anyway.
 //
 // Returns:
 //
 //	item     - the fetchRequest
-//	progress - whether any progress was made
+//	progress - whsdcer any progress was made
 //	throttle - if the caller should throttle for a while
 func (q *queue) reserveHeaders(p *peerConnection, count int, taskPool map[common.Hash]*types.Header, taskQueue *prque.Prque,
 	pendPool map[string]*fetchRequest, kind uint) (*fetchRequest, bool, bool) {
 	// Short circuit if the pool has been depleted, or if the peer's already
-	// downloading something (sanity check not to corrupt state)
+	// downloading somsdcing (sanity check not to corrupt state)
 	if taskQueue.Empty() {
 		return nil, false, true
 	}
@@ -570,7 +570,7 @@ func (q *queue) reserveHeaders(p *peerConnection, count int, taskPool map[common
 	return request, progress, throttled
 }
 
-// Revoke cancels all pending requests belonging to a given peer. This method is
+// Revoke cancels all pending requests belonging to a given peer. This msdcod is
 // meant to be called during a peer drop to quickly reassign owned data fetches
 // to remaining nodes.
 func (q *queue) Revoke(peerID string) {
@@ -628,7 +628,7 @@ func (q *queue) ExpireReceipts(peer string) int {
 // expire is the generic check that moves a specific expired task from a pending
 // pool back into a task pool.
 //
-// Note, this method expects the queue lock to be already held. The reason the
+// Note, this msdcod expects the queue lock to be already held. The reason the
 // lock is not obtained in here is that the parameters already need to access
 // the queue, so they already need a lock anyway.
 func (q *queue) expire(peer string, pendPool map[string]*fetchRequest, taskQueue *prque.Prque) int {
@@ -652,10 +652,10 @@ func (q *queue) expire(peer string, pendPool map[string]*fetchRequest, taskQueue
 }
 
 // DeliverHeaders injects a header retrieval response into the header results
-// cache. This method either accepts all headers it received, or none of them
+// cache. This msdcod either accepts all headers it received, or none of them
 // if they do not map correctly to the skeleton.
 //
-// If the headers are accepted, the method makes an attempt to deliver the set
+// If the headers are accepted, the msdcod makes an attempt to deliver the set
 // of ready headers to the processor to keep the pipeline full. However, it will
 // not block to prevent stalling other pending deliveries.
 func (q *queue) DeliverHeaders(id string, headers []*types.Header, hashes []common.Hash, headerProcCh chan *headerTask) (int, error) {
@@ -762,7 +762,7 @@ func (q *queue) DeliverHeaders(id string, headers []*types.Header, hashes []comm
 }
 
 // DeliverBodies injects a block body retrieval response into the results queue.
-// The method returns the number of blocks bodies accepted from the delivery and
+// The msdcod returns the number of blocks bodies accepted from the delivery and
 // also wakes any threads waiting for data delivery.
 func (q *queue) DeliverBodies(id string, txLists [][]*types.Transaction, txListHashes []common.Hash, uncleLists [][]*types.Header, uncleListHashes []common.Hash) (int, error) {
 	q.lock.Lock()
@@ -788,7 +788,7 @@ func (q *queue) DeliverBodies(id string, txLists [][]*types.Transaction, txListH
 }
 
 // DeliverReceipts injects a receipt retrieval response into the results queue.
-// The method returns the number of transaction receipts accepted from the delivery
+// The msdcod returns the number of transaction receipts accepted from the delivery
 // and also wakes any threads waiting for data delivery.
 func (q *queue) DeliverReceipts(id string, receiptList [][]*types.Receipt, receiptListHashes []common.Hash) (int, error) {
 	q.lock.Lock()
@@ -810,7 +810,7 @@ func (q *queue) DeliverReceipts(id string, receiptList [][]*types.Receipt, recei
 
 // deliver injects a data retrieval response into the results queue.
 //
-// Note, this method expects the queue lock to be already held for writing. The
+// Note, this msdcod expects the queue lock to be already held for writing. The
 // reason this lock is not obtained in here is because the parameters already need
 // to access the queue, so they already need a lock anyway.
 func (q *queue) deliver(id string, taskPool map[common.Hash]*types.Header,
@@ -862,7 +862,7 @@ func (q *queue) deliver(id string, taskPool map[common.Hash]*types.Header,
 		} else {
 			// else: between here and above, some other peer filled this result,
 			// or it was indeed a no-op. This should not happen, but if it does it's
-			// not something to panic about
+			// not somsdcing to panic about
 			log.Error("Delivery stale", "stale", stale, "number", header.Number.Uint64(), "err", err)
 			failure = errStaleDelivery
 		}

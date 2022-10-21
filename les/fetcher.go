@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -22,16 +22,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/les/fetcher"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/les/fetcher"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
 )
 
 const (
@@ -125,12 +125,12 @@ func (fp *fetcherPeer) forwardAnno(td *big.Int) []*announce {
 }
 
 // lightFetcher implements retrieval of newly announced headers. It reuses
-// the eth.BlockFetcher as the underlying fetcher but adding more additional
+// the sdc.BlockFetcher as the underlying fetcher but adding more additional
 // rules: e.g. evict "timeout" peers.
 type lightFetcher struct {
 	// Various handlers
 	ulc     *ulc
-	chaindb ethdb.Database
+	chaindb sdcdb.Database
 	reqDist *requestDistributor
 	peerset *serverPeerSet        // The global peerset of light client which shared by all components
 	chain   *light.LightChain     // The local light chain which maintains the canonical header chain.
@@ -157,7 +157,7 @@ type lightFetcher struct {
 }
 
 // newLightFetcher creates a light fetcher instance.
-func newLightFetcher(chain *light.LightChain, engine consensus.Engine, peers *serverPeerSet, ulc *ulc, chaindb ethdb.Database, reqDist *requestDistributor, syncFn func(p *serverPeer)) *lightFetcher {
+func newLightFetcher(chain *light.LightChain, engine consensus.Engine, peers *serverPeerSet, ulc *ulc, chaindb sdcdb.Database, reqDist *requestDistributor, syncFn func(p *serverPeer)) *lightFetcher {
 	// Construct the fetcher by offering all necessary APIs
 	validator := func(header *types.Header) error {
 		// Disable seal verification explicitly if we are running in ulc mode.
@@ -179,7 +179,7 @@ func newLightFetcher(chain *light.LightChain, engine consensus.Engine, peers *se
 		chaindb:     chaindb,
 		chain:       chain,
 		reqDist:     reqDist,
-		fetcher:     fetcher.NewBlockFetcher(true, chain.GetHeaderByHash, nil, validator, nil, heighter, inserter, nil, dropper),
+		fetcher:     fetcher.NewBlockFetcher(true, chain.GsdceaderByHash, nil, validator, nil, heighter, inserter, nil, dropper),
 		peers:       make(map[enode.ID]*fetcherPeer),
 		synchronise: syncFn,
 		announceCh:  make(chan *announce),
@@ -261,7 +261,7 @@ func (f *lightFetcher) mainloop() {
 
 	var (
 		syncInterval = uint64(1) // Interval used to trigger a light resync.
-		syncing      bool        // Indicator whether the client is syncing
+		syncing      bool        // Indicator whsdcer the client is syncing
 
 		ulc          = f.ulc != nil
 		headCh       = make(chan core.ChainHeadEvent, 100)
@@ -280,7 +280,7 @@ func (f *lightFetcher) mainloop() {
 		localHead = header
 		localTd = f.chain.GetTd(header.Hash(), header.Number.Uint64())
 	}
-	// trustedHeader returns an indicator whether the header is regarded as
+	// trustedHeader returns an indicator whsdcer the header is regarded as
 	// trusted. If we are running in the ulc mode, only when we receive enough
 	// same announcement from trusted server, the header will be trusted.
 	trustedHeader := func(hash common.Hash, number uint64) (bool, []enode.ID) {
@@ -413,7 +413,7 @@ func (f *lightFetcher) mainloop() {
 			f.forEachPeer(func(id enode.ID, p *fetcherPeer) bool {
 				removed := p.forwardAnno(localTd)
 				for _, anno := range removed {
-					if header := f.chain.GetHeaderByHash(anno.data.Hash); header != nil {
+					if header := f.chain.GsdceaderByHash(anno.data.Hash); header != nil {
 						if header.Number.Uint64() != anno.data.Number {
 							droplist = append(droplist, id)
 							break
@@ -458,7 +458,7 @@ func (f *lightFetcher) mainloop() {
 						break
 					}
 					untrusted = append(untrusted, hash)
-					head = f.chain.GetHeader(head.ParentHash, number-1)
+					head = f.chain.Gsdceader(head.ParentHash, number-1)
 					if head == nil {
 						break // all the synced headers will be dropped
 					}
@@ -503,8 +503,8 @@ func (f *lightFetcher) trackRequest(peerid enode.ID, reqid uint64, hash common.H
 // requestHeaderByHash constructs a header retrieval request and sends it to
 // local request distributor.
 //
-// Note, we rely on the underlying eth/fetcher to retrieve and validate the
-// response, so that we have to obey the rule of eth/fetcher which only accepts
+// Note, we rely on the underlying sdc/fetcher to retrieve and validate the
+// response, so that we have to obey the rule of sdc/fetcher which only accepts
 // the response from given peer.
 func (f *lightFetcher) requestHeaderByHash(peerid enode.ID) func(common.Hash) error {
 	return func(hash common.Hash) error {

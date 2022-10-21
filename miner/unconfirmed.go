@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package miner
 
@@ -20,16 +20,16 @@ import (
 	"container/ring"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
-// chainRetriever is used by the unconfirmed block set to verify whether a previously
+// chainRetriever is used by the unconfirmed block set to verify whsdcer a previously
 // mined block is part of the canonical chain or not.
 type chainRetriever interface {
-	// GetHeaderByNumber retrieves the canonical header associated with a block number.
-	GetHeaderByNumber(number uint64) *types.Header
+	// GsdceaderByNumber retrieves the canonical header associated with a block number.
+	GsdceaderByNumber(number uint64) *types.Header
 
 	// GetBlockByNumber retrieves the canonical block associated with a block number.
 	GetBlockByNumber(number uint64) *types.Block
@@ -99,14 +99,14 @@ func (set *unconfirmedBlocks) Shift(height uint64) {
 			break
 		}
 		// Block seems to exceed depth allowance, check for canonical status
-		header := set.chain.GetHeaderByNumber(next.index)
+		header := set.chain.GsdceaderByNumber(next.index)
 		switch {
 		case header == nil:
 			log.Warn("Failed to retrieve header of mined block", "number", next.index, "hash", next.hash)
 		case header.Hash() == next.hash:
 			log.Info("🔗 block reached canonical chain", "number", next.index, "hash", next.hash)
 		default:
-			// Block is not canonical, check whether we have an uncle or a lost block
+			// Block is not canonical, check whsdcer we have an uncle or a lost block
 			included := false
 			for number := next.index; !included && number < next.index+uint64(set.depth) && number <= height; number++ {
 				if block := set.chain.GetBlockByNumber(number); block != nil {

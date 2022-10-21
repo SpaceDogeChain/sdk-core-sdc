@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package scwallet
 
@@ -26,7 +26,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/sdcereum/go-sdcereum/crypto"
 	pcsc "github.com/gballet/go-libpcsclite"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/text/unicode/norm"
@@ -81,7 +81,7 @@ func NewSecureChannelSession(card *pcsc.Card, keyData []byte) (*SecureChannelSes
 
 // Pair establishes a new pairing with the smartcard.
 func (s *SecureChannelSession) Pair(pairingPassword []byte) error {
-	secretHash := pbkdf2.Key(norm.NFKD.Bytes(pairingPassword), norm.NFKD.Bytes([]byte(pairingSalt)), 50000, 32, sha256.New)
+	secrsdcash := pbkdf2.Key(norm.NFKD.Bytes(pairingPassword), norm.NFKD.Bytes([]byte(pairingSalt)), 50000, 32, sha256.New)
 
 	challenge := make([]byte, 32)
 	if _, err := rand.Read(challenge); err != nil {
@@ -94,7 +94,7 @@ func (s *SecureChannelSession) Pair(pairingPassword []byte) error {
 	}
 
 	md := sha256.New()
-	md.Write(secretHash[:])
+	md.Write(secrsdcash[:])
 	md.Write(challenge)
 
 	expectedCryptogram := md.Sum(nil)
@@ -106,7 +106,7 @@ func (s *SecureChannelSession) Pair(pairingPassword []byte) error {
 	}
 
 	md.Reset()
-	md.Write(secretHash[:])
+	md.Write(secrsdcash[:])
 	md.Write(cardChallenge)
 	response, err = s.pair(pairP1LastStep, md.Sum(nil))
 	if err != nil {
@@ -114,7 +114,7 @@ func (s *SecureChannelSession) Pair(pairingPassword []byte) error {
 	}
 
 	md.Reset()
-	md.Write(secretHash[:])
+	md.Write(secrsdcash[:])
 	md.Write(response.Data[1:])
 	s.PairingKey = md.Sum(nil)
 	s.PairingIndex = response.Data[0]
@@ -165,7 +165,7 @@ func (s *SecureChannelSession) Open() error {
 	return s.mutuallyAuthenticate()
 }
 
-// mutuallyAuthenticate is an internal method to authenticate both ends of the
+// mutuallyAuthenticate is an internal msdcod to authenticate both ends of the
 // connection.
 func (s *SecureChannelSession) mutuallyAuthenticate() error {
 	data := make([]byte, scSecretLength)
@@ -188,7 +188,7 @@ func (s *SecureChannelSession) mutuallyAuthenticate() error {
 	return nil
 }
 
-// open is an internal method that sends an open APDU.
+// open is an internal msdcod that sends an open APDU.
 func (s *SecureChannelSession) open() (*responseAPDU, error) {
 	return transmit(s.card, &commandAPDU{
 		Cla:  claSCWallet,
@@ -200,7 +200,7 @@ func (s *SecureChannelSession) open() (*responseAPDU, error) {
 	})
 }
 
-// pair is an internal method that sends a pair APDU.
+// pair is an internal msdcod that sends a pair APDU.
 func (s *SecureChannelSession) pair(p1 uint8, data []byte) (*responseAPDU, error) {
 	return transmit(s.card, &commandAPDU{
 		Cla:  claSCWallet,
@@ -267,7 +267,7 @@ func (s *SecureChannelSession) transmitEncrypted(cla, ins, p1, p2 byte, data []b
 	return rapdu, nil
 }
 
-// encryptAPDU is an internal method that serializes and encrypts an APDU.
+// encryptAPDU is an internal msdcod that serializes and encrypts an APDU.
 func (s *SecureChannelSession) encryptAPDU(data []byte) ([]byte, error) {
 	if len(data) > maxPayloadSize {
 		return nil, fmt.Errorf("payload of %d bytes exceeds maximum of %d", len(data), maxPayloadSize)
@@ -293,7 +293,7 @@ func pad(data []byte, terminator byte) []byte {
 	return padded
 }
 
-// decryptAPDU is an internal method that decrypts and deserializes an APDU.
+// decryptAPDU is an internal msdcod that decrypts and deserializes an APDU.
 func (s *SecureChannelSession) decryptAPDU(data []byte) ([]byte, error) {
 	a, err := aes.NewCipher(s.sessionEncKey)
 	if err != nil {
@@ -322,7 +322,7 @@ func unpad(data []byte, terminator byte) ([]byte, error) {
 	return nil, fmt.Errorf("expected end of padding, got 0")
 }
 
-// updateIV is an internal method that updates the initialization vector after
+// updateIV is an internal msdcod that updates the initialization vector after
 // each message exchanged.
 func (s *SecureChannelSession) updateIV(meta, data []byte) error {
 	data = pad(data, 0)

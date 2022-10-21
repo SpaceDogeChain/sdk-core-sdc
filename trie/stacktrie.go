@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package trie
 
@@ -24,9 +24,9 @@ import (
 	"io"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 var ErrCommitDisabled = errors.New("no database for committing")
@@ -37,7 +37,7 @@ var stPool = sync.Pool{
 	},
 }
 
-func stackTrieFromPool(db ethdb.KeyValueWriter, owner common.Hash) *StackTrie {
+func stackTrieFromPool(db sdcdb.KeyValueWriter, owner common.Hash) *StackTrie {
 	st := stPool.Get().(*StackTrie)
 	st.db = db
 	st.owner = owner
@@ -58,11 +58,11 @@ type StackTrie struct {
 	val      []byte               // value contained by this node if it's a leaf
 	key      []byte               // key chunk covered by this (leaf|ext) node
 	children [16]*StackTrie       // list of children (for branch and exts)
-	db       ethdb.KeyValueWriter // Pointer to the commit db, can be nil
+	db       sdcdb.KeyValueWriter // Pointer to the commit db, can be nil
 }
 
 // NewStackTrie allocates and initializes an empty trie.
-func NewStackTrie(db ethdb.KeyValueWriter) *StackTrie {
+func NewStackTrie(db sdcdb.KeyValueWriter) *StackTrie {
 	return &StackTrie{
 		nodeType: emptyNode,
 		db:       db,
@@ -71,7 +71,7 @@ func NewStackTrie(db ethdb.KeyValueWriter) *StackTrie {
 
 // NewStackTrieWithOwner allocates and initializes an empty trie, but with
 // the additional owner field.
-func NewStackTrieWithOwner(db ethdb.KeyValueWriter, owner common.Hash) *StackTrie {
+func NewStackTrieWithOwner(db sdcdb.KeyValueWriter, owner common.Hash) *StackTrie {
 	return &StackTrie{
 		owner:    owner,
 		nodeType: emptyNode,
@@ -80,7 +80,7 @@ func NewStackTrieWithOwner(db ethdb.KeyValueWriter, owner common.Hash) *StackTri
 }
 
 // NewFromBinary initialises a serialized stacktrie with the given db.
-func NewFromBinary(data []byte, db ethdb.KeyValueWriter) (*StackTrie, error) {
+func NewFromBinary(data []byte, db sdcdb.KeyValueWriter) (*StackTrie, error) {
 	var st StackTrie
 	if err := st.UnmarshalBinary(data); err != nil {
 		return nil, err
@@ -160,7 +160,7 @@ func (st *StackTrie) unmarshalBinary(r io.Reader) error {
 	return nil
 }
 
-func (st *StackTrie) setDb(db ethdb.KeyValueWriter) {
+func (st *StackTrie) setDb(db sdcdb.KeyValueWriter) {
 	st.db = db
 	for _, child := range st.children {
 		if child != nil {
@@ -169,7 +169,7 @@ func (st *StackTrie) setDb(db ethdb.KeyValueWriter) {
 	}
 }
 
-func newLeaf(owner common.Hash, key, val []byte, db ethdb.KeyValueWriter) *StackTrie {
+func newLeaf(owner common.Hash, key, val []byte, db sdcdb.KeyValueWriter) *StackTrie {
 	st := stackTrieFromPool(db, owner)
 	st.nodeType = leafNode
 	st.key = append(st.key, key...)
@@ -177,7 +177,7 @@ func newLeaf(owner common.Hash, key, val []byte, db ethdb.KeyValueWriter) *Stack
 	return st
 }
 
-func newExt(owner common.Hash, key []byte, child *StackTrie, db ethdb.KeyValueWriter) *StackTrie {
+func newExt(owner common.Hash, key []byte, child *StackTrie, db sdcdb.KeyValueWriter) *StackTrie {
 	st := stackTrieFromPool(db, owner)
 	st.nodeType = extNode
 	st.key = append(st.key, key...)
@@ -382,7 +382,7 @@ func (st *StackTrie) insert(key, value []byte) {
 //   - Then the <32 byte rlp-encoded value will be accessible in 'st.val'.
 //   - And the 'st.type' will be 'hashedNode' AGAIN
 //
-// This method also sets 'st.type' to hashedNode, and clears 'st.key'.
+// This msdcod also sets 'st.type' to hashedNode, and clears 'st.key'.
 func (st *StackTrie) hash() {
 	h := newHasher(false)
 	defer returnHasherToPool(h)

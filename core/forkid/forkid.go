@@ -1,20 +1,20 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package forkid implements EIP-2124 (https://eips.ethereum.org/EIPS/eip-2124).
+// Package forkid implements EIP-2124 (https://eips.sdcereum.org/EIPS/eip-2124).
 package forkid
 
 import (
@@ -26,10 +26,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 var (
@@ -44,7 +44,7 @@ var (
 	ErrLocalIncompatibleOrStale = errors.New("local incompatible or needs update")
 )
 
-// Blockchain defines all necessary method to build a forkID.
+// Blockchain defines all necessary msdcod to build a forkID.
 type Blockchain interface {
 	// Config retrieves the chain's fork configuration.
 	Config() *params.ChainConfig
@@ -65,7 +65,7 @@ type ID struct {
 // Filter is a fork id filter to validate a remotely advertised ID.
 type Filter func(id ID) error
 
-// NewID calculates the Ethereum fork ID from the chain config, genesis hash, and head.
+// NewID calculates the sdcereum fork ID from the chain config, genesis hash, and head.
 func NewID(config *params.ChainConfig, genesis common.Hash, head uint64) ID {
 	// Calculate the starting checksum from the genesis hash
 	hash := crc32.ChecksumIEEE(genesis[:])
@@ -84,7 +84,7 @@ func NewID(config *params.ChainConfig, genesis common.Hash, head uint64) ID {
 	return ID{Hash: checksumToBytes(hash), Next: next}
 }
 
-// NewIDWithChain calculates the Ethereum fork ID from an existing chain instance.
+// NewIDWithChain calculates the sdcereum fork ID from an existing chain instance.
 func NewIDWithChain(chain Blockchain) ID {
 	return NewID(
 		chain.Config(),
@@ -192,7 +192,7 @@ func newFilter(config *params.ChainConfig, genesis common.Hash, headfn func() ui
 			return ErrLocalIncompatibleOrStale
 		}
 		log.Error("Impossible fork ID validation", "id", id)
-		return nil // Something's very wrong, accept rather than reject
+		return nil // Somsdcing's very wrong, accept rather than reject
 	}
 }
 

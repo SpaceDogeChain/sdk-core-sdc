@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package trie
 
@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/prque"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // ErrNotRequested is returned by the trie sync when it's requested to process a
@@ -139,7 +139,7 @@ func (batch *syncMemBatch) hasCode(hash common.Hash) bool {
 // unknown trie hashes to retrieve, accepts node data associated with said hashes
 // and reconstructs the trie step by step until all is done.
 type Sync struct {
-	database ethdb.KeyValueReader         // Persistent database to check for existing entries
+	database sdcdb.KeyValueReader         // Persistent database to check for existing entries
 	membatch *syncMemBatch                // Memory buffer to avoid frequent database writes
 	nodeReqs map[string]*nodeRequest      // Pending requests pertaining to a trie node path
 	codeReqs map[common.Hash]*codeRequest // Pending requests pertaining to a code hash
@@ -148,7 +148,7 @@ type Sync struct {
 }
 
 // NewSync creates a new trie data download scheduler.
-func NewSync(root common.Hash, database ethdb.KeyValueReader, callback LeafCallback) *Sync {
+func NewSync(root common.Hash, database sdcdb.KeyValueReader, callback LeafCallback) *Sync {
 	ts := &Sync{
 		database: database,
 		membatch: newSyncMemBatch(),
@@ -181,7 +181,7 @@ func (s *Sync) AddSubTrie(root common.Hash, path []byte, parent common.Hash, par
 		path:     path,
 		callback: callback,
 	}
-	// If this sub-trie has a designated parent, link them together
+	// If this sub-trie has a designated parent, link them togsdcer
 	if parent != (common.Hash{}) {
 		ancestor := s.nodeReqs[string(parentPath)]
 		if ancestor == nil {
@@ -217,7 +217,7 @@ func (s *Sync) AddCodeEntry(hash common.Hash, path []byte, parent common.Hash, p
 		path: path,
 		hash: hash,
 	}
-	// If this sub-trie has a designated parent, link them together
+	// If this sub-trie has a designated parent, link them togsdcer
 	if parent != (common.Hash{}) {
 		ancestor := s.nodeReqs[string(parentPath)] // the parent of codereq can ONLY be nodereq
 		if ancestor == nil {
@@ -230,7 +230,7 @@ func (s *Sync) AddCodeEntry(hash common.Hash, path []byte, parent common.Hash, p
 }
 
 // Missing retrieves the known missing nodes from the trie for retrieval. To aid
-// both eth/6x style fast sync and snap/1x style state sync, the paths of trie
+// both sdc/6x style fast sync and snap/1x style state sync, the paths of trie
 // nodes are returned too, as well as separate hash list for codes.
 func (s *Sync) Missing(max int) ([]string, []common.Hash, []common.Hash) {
 	var (
@@ -326,7 +326,7 @@ func (s *Sync) ProcessNode(result NodeSyncResult) error {
 
 // Commit flushes the data stored in the internal membatch out to persistent
 // storage, returning any occurred error.
-func (s *Sync) Commit(dbw ethdb.Batch) error {
+func (s *Sync) Commit(dbw sdcdb.Batch) error {
 	// Dump the membatch into a database dbw
 	for path, value := range s.membatch.nodes {
 		rawdb.WriteTrieNode(dbw, s.membatch.hashes[path], value)
@@ -387,7 +387,7 @@ func (s *Sync) scheduleCodeRequest(req *codeRequest) {
 // children retrieves all the missing children of a state trie entry for future
 // retrieval scheduling.
 func (s *Sync) children(req *nodeRequest, object node) ([]*nodeRequest, error) {
-	// Gather all the children of the node, irrelevant whether known or not
+	// Gather all the children of the node, irrelevant whsdcer known or not
 	type childNode struct {
 		path []byte
 		node node

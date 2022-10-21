@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2019 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -24,11 +24,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/console/prompt"
-	"github.com/ethereum/go-ethereum/p2p/dnsdisc"
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"github.com/spacedogechain/go-spacedogechain/accounts/keystore"
+	"github.com/spacedogechain/go-spacedogechain/common"
+	"github.com/spacedogechain/go-spacedogechain/console/prompt"
+	"github.com/spacedogechain/go-spacedogechain/p2p/dnsdisc"
+	"github.com/spacedogechain/go-spacedogechain/p2p/enode"
 	"github.com/urfave/cli/v2"
 )
 
@@ -250,7 +250,7 @@ func dnsNukeRoute53(ctx *cli.Context) error {
 	return client.deleteDomain(ctx.Args().First())
 }
 
-// loadSigningKey loads a private key in Ethereum keystore format.
+// loadSigningKey loads a private key in spacedogechain keystore format.
 func loadSigningKey(keyfile string) *ecdsa.PrivateKey {
 	keyjson, err := os.ReadFile(keyfile)
 	if err != nil {

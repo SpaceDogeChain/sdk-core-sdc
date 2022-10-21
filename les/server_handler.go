@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -22,20 +22,20 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/forkid"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/les/flowcontrol"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/forkid"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/les/flowcontrol"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 const (
@@ -61,19 +61,19 @@ var (
 type serverHandler struct {
 	forkFilter forkid.Filter
 	blockchain *core.BlockChain
-	chainDb    ethdb.Database
+	chainDb    sdcdb.Database
 	txpool     *core.TxPool
 	server     *LesServer
 
 	closeCh chan struct{}  // Channel used to exit all background routines of handler.
 	wg      sync.WaitGroup // WaitGroup used to track all background routines of handler.
-	synced  func() bool    // Callback function used to determine whether local node is synced.
+	synced  func() bool    // Callback function used to determine whsdcer local node is synced.
 
 	// Testing fields
 	addTxsSync bool
 }
 
-func newServerHandler(server *LesServer, blockchain *core.BlockChain, chainDb ethdb.Database, txpool *core.TxPool, synced func() bool) *serverHandler {
+func newServerHandler(server *LesServer, blockchain *core.BlockChain, chainDb sdcdb.Database, txpool *core.TxPool, synced func() bool) *serverHandler {
 	handler := &serverHandler{
 		forkFilter: forkid.NewFilter(blockchain),
 		server:     server,
@@ -108,7 +108,7 @@ func (h *serverHandler) runPeer(version uint, p *p2p.Peer, rw p2p.MsgReadWriter)
 }
 
 func (h *serverHandler) handle(p *clientPeer) error {
-	p.Log().Debug("Light Ethereum peer connected", "name", p.Name())
+	p.Log().Debug("Light sdcereum peer connected", "name", p.Name())
 
 	// Execute the LES handshake
 	var (
@@ -119,7 +119,7 @@ func (h *serverHandler) handle(p *clientPeer) error {
 		forkID = forkid.NewID(h.blockchain.Config(), h.blockchain.Genesis().Hash(), h.blockchain.CurrentBlock().NumberU64())
 	)
 	if err := p.Handshake(td, hash, number, h.blockchain.Genesis().Hash(), forkID, h.forkFilter, h.server); err != nil {
-		p.Log().Debug("Light Ethereum handshake failed", "err", err)
+		p.Log().Debug("Light sdcereum handshake failed", "err", err)
 		return err
 	}
 	// Connected to another server, no messages expected, just wait for disconnection
@@ -170,12 +170,12 @@ func (h *serverHandler) handle(p *clientPeer) error {
 	for {
 		select {
 		case err := <-p.errCh:
-			p.Log().Debug("Failed to send light ethereum response", "err", err)
+			p.Log().Debug("Failed to send light sdcereum response", "err", err)
 			return err
 		default:
 		}
 		if err := h.handleMsg(p, &wg); err != nil {
-			p.Log().Debug("Light Ethereum message handling failed", "err", err)
+			p.Log().Debug("Light sdcereum message handling failed", "err", err)
 			return err
 		}
 	}
@@ -273,7 +273,7 @@ func (h *serverHandler) handleMsg(p *clientPeer, wg *sync.WaitGroup) error {
 	if err != nil {
 		return err
 	}
-	p.Log().Trace("Light Ethereum message arrived", "code", msg.Code, "bytes", msg.Size)
+	p.Log().Trace("Light sdcereum message arrived", "code", msg.Code, "bytes", msg.Size)
 
 	// Discard large message which exceeds the limitation.
 	if msg.Size > ProtocolMaxMsgSize {
@@ -374,8 +374,8 @@ func getAccount(triedb *trie.Database, root, hash common.Hash) (types.StateAccou
 	return acc, nil
 }
 
-// GetHelperTrie returns the post-processed trie root for the given trie ID and section index
-func (h *serverHandler) GetHelperTrie(typ uint, index uint64) *trie.Trie {
+// GsdcelperTrie returns the post-processed trie root for the given trie ID and section index
+func (h *serverHandler) GsdcelperTrie(typ uint, index uint64) *trie.Trie {
 	var (
 		root   common.Hash
 		prefix string
@@ -421,7 +421,7 @@ func (h *serverHandler) broadcastLoop() {
 			}
 			var reorg uint64
 			if lastHead != nil {
-				// If a setHead has been performed, the common ancestor can be nil.
+				// If a ssdcead has been performed, the common ancestor can be nil.
 				if ancestor := rawdb.FindCommonAncestor(h.chainDb, header, lastHead); ancestor != nil {
 					reorg = lastHead.Number.Uint64() - ancestor.Number.Uint64()
 				}

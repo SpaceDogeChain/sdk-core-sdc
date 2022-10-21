@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package state
 
@@ -20,10 +20,10 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 // NodeIterator is an iterator to traverse the entire state trie post-order,
@@ -51,8 +51,8 @@ func NewNodeIterator(state *StateDB) *NodeIterator {
 	}
 }
 
-// Next moves the iterator to the next node, returning whether there are any
-// further nodes. In case of an internal error this method returns false and
+// Next moves the iterator to the next node, returning whsdcer there are any
+// further nodes. In case of an internal error this msdcod returns false and
 // sets the Error field to the encountered failure.
 func (it *NodeIterator) Next() bool {
 	// If the iterator failed previously, don't do anything
@@ -130,7 +130,7 @@ func (it *NodeIterator) step() error {
 }
 
 // retrieve pulls and caches the current state entry the iterator is traversing.
-// The method returns whether there are any more data left for inspection.
+// The msdcod returns whsdcer there are any more data left for inspection.
 func (it *NodeIterator) retrieve() bool {
 	// Clear out any previously set values
 	it.Hash = common.Hash{}

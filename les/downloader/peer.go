@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains the active peer-set of the downloader, maintaining both failures
 // as well as reputation metrics to prioritize the block retrievals.
@@ -27,11 +27,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/msgrate"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/p2p/msgrate"
 )
 
 const (
@@ -63,19 +63,19 @@ type peerConnection struct {
 
 	peer Peer
 
-	version uint       // Eth protocol version number to switch strategies
+	version uint       // sdc protocol version number to switch strategies
 	log     log.Logger // Contextual logger to add extra infos to peer logs
 	lock    sync.RWMutex
 }
 
-// LightPeer encapsulates the methods required to synchronise with a remote light peer.
+// LightPeer encapsulates the msdcods required to synchronise with a remote light peer.
 type LightPeer interface {
 	Head() (common.Hash, *big.Int)
 	RequestHeadersByHash(common.Hash, int, int, bool) error
 	RequestHeadersByNumber(uint64, int, int, bool) error
 }
 
-// Peer encapsulates the methods required to synchronise with a remote full peer.
+// Peer encapsulates the msdcods required to synchronise with a remote full peer.
 type Peer interface {
 	LightPeer
 	RequestBodies([]common.Hash) error
@@ -83,7 +83,7 @@ type Peer interface {
 	RequestNodeData([]common.Hash) error
 }
 
-// lightPeerWrapper wraps a LightPeer struct, stubbing out the Peer-only methods.
+// lightPeerWrapper wraps a LightPeer struct, stubbing out the Peer-only msdcods.
 type lightPeerWrapper struct {
 	peer LightPeer
 }
@@ -196,11 +196,11 @@ func (p *peerConnection) FetchNodeData(hashes []common.Hash) error {
 	return nil
 }
 
-// SetHeadersIdle sets the peer to idle, allowing it to execute new header retrieval
+// SsdceadersIdle sets the peer to idle, allowing it to execute new header retrieval
 // requests. Its estimated header retrieval throughput is updated with that measured
 // just now.
-func (p *peerConnection) SetHeadersIdle(delivered int, deliveryTime time.Time) {
-	p.rates.Update(eth.BlockHeadersMsg, deliveryTime.Sub(p.headerStarted), delivered)
+func (p *peerConnection) SsdceadersIdle(delivered int, deliveryTime time.Time) {
+	p.rates.Update(sdc.BlockHeadersMsg, deliveryTime.Sub(p.headerStarted), delivered)
 	atomic.StoreInt32(&p.headerIdle, 0)
 }
 
@@ -208,7 +208,7 @@ func (p *peerConnection) SetHeadersIdle(delivered int, deliveryTime time.Time) {
 // requests. Its estimated body retrieval throughput is updated with that measured
 // just now.
 func (p *peerConnection) SetBodiesIdle(delivered int, deliveryTime time.Time) {
-	p.rates.Update(eth.BlockBodiesMsg, deliveryTime.Sub(p.blockStarted), delivered)
+	p.rates.Update(sdc.BlockBodiesMsg, deliveryTime.Sub(p.blockStarted), delivered)
 	atomic.StoreInt32(&p.blockIdle, 0)
 }
 
@@ -216,7 +216,7 @@ func (p *peerConnection) SetBodiesIdle(delivered int, deliveryTime time.Time) {
 // retrieval requests. Its estimated receipt retrieval throughput is updated
 // with that measured just now.
 func (p *peerConnection) SetReceiptsIdle(delivered int, deliveryTime time.Time) {
-	p.rates.Update(eth.ReceiptsMsg, deliveryTime.Sub(p.receiptStarted), delivered)
+	p.rates.Update(sdc.ReceiptsMsg, deliveryTime.Sub(p.receiptStarted), delivered)
 	atomic.StoreInt32(&p.receiptIdle, 0)
 }
 
@@ -224,14 +224,14 @@ func (p *peerConnection) SetReceiptsIdle(delivered int, deliveryTime time.Time) 
 // data retrieval requests. Its estimated state retrieval throughput is updated
 // with that measured just now.
 func (p *peerConnection) SetNodeDataIdle(delivered int, deliveryTime time.Time) {
-	p.rates.Update(eth.NodeDataMsg, deliveryTime.Sub(p.stateStarted), delivered)
+	p.rates.Update(sdc.NodeDataMsg, deliveryTime.Sub(p.stateStarted), delivered)
 	atomic.StoreInt32(&p.stateIdle, 0)
 }
 
 // HeaderCapacity retrieves the peers header download allowance based on its
 // previously discovered throughput.
 func (p *peerConnection) HeaderCapacity(targetRTT time.Duration) int {
-	cap := p.rates.Capacity(eth.BlockHeadersMsg, targetRTT)
+	cap := p.rates.Capacity(sdc.BlockHeadersMsg, targetRTT)
 	if cap > MaxHeaderFetch {
 		cap = MaxHeaderFetch
 	}
@@ -241,7 +241,7 @@ func (p *peerConnection) HeaderCapacity(targetRTT time.Duration) int {
 // BlockCapacity retrieves the peers block download allowance based on its
 // previously discovered throughput.
 func (p *peerConnection) BlockCapacity(targetRTT time.Duration) int {
-	cap := p.rates.Capacity(eth.BlockBodiesMsg, targetRTT)
+	cap := p.rates.Capacity(sdc.BlockBodiesMsg, targetRTT)
 	if cap > MaxBlockFetch {
 		cap = MaxBlockFetch
 	}
@@ -251,7 +251,7 @@ func (p *peerConnection) BlockCapacity(targetRTT time.Duration) int {
 // ReceiptCapacity retrieves the peers receipt download allowance based on its
 // previously discovered throughput.
 func (p *peerConnection) ReceiptCapacity(targetRTT time.Duration) int {
-	cap := p.rates.Capacity(eth.ReceiptsMsg, targetRTT)
+	cap := p.rates.Capacity(sdc.ReceiptsMsg, targetRTT)
 	if cap > MaxReceiptFetch {
 		cap = MaxReceiptFetch
 	}
@@ -261,7 +261,7 @@ func (p *peerConnection) ReceiptCapacity(targetRTT time.Duration) int {
 // NodeDataCapacity retrieves the peers state download allowance based on its
 // previously discovered throughput.
 func (p *peerConnection) NodeDataCapacity(targetRTT time.Duration) int {
-	cap := p.rates.Capacity(eth.NodeDataMsg, targetRTT)
+	cap := p.rates.Capacity(sdc.NodeDataMsg, targetRTT)
 	if cap > MaxStateFetch {
 		cap = MaxStateFetch
 	}
@@ -284,8 +284,8 @@ func (p *peerConnection) MarkLacking(hash common.Hash) {
 	p.lacking[hash] = struct{}{}
 }
 
-// Lacks retrieves whether the hash of a blockchain item is on the peers lacking
-// list (i.e. whether we know that the peer does not have it).
+// Lacks retrieves whsdcer the hash of a blockchain item is on the peers lacking
+// list (i.e. whsdcer we know that the peer does not have it).
 func (p *peerConnection) Lacks(hash common.Hash) bool {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
@@ -310,7 +310,7 @@ type peerSet struct {
 func newPeerSet() *peerSet {
 	return &peerSet{
 		peers: make(map[string]*peerConnection),
-		rates: msgrate.NewTrackers(log.New("proto", "eth")),
+		rates: msgrate.NewTrackers(log.New("proto", "sdc")),
 	}
 }
 
@@ -338,7 +338,7 @@ func (ps *peerSet) Reset() {
 // Register injects a new peer into the working set, or returns an error if the
 // peer is already known.
 //
-// The method also sets the starting throughput values of the new peer to the
+// The msdcod also sets the starting throughput values of the new peer to the
 // average of all existing peers, to give it a realistic chance of being used
 // for data retrievals.
 func (ps *peerSet) Register(p *peerConnection) error {
@@ -412,9 +412,9 @@ func (ps *peerSet) HeaderIdlePeers() ([]*peerConnection, int) {
 		return atomic.LoadInt32(&p.headerIdle) == 0
 	}
 	throughput := func(p *peerConnection) int {
-		return p.rates.Capacity(eth.BlockHeadersMsg, time.Second)
+		return p.rates.Capacity(sdc.BlockHeadersMsg, time.Second)
 	}
-	return ps.idlePeers(eth.ETH66, eth.ETH67, idle, throughput)
+	return ps.idlePeers(sdc.sdc66, sdc.sdc67, idle, throughput)
 }
 
 // BodyIdlePeers retrieves a flat list of all the currently body-idle peers within
@@ -424,9 +424,9 @@ func (ps *peerSet) BodyIdlePeers() ([]*peerConnection, int) {
 		return atomic.LoadInt32(&p.blockIdle) == 0
 	}
 	throughput := func(p *peerConnection) int {
-		return p.rates.Capacity(eth.BlockBodiesMsg, time.Second)
+		return p.rates.Capacity(sdc.BlockBodiesMsg, time.Second)
 	}
-	return ps.idlePeers(eth.ETH66, eth.ETH67, idle, throughput)
+	return ps.idlePeers(sdc.sdc66, sdc.sdc67, idle, throughput)
 }
 
 // ReceiptIdlePeers retrieves a flat list of all the currently receipt-idle peers
@@ -436,9 +436,9 @@ func (ps *peerSet) ReceiptIdlePeers() ([]*peerConnection, int) {
 		return atomic.LoadInt32(&p.receiptIdle) == 0
 	}
 	throughput := func(p *peerConnection) int {
-		return p.rates.Capacity(eth.ReceiptsMsg, time.Second)
+		return p.rates.Capacity(sdc.ReceiptsMsg, time.Second)
 	}
-	return ps.idlePeers(eth.ETH66, eth.ETH67, idle, throughput)
+	return ps.idlePeers(sdc.sdc66, sdc.sdc67, idle, throughput)
 }
 
 // NodeDataIdlePeers retrieves a flat list of all the currently node-data-idle
@@ -448,9 +448,9 @@ func (ps *peerSet) NodeDataIdlePeers() ([]*peerConnection, int) {
 		return atomic.LoadInt32(&p.stateIdle) == 0
 	}
 	throughput := func(p *peerConnection) int {
-		return p.rates.Capacity(eth.NodeDataMsg, time.Second)
+		return p.rates.Capacity(sdc.NodeDataMsg, time.Second)
 	}
-	return ps.idlePeers(eth.ETH66, eth.ETH67, idle, throughput)
+	return ps.idlePeers(sdc.sdc66, sdc.sdc67, idle, throughput)
 }
 
 // idlePeers retrieves a flat list of all currently idle peers satisfying the

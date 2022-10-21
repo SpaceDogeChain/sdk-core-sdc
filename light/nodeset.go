@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package light
 
@@ -20,10 +20,10 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 // NodeSet stores a set of trie nodes. It implements trie.Database and can also
@@ -115,7 +115,7 @@ func (db *NodeSet) NodeList() NodeList {
 }
 
 // Store writes the contents of the set to the given database
-func (db *NodeSet) Store(target ethdb.KeyValueWriter) {
+func (db *NodeSet) Store(target sdcdb.KeyValueWriter) {
 	db.lock.RLock()
 	defer db.lock.RUnlock()
 
@@ -124,11 +124,11 @@ func (db *NodeSet) Store(target ethdb.KeyValueWriter) {
 	}
 }
 
-// NodeList stores an ordered list of trie nodes. It implements ethdb.KeyValueWriter.
+// NodeList stores an ordered list of trie nodes. It implements sdcdb.KeyValueWriter.
 type NodeList []rlp.RawValue
 
 // Store writes the contents of the list to the given database
-func (n NodeList) Store(db ethdb.KeyValueWriter) {
+func (n NodeList) Store(db sdcdb.KeyValueWriter) {
 	for _, node := range n {
 		db.Put(crypto.Keccak256(node), node)
 	}

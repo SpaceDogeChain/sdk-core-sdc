@@ -1,20 +1,20 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"fmt"
@@ -24,69 +24,69 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/forkid"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/forkid"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
-// testEthHandler is a mock event handler to listen for inbound network requests
-// on the `eth` protocol and convert them into a more easily testable form.
-type testEthHandler struct {
+// testsdcHandler is a mock event handler to listen for inbound network requests
+// on the `sdc` protocol and convert them into a more easily testable form.
+type testsdcHandler struct {
 	blockBroadcasts event.Feed
 	txAnnounces     event.Feed
 	txBroadcasts    event.Feed
 }
 
-func (h *testEthHandler) Chain() *core.BlockChain              { panic("no backing chain") }
-func (h *testEthHandler) TxPool() eth.TxPool                   { panic("no backing tx pool") }
-func (h *testEthHandler) AcceptTxs() bool                      { return true }
-func (h *testEthHandler) RunPeer(*eth.Peer, eth.Handler) error { panic("not used in tests") }
-func (h *testEthHandler) PeerInfo(enode.ID) interface{}        { panic("not used in tests") }
+func (h *testsdcHandler) Chain() *core.BlockChain              { panic("no backing chain") }
+func (h *testsdcHandler) TxPool() sdc.TxPool                   { panic("no backing tx pool") }
+func (h *testsdcHandler) AcceptTxs() bool                      { return true }
+func (h *testsdcHandler) RunPeer(*sdc.Peer, sdc.Handler) error { panic("not used in tests") }
+func (h *testsdcHandler) PeerInfo(enode.ID) interface{}        { panic("not used in tests") }
 
-func (h *testEthHandler) Handle(peer *eth.Peer, packet eth.Packet) error {
+func (h *testsdcHandler) Handle(peer *sdc.Peer, packet sdc.Packet) error {
 	switch packet := packet.(type) {
-	case *eth.NewBlockPacket:
+	case *sdc.NewBlockPacket:
 		h.blockBroadcasts.Send(packet.Block)
 		return nil
 
-	case *eth.NewPooledTransactionHashesPacket:
+	case *sdc.NewPooledTransactionHashesPacket:
 		h.txAnnounces.Send(([]common.Hash)(*packet))
 		return nil
 
-	case *eth.TransactionsPacket:
+	case *sdc.TransactionsPacket:
 		h.txBroadcasts.Send(([]*types.Transaction)(*packet))
 		return nil
 
-	case *eth.PooledTransactionsPacket:
+	case *sdc.PooledTransactionsPacket:
 		h.txBroadcasts.Send(([]*types.Transaction)(*packet))
 		return nil
 
 	default:
-		panic(fmt.Sprintf("unexpected eth packet type in tests: %T", packet))
+		panic(fmt.Sprintf("unexpected sdc packet type in tests: %T", packet))
 	}
 }
 
 // Tests that peers are correctly accepted (or rejected) based on the advertised
 // fork IDs in the protocol handshake.
-func TestForkIDSplit66(t *testing.T) { testForkIDSplit(t, eth.ETH66) }
+func TestForkIDSplit66(t *testing.T) { testForkIDSplit(t, sdc.sdc66) }
 
 func testForkIDSplit(t *testing.T, protocol uint) {
 	t.Parallel()
 
 	var (
-		engine = ethash.NewFaker()
+		engine = sdcash.NewFaker()
 
 		configNoFork  = &params.ChainConfig{HomesteadBlock: big.NewInt(1)}
 		configProFork = &params.ChainConfig{
@@ -108,7 +108,7 @@ func testForkIDSplit(t *testing.T, protocol uint) {
 		_, blocksNoFork, _  = core.GenerateChainWithGenesis(gspecNoFork, engine, 2, nil)
 		_, blocksProFork, _ = core.GenerateChainWithGenesis(gspecProFork, engine, 2, nil)
 
-		ethNoFork, _ = newHandler(&handlerConfig{
+		sdcNoFork, _ = newHandler(&handlerConfig{
 			Database:   dbNoFork,
 			Chain:      chainNoFork,
 			TxPool:     newTestTxPool(),
@@ -117,7 +117,7 @@ func testForkIDSplit(t *testing.T, protocol uint) {
 			Sync:       downloader.FullSync,
 			BloomCache: 1,
 		})
-		ethProFork, _ = newHandler(&handlerConfig{
+		sdcProFork, _ = newHandler(&handlerConfig{
 			Database:   dbProFork,
 			Chain:      chainProFork,
 			TxPool:     newTestTxPool(),
@@ -127,32 +127,32 @@ func testForkIDSplit(t *testing.T, protocol uint) {
 			BloomCache: 1,
 		})
 	)
-	ethNoFork.Start(1000)
-	ethProFork.Start(1000)
+	sdcNoFork.Start(1000)
+	sdcProFork.Start(1000)
 
 	// Clean up everything after ourselves
 	defer chainNoFork.Stop()
 	defer chainProFork.Stop()
 
-	defer ethNoFork.Stop()
-	defer ethProFork.Stop()
+	defer sdcNoFork.Stop()
+	defer sdcProFork.Stop()
 
 	// Both nodes should allow the other to connect (same genesis, next fork is the same)
 	p2pNoFork, p2pProFork := p2p.MsgPipe()
 	defer p2pNoFork.Close()
 	defer p2pProFork.Close()
 
-	peerNoFork := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pNoFork), p2pNoFork, nil)
-	peerProFork := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pProFork), p2pProFork, nil)
+	peerNoFork := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pNoFork), p2pNoFork, nil)
+	peerProFork := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pProFork), p2pProFork, nil)
 	defer peerNoFork.Close()
 	defer peerProFork.Close()
 
 	errc := make(chan error, 2)
 	go func(errc chan error) {
-		errc <- ethNoFork.runEthPeer(peerProFork, func(peer *eth.Peer) error { return nil })
+		errc <- sdcNoFork.runsdcPeer(peerProFork, func(peer *sdc.Peer) error { return nil })
 	}(errc)
 	go func(errc chan error) {
-		errc <- ethProFork.runEthPeer(peerNoFork, func(peer *eth.Peer) error { return nil })
+		errc <- sdcProFork.runsdcPeer(peerNoFork, func(peer *sdc.Peer) error { return nil })
 	}(errc)
 
 	for i := 0; i < 2; i++ {
@@ -173,17 +173,17 @@ func testForkIDSplit(t *testing.T, protocol uint) {
 	defer p2pNoFork.Close()
 	defer p2pProFork.Close()
 
-	peerNoFork = eth.NewPeer(protocol, p2p.NewPeer(enode.ID{1}, "", nil), p2pNoFork, nil)
-	peerProFork = eth.NewPeer(protocol, p2p.NewPeer(enode.ID{2}, "", nil), p2pProFork, nil)
+	peerNoFork = sdc.NewPeer(protocol, p2p.NewPeer(enode.ID{1}, "", nil), p2pNoFork, nil)
+	peerProFork = sdc.NewPeer(protocol, p2p.NewPeer(enode.ID{2}, "", nil), p2pProFork, nil)
 	defer peerNoFork.Close()
 	defer peerProFork.Close()
 
 	errc = make(chan error, 2)
 	go func(errc chan error) {
-		errc <- ethNoFork.runEthPeer(peerProFork, func(peer *eth.Peer) error { return nil })
+		errc <- sdcNoFork.runsdcPeer(peerProFork, func(peer *sdc.Peer) error { return nil })
 	}(errc)
 	go func(errc chan error) {
-		errc <- ethProFork.runEthPeer(peerNoFork, func(peer *eth.Peer) error { return nil })
+		errc <- sdcProFork.runsdcPeer(peerNoFork, func(peer *sdc.Peer) error { return nil })
 	}(errc)
 
 	for i := 0; i < 2; i++ {
@@ -204,17 +204,17 @@ func testForkIDSplit(t *testing.T, protocol uint) {
 	defer p2pNoFork.Close()
 	defer p2pProFork.Close()
 
-	peerNoFork = eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pNoFork), p2pNoFork, nil)
-	peerProFork = eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pProFork), p2pProFork, nil)
+	peerNoFork = sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pNoFork), p2pNoFork, nil)
+	peerProFork = sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pProFork), p2pProFork, nil)
 	defer peerNoFork.Close()
 	defer peerProFork.Close()
 
 	errc = make(chan error, 2)
 	go func(errc chan error) {
-		errc <- ethNoFork.runEthPeer(peerProFork, func(peer *eth.Peer) error { return nil })
+		errc <- sdcNoFork.runsdcPeer(peerProFork, func(peer *sdc.Peer) error { return nil })
 	}(errc)
 	go func(errc chan error) {
-		errc <- ethProFork.runEthPeer(peerNoFork, func(peer *eth.Peer) error { return nil })
+		errc <- sdcProFork.runsdcPeer(peerNoFork, func(peer *sdc.Peer) error { return nil })
 	}(errc)
 
 	var successes int
@@ -234,7 +234,7 @@ func testForkIDSplit(t *testing.T, protocol uint) {
 }
 
 // Tests that received transactions are added to the local pool.
-func TestRecvTransactions66(t *testing.T) { testRecvTransactions(t, eth.ETH66) }
+func TestRecvTransactions66(t *testing.T) { testRecvTransactions(t, sdc.sdc66) }
 
 func testRecvTransactions(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -254,13 +254,13 @@ func testRecvTransactions(t *testing.T, protocol uint) {
 	defer p2pSrc.Close()
 	defer p2pSink.Close()
 
-	src := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pSrc), p2pSrc, handler.txpool)
-	sink := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pSink), p2pSink, handler.txpool)
+	src := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pSrc), p2pSrc, handler.txpool)
+	sink := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pSink), p2pSink, handler.txpool)
 	defer src.Close()
 	defer sink.Close()
 
-	go handler.handler.runEthPeer(sink, func(peer *eth.Peer) error {
-		return eth.Handle((*ethHandler)(handler.handler), peer)
+	go handler.handler.runsdcPeer(sink, func(peer *sdc.Peer) error {
+		return sdc.Handle((*sdcHandler)(handler.handler), peer)
 	})
 	// Run the handshake locally to avoid spinning up a source handler
 	var (
@@ -291,7 +291,7 @@ func testRecvTransactions(t *testing.T, protocol uint) {
 }
 
 // This test checks that pending transactions are sent.
-func TestSendTransactions66(t *testing.T) { testSendTransactions(t, eth.ETH66) }
+func TestSendTransactions66(t *testing.T) { testSendTransactions(t, sdc.sdc66) }
 
 func testSendTransactions(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -315,13 +315,13 @@ func testSendTransactions(t *testing.T, protocol uint) {
 	defer p2pSrc.Close()
 	defer p2pSink.Close()
 
-	src := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pSrc), p2pSrc, handler.txpool)
-	sink := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pSink), p2pSink, handler.txpool)
+	src := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pSrc), p2pSrc, handler.txpool)
+	sink := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pSink), p2pSink, handler.txpool)
 	defer src.Close()
 	defer sink.Close()
 
-	go handler.handler.runEthPeer(src, func(peer *eth.Peer) error {
-		return eth.Handle((*ethHandler)(handler.handler), peer)
+	go handler.handler.runsdcPeer(src, func(peer *sdc.Peer) error {
+		return sdc.Handle((*sdcHandler)(handler.handler), peer)
 	})
 	// Run the handshake locally to avoid spinning up a source handler
 	var (
@@ -334,7 +334,7 @@ func testSendTransactions(t *testing.T, protocol uint) {
 	}
 	// After the handshake completes, the source handler should stream the sink
 	// the transactions, subscribe to all inbound network events
-	backend := new(testEthHandler)
+	backend := new(testsdcHandler)
 
 	anns := make(chan []common.Hash)
 	annSub := backend.txAnnounces.Subscribe(anns)
@@ -344,7 +344,7 @@ func testSendTransactions(t *testing.T, protocol uint) {
 	bcastSub := backend.txBroadcasts.Subscribe(bcasts)
 	defer bcastSub.Unsubscribe()
 
-	go eth.Handle(backend, sink)
+	go sdc.Handle(backend, sink)
 
 	// Make sure we get all the transactions on the correct channels
 	seen := make(map[common.Hash]struct{})
@@ -360,7 +360,7 @@ func testSendTransactions(t *testing.T, protocol uint) {
 					seen[hash] = struct{}{}
 				}
 			case <-bcasts:
-				t.Errorf("initial tx broadcast received on post eth/66")
+				t.Errorf("initial tx broadcast received on post sdc/66")
 			}
 
 		default:
@@ -376,7 +376,7 @@ func testSendTransactions(t *testing.T, protocol uint) {
 
 // Tests that transactions get propagated to all attached peers, either via direct
 // broadcasts or via announcements/retrievals.
-func TestTransactionPropagation66(t *testing.T) { testTransactionPropagation(t, eth.ETH66) }
+func TestTransactionPropagation66(t *testing.T) { testTransactionPropagation(t, sdc.sdc66) }
 
 func testTransactionPropagation(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -403,16 +403,16 @@ func testTransactionPropagation(t *testing.T, protocol uint) {
 		defer sourcePipe.Close()
 		defer sinkPipe.Close()
 
-		sourcePeer := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{byte(i + 1)}, "", nil, sourcePipe), sourcePipe, source.txpool)
-		sinkPeer := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{0}, "", nil, sinkPipe), sinkPipe, sink.txpool)
+		sourcePeer := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{byte(i + 1)}, "", nil, sourcePipe), sourcePipe, source.txpool)
+		sinkPeer := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{0}, "", nil, sinkPipe), sinkPipe, sink.txpool)
 		defer sourcePeer.Close()
 		defer sinkPeer.Close()
 
-		go source.handler.runEthPeer(sourcePeer, func(peer *eth.Peer) error {
-			return eth.Handle((*ethHandler)(source.handler), peer)
+		go source.handler.runsdcPeer(sourcePeer, func(peer *sdc.Peer) error {
+			return sdc.Handle((*sdcHandler)(source.handler), peer)
 		})
-		go sink.handler.runEthPeer(sinkPeer, func(peer *eth.Peer) error {
-			return eth.Handle((*ethHandler)(sink.handler), peer)
+		go sink.handler.runsdcPeer(sinkPeer, func(peer *sdc.Peer) error {
+			return sdc.Handle((*sdcHandler)(sink.handler), peer)
 		})
 	}
 	// Subscribe to all the transaction pools
@@ -447,7 +447,7 @@ func testTransactionPropagation(t *testing.T, protocol uint) {
 	}
 }
 
-// Tests that post eth protocol handshake, clients perform a mutual checkpoint
+// Tests that post sdc protocol handshake, clients perform a mutual checkpoint
 // challenge to validate each other's chains. Hash mismatches, or missing ones
 // during a fast sync should lead to the peer getting dropped.
 func TestCheckpointChallenge(t *testing.T) {
@@ -516,16 +516,16 @@ func testCheckpointChallenge(t *testing.T, syncmode downloader.SyncMode, checkpo
 	defer p2pLocal.Close()
 	defer p2pRemote.Close()
 
-	local := eth.NewPeer(eth.ETH66, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pLocal), p2pLocal, handler.txpool)
-	remote := eth.NewPeer(eth.ETH66, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pRemote), p2pRemote, handler.txpool)
+	local := sdc.NewPeer(sdc.sdc66, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pLocal), p2pLocal, handler.txpool)
+	remote := sdc.NewPeer(sdc.sdc66, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pRemote), p2pRemote, handler.txpool)
 	defer local.Close()
 	defer remote.Close()
 
 	handlerDone := make(chan struct{})
 	go func() {
 		defer close(handlerDone)
-		handler.handler.runEthPeer(local, func(peer *eth.Peer) error {
-			return eth.Handle((*ethHandler)(handler.handler), peer)
+		handler.handler.runsdcPeer(local, func(peer *sdc.Peer) error {
+			return sdc.Handle((*sdcHandler)(handler.handler), peer)
 		})
 	}()
 
@@ -544,7 +544,7 @@ func testCheckpointChallenge(t *testing.T, syncmode downloader.SyncMode, checkpo
 		if err != nil {
 			t.Fatalf("failed to read checkpoint challenge: %v", err)
 		}
-		request := new(eth.GetBlockHeadersPacket66)
+		request := new(sdc.GetBlockHeadersPacket66)
 		if err := msg.Decode(request); err != nil {
 			t.Fatalf("failed to decode checkpoint challenge: %v", err)
 		}
@@ -609,9 +609,9 @@ func testBroadcastBlock(t *testing.T, peers, bcasts int) {
 	source := newTestHandlerWithBlocks(1)
 	defer source.close()
 
-	sinks := make([]*testEthHandler, peers)
+	sinks := make([]*testsdcHandler, peers)
 	for i := 0; i < len(sinks); i++ {
-		sinks[i] = new(testEthHandler)
+		sinks[i] = new(testsdcHandler)
 	}
 	// Interconnect all the sink handlers with the source handler
 	var (
@@ -625,18 +625,18 @@ func testBroadcastBlock(t *testing.T, peers, bcasts int) {
 		defer sourcePipe.Close()
 		defer sinkPipe.Close()
 
-		sourcePeer := eth.NewPeer(eth.ETH66, p2p.NewPeerPipe(enode.ID{byte(i)}, "", nil, sourcePipe), sourcePipe, nil)
-		sinkPeer := eth.NewPeer(eth.ETH66, p2p.NewPeerPipe(enode.ID{0}, "", nil, sinkPipe), sinkPipe, nil)
+		sourcePeer := sdc.NewPeer(sdc.sdc66, p2p.NewPeerPipe(enode.ID{byte(i)}, "", nil, sourcePipe), sourcePipe, nil)
+		sinkPeer := sdc.NewPeer(sdc.sdc66, p2p.NewPeerPipe(enode.ID{0}, "", nil, sinkPipe), sinkPipe, nil)
 		defer sourcePeer.Close()
 		defer sinkPeer.Close()
 
-		go source.handler.runEthPeer(sourcePeer, func(peer *eth.Peer) error {
-			return eth.Handle((*ethHandler)(source.handler), peer)
+		go source.handler.runsdcPeer(sourcePeer, func(peer *sdc.Peer) error {
+			return sdc.Handle((*sdcHandler)(source.handler), peer)
 		})
 		if err := sinkPeer.Handshake(1, td, genesis.Hash(), genesis.Hash(), forkid.NewIDWithChain(source.chain), forkid.NewFilter(source.chain)); err != nil {
 			t.Fatalf("failed to run protocol handshake")
 		}
-		go eth.Handle(sink, sinkPeer)
+		go sdc.Handle(sink, sinkPeer)
 	}
 	// Subscribe to all the transaction pools
 	blockChs := make([]chan *types.Block, len(sinks))
@@ -677,7 +677,7 @@ func testBroadcastBlock(t *testing.T, peers, bcasts int) {
 
 // Tests that a propagated malformed block (uncles or transactions don't match
 // with the hashes in the header) gets discarded and not broadcast forward.
-func TestBroadcastMalformedBlock66(t *testing.T) { testBroadcastMalformedBlock(t, eth.ETH66) }
+func TestBroadcastMalformedBlock66(t *testing.T) { testBroadcastMalformedBlock(t, sdc.sdc66) }
 
 func testBroadcastMalformedBlock(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -692,13 +692,13 @@ func testBroadcastMalformedBlock(t *testing.T, protocol uint) {
 	defer p2pSrc.Close()
 	defer p2pSink.Close()
 
-	src := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pSrc), p2pSrc, source.txpool)
-	sink := eth.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pSink), p2pSink, source.txpool)
+	src := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{1}, "", nil, p2pSrc), p2pSrc, source.txpool)
+	sink := sdc.NewPeer(protocol, p2p.NewPeerPipe(enode.ID{2}, "", nil, p2pSink), p2pSink, source.txpool)
 	defer src.Close()
 	defer sink.Close()
 
-	go source.handler.runEthPeer(src, func(peer *eth.Peer) error {
-		return eth.Handle((*ethHandler)(source.handler), peer)
+	go source.handler.runsdcPeer(src, func(peer *sdc.Peer) error {
+		return sdc.Handle((*sdcHandler)(source.handler), peer)
 	})
 	// Run the handshake locally to avoid spinning up a sink handler
 	var (
@@ -710,13 +710,13 @@ func testBroadcastMalformedBlock(t *testing.T, protocol uint) {
 	}
 	// After the handshake completes, the source handler should stream the sink
 	// the blocks, subscribe to inbound network events
-	backend := new(testEthHandler)
+	backend := new(testsdcHandler)
 
 	blocks := make(chan *types.Block, 1)
 	sub := backend.blockBroadcasts.Subscribe(blocks)
 	defer sub.Unsubscribe()
 
-	go eth.Handle(backend, sink)
+	go sdc.Handle(backend, sink)
 
 	// Create various combinations of malformed blocks
 	head := source.chain.CurrentBlock()

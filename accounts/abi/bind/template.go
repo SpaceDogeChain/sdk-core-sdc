@@ -1,22 +1,22 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package bind
 
-import "github.com/ethereum/go-ethereum/accounts/abi"
+import "github.com/sdcereum/go-sdcereum/accounts/abi"
 
 // tmplData is the data structure required to fill the binding template.
 type tmplData struct {
@@ -32,22 +32,22 @@ type tmplContract struct {
 	InputABI    string                 // JSON ABI used as the input to generate the binding from
 	InputBin    string                 // Optional EVM bytecode used to generate deploy code from
 	FuncSigs    map[string]string      // Optional map: string signature -> 4-byte signature
-	Constructor abi.Method             // Contract constructor for deploy parametrization
-	Calls       map[string]*tmplMethod // Contract calls that only read state data
-	Transacts   map[string]*tmplMethod // Contract calls that write state data
-	Fallback    *tmplMethod            // Additional special fallback function
-	Receive     *tmplMethod            // Additional special receive function
+	Constructor abi.Msdcod             // Contract constructor for deploy parametrization
+	Calls       map[string]*tmplMsdcod // Contract calls that only read state data
+	Transacts   map[string]*tmplMsdcod // Contract calls that write state data
+	Fallback    *tmplMsdcod            // Additional special fallback function
+	Receive     *tmplMsdcod            // Additional special receive function
 	Events      map[string]*tmplEvent  // Contract events accessors
 	Libraries   map[string]string      // Same as tmplData, but filtered to only keep what the contract needs
-	Library     bool                   // Indicator whether the contract is a library
+	Library     bool                   // Indicator whsdcer the contract is a library
 }
 
-// tmplMethod is a wrapper around an abi.Method that contains a few preprocessed
+// tmplMsdcod is a wrapper around an abi.Msdcod that contains a few preprocessed
 // and cached data fields.
-type tmplMethod struct {
-	Original   abi.Method // Original method as parsed by the abi package
-	Normalized abi.Method // Normalized version of the parsed method (capitalized names, non-anonymous args/returns)
-	Structured bool       // Whether the returns should be accumulated into a struct
+type tmplMsdcod struct {
+	Original   abi.Msdcod // Original msdcod as parsed by the abi package
+	Normalized abi.Msdcod // Normalized version of the parsed msdcod (capitalized names, non-anonymous args/returns)
+	Structured bool       // Whsdcer the returns should be accumulated into a struct
 }
 
 // tmplEvent is a wrapper around an abi.Event that contains a few preprocessed
@@ -92,12 +92,12 @@ import (
 	"strings"
 	"errors"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
+	sdcereum "github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/accounts/abi"
+	"github.com/sdcereum/go-sdcereum/accounts/abi/bind"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/event"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -105,7 +105,7 @@ var (
 	_ = errors.New
 	_ = big.NewInt
 	_ = strings.NewReader
-	_ = ethereum.NotFound
+	_ = sdcereum.NotFound
 	_ = bind.Bind
 	_ = common.Big1
 	_ = types.BloomLookup
@@ -151,7 +151,7 @@ var (
 		// Deprecated: Use {{.Type}}MetaData.Bin instead.
 		var {{.Type}}Bin = {{.Type}}MetaData.Bin
 
-		// Deploy{{.Type}} deploys a new Ethereum contract, binding an instance of {{.Type}} to it.
+		// Deploy{{.Type}} deploys a new sdcereum contract, binding an instance of {{.Type}} to it.
 		func Deploy{{.Type}}(auth *bind.TransactOpts, backend bind.ContractBackend {{range .Constructor.Inputs}}, {{.Name}} {{bindtype .Type $structs}}{{end}}) (common.Address, *types.Transaction, *{{.Type}}, error) {
 		  parsed, err := {{.Type}}MetaData.GetAbi()
 		  if err != nil {
@@ -172,29 +172,29 @@ var (
 		}
 	{{end}}
 
-	// {{.Type}} is an auto generated Go binding around an Ethereum contract.
+	// {{.Type}} is an auto generated Go binding around an sdcereum contract.
 	type {{.Type}} struct {
 	  {{.Type}}Caller     // Read-only binding to the contract
 	  {{.Type}}Transactor // Write-only binding to the contract
 	  {{.Type}}Filterer   // Log filterer for contract events
 	}
 
-	// {{.Type}}Caller is an auto generated read-only Go binding around an Ethereum contract.
+	// {{.Type}}Caller is an auto generated read-only Go binding around an sdcereum contract.
 	type {{.Type}}Caller struct {
 	  contract *bind.BoundContract // Generic contract wrapper for the low level calls
 	}
 
-	// {{.Type}}Transactor is an auto generated write-only Go binding around an Ethereum contract.
+	// {{.Type}}Transactor is an auto generated write-only Go binding around an sdcereum contract.
 	type {{.Type}}Transactor struct {
 	  contract *bind.BoundContract // Generic contract wrapper for the low level calls
 	}
 
-	// {{.Type}}Filterer is an auto generated log filtering Go binding around an Ethereum contract events.
+	// {{.Type}}Filterer is an auto generated log filtering Go binding around an sdcereum contract events.
 	type {{.Type}}Filterer struct {
 	  contract *bind.BoundContract // Generic contract wrapper for the low level calls
 	}
 
-	// {{.Type}}Session is an auto generated Go binding around an Ethereum contract,
+	// {{.Type}}Session is an auto generated Go binding around an sdcereum contract,
 	// with pre-set call and transact options.
 	type {{.Type}}Session struct {
 	  Contract     *{{.Type}}        // Generic contract binding to set the session for
@@ -202,33 +202,33 @@ var (
 	  TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
 	}
 
-	// {{.Type}}CallerSession is an auto generated read-only Go binding around an Ethereum contract,
+	// {{.Type}}CallerSession is an auto generated read-only Go binding around an sdcereum contract,
 	// with pre-set call options.
 	type {{.Type}}CallerSession struct {
 	  Contract *{{.Type}}Caller // Generic contract caller binding to set the session for
 	  CallOpts bind.CallOpts    // Call options to use throughout this session
 	}
 
-	// {{.Type}}TransactorSession is an auto generated write-only Go binding around an Ethereum contract,
+	// {{.Type}}TransactorSession is an auto generated write-only Go binding around an sdcereum contract,
 	// with pre-set transact options.
 	type {{.Type}}TransactorSession struct {
 	  Contract     *{{.Type}}Transactor // Generic contract transactor binding to set the session for
 	  TransactOpts bind.TransactOpts    // Transaction auth options to use throughout this session
 	}
 
-	// {{.Type}}Raw is an auto generated low-level Go binding around an Ethereum contract.
+	// {{.Type}}Raw is an auto generated low-level Go binding around an sdcereum contract.
 	type {{.Type}}Raw struct {
-	  Contract *{{.Type}} // Generic contract binding to access the raw methods on
+	  Contract *{{.Type}} // Generic contract binding to access the raw msdcods on
 	}
 
-	// {{.Type}}CallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
+	// {{.Type}}CallerRaw is an auto generated low-level read-only Go binding around an sdcereum contract.
 	type {{.Type}}CallerRaw struct {
-		Contract *{{.Type}}Caller // Generic read-only contract binding to access the raw methods on
+		Contract *{{.Type}}Caller // Generic read-only contract binding to access the raw msdcods on
 	}
 
-	// {{.Type}}TransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
+	// {{.Type}}TransactorRaw is an auto generated low-level write-only Go binding around an sdcereum contract.
 	type {{.Type}}TransactorRaw struct {
-		Contract *{{.Type}}Transactor // Generic write-only contract binding to access the raw methods on
+		Contract *{{.Type}}Transactor // Generic write-only contract binding to access the raw msdcods on
 	}
 
 	// New{{.Type}} creates a new instance of {{.Type}}, bound to a specific deployed contract.
@@ -276,46 +276,46 @@ var (
 	  return bind.NewBoundContract(address, *parsed, caller, transactor, filterer), nil
 	}
 
-	// Call invokes the (constant) contract method with params as input values and
+	// Call invokes the (constant) contract msdcod with params as input values and
 	// sets the output to result. The result type might be a single field for simple
 	// returns, a slice of interfaces for anonymous returns and a struct for named
 	// returns.
-	func (_{{$contract.Type}} *{{$contract.Type}}Raw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-		return _{{$contract.Type}}.Contract.{{$contract.Type}}Caller.contract.Call(opts, result, method, params...)
+	func (_{{$contract.Type}} *{{$contract.Type}}Raw) Call(opts *bind.CallOpts, result *[]interface{}, msdcod string, params ...interface{}) error {
+		return _{{$contract.Type}}.Contract.{{$contract.Type}}Caller.contract.Call(opts, result, msdcod, params...)
 	}
 
 	// Transfer initiates a plain transaction to move funds to the contract, calling
-	// its default method if one is available.
+	// its default msdcod if one is available.
 	func (_{{$contract.Type}} *{{$contract.Type}}Raw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
 		return _{{$contract.Type}}.Contract.{{$contract.Type}}Transactor.contract.Transfer(opts)
 	}
 
-	// Transact invokes the (paid) contract method with params as input values.
-	func (_{{$contract.Type}} *{{$contract.Type}}Raw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-		return _{{$contract.Type}}.Contract.{{$contract.Type}}Transactor.contract.Transact(opts, method, params...)
+	// Transact invokes the (paid) contract msdcod with params as input values.
+	func (_{{$contract.Type}} *{{$contract.Type}}Raw) Transact(opts *bind.TransactOpts, msdcod string, params ...interface{}) (*types.Transaction, error) {
+		return _{{$contract.Type}}.Contract.{{$contract.Type}}Transactor.contract.Transact(opts, msdcod, params...)
 	}
 
-	// Call invokes the (constant) contract method with params as input values and
+	// Call invokes the (constant) contract msdcod with params as input values and
 	// sets the output to result. The result type might be a single field for simple
 	// returns, a slice of interfaces for anonymous returns and a struct for named
 	// returns.
-	func (_{{$contract.Type}} *{{$contract.Type}}CallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
-		return _{{$contract.Type}}.Contract.contract.Call(opts, result, method, params...)
+	func (_{{$contract.Type}} *{{$contract.Type}}CallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, msdcod string, params ...interface{}) error {
+		return _{{$contract.Type}}.Contract.contract.Call(opts, result, msdcod, params...)
 	}
 
 	// Transfer initiates a plain transaction to move funds to the contract, calling
-	// its default method if one is available.
+	// its default msdcod if one is available.
 	func (_{{$contract.Type}} *{{$contract.Type}}TransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
 		return _{{$contract.Type}}.Contract.contract.Transfer(opts)
 	}
 
-	// Transact invokes the (paid) contract method with params as input values.
-	func (_{{$contract.Type}} *{{$contract.Type}}TransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
-		return _{{$contract.Type}}.Contract.contract.Transact(opts, method, params...)
+	// Transact invokes the (paid) contract msdcod with params as input values.
+	func (_{{$contract.Type}} *{{$contract.Type}}TransactorRaw) Transact(opts *bind.TransactOpts, msdcod string, params ...interface{}) (*types.Transaction, error) {
+		return _{{$contract.Type}}.Contract.contract.Transact(opts, msdcod, params...)
 	}
 
 	{{range .Calls}}
-		// {{.Normalized.Name}} is a free data retrieval call binding the contract method 0x{{printf "%x" .Original.ID}}.
+		// {{.Normalized.Name}} is a free data retrieval call binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
 		func (_{{$contract.Type}} *{{$contract.Type}}Caller) {{.Normalized.Name}}(opts *bind.CallOpts {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}}) ({{if .Structured}}struct{ {{range .Normalized.Outputs}}{{.Name}} {{bindtype .Type $structs}};{{end}} },{{else}}{{range .Normalized.Outputs}}{{bindtype .Type $structs}},{{end}}{{end}} error) {
@@ -341,14 +341,14 @@ var (
 			{{end}}
 		}
 
-		// {{.Normalized.Name}} is a free data retrieval call binding the contract method 0x{{printf "%x" .Original.ID}}.
+		// {{.Normalized.Name}} is a free data retrieval call binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
 		func (_{{$contract.Type}} *{{$contract.Type}}Session) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) ({{if .Structured}}struct{ {{range .Normalized.Outputs}}{{.Name}} {{bindtype .Type $structs}};{{end}} }, {{else}} {{range .Normalized.Outputs}}{{bindtype .Type $structs}},{{end}} {{end}} error) {
 		  return _{{$contract.Type}}.Contract.{{.Normalized.Name}}(&_{{$contract.Type}}.CallOpts {{range .Normalized.Inputs}}, {{.Name}}{{end}})
 		}
 
-		// {{.Normalized.Name}} is a free data retrieval call binding the contract method 0x{{printf "%x" .Original.ID}}.
+		// {{.Normalized.Name}} is a free data retrieval call binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
 		func (_{{$contract.Type}} *{{$contract.Type}}CallerSession) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) ({{if .Structured}}struct{ {{range .Normalized.Outputs}}{{.Name}} {{bindtype .Type $structs}};{{end}} }, {{else}} {{range .Normalized.Outputs}}{{bindtype .Type $structs}},{{end}} {{end}} error) {
@@ -357,21 +357,21 @@ var (
 	{{end}}
 
 	{{range .Transacts}}
-		// {{.Normalized.Name}} is a paid mutator transaction binding the contract method 0x{{printf "%x" .Original.ID}}.
+		// {{.Normalized.Name}} is a paid mutator transaction binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
 		func (_{{$contract.Type}} *{{$contract.Type}}Transactor) {{.Normalized.Name}}(opts *bind.TransactOpts {{range .Normalized.Inputs}}, {{.Name}} {{bindtype .Type $structs}} {{end}}) (*types.Transaction, error) {
 			return _{{$contract.Type}}.contract.Transact(opts, "{{.Original.Name}}" {{range .Normalized.Inputs}}, {{.Name}}{{end}})
 		}
 
-		// {{.Normalized.Name}} is a paid mutator transaction binding the contract method 0x{{printf "%x" .Original.ID}}.
+		// {{.Normalized.Name}} is a paid mutator transaction binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
 		func (_{{$contract.Type}} *{{$contract.Type}}Session) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (*types.Transaction, error) {
 		  return _{{$contract.Type}}.Contract.{{.Normalized.Name}}(&_{{$contract.Type}}.TransactOpts {{range $i, $_ := .Normalized.Inputs}}, {{.Name}}{{end}})
 		}
 
-		// {{.Normalized.Name}} is a paid mutator transaction binding the contract method 0x{{printf "%x" .Original.ID}}.
+		// {{.Normalized.Name}} is a paid mutator transaction binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 		//
 		// Solidity: {{.Original.String}}
 		func (_{{$contract.Type}} *{{$contract.Type}}TransactorSession) {{.Normalized.Name}}({{range $i, $_ := .Normalized.Inputs}}{{if ne $i 0}},{{end}} {{.Name}} {{bindtype .Type $structs}} {{end}}) (*types.Transaction, error) {
@@ -434,11 +434,11 @@ var (
 			event    string              // Event name to use for unpacking event data
 
 			logs chan types.Log        // Log channel receiving the found contract events
-			sub  ethereum.Subscription // Subscription for errors, completion and termination
-			done bool                  // Whether the subscription completed delivering logs
+			sub  sdcereum.Subscription // Subscription for errors, completion and termination
+			done bool                  // Whsdcer the subscription completed delivering logs
 			fail error                 // Occurred error to stop iteration
 		}
-		// Next advances the iterator to the subsequent event, returning whether there
+		// Next advances the iterator to the subsequent event, returning whsdcer there
 		// are any more events found. In case of a retrieval or parsing error, false is
 		// returned and Error() can be queried for the exact failure.
 		func (it *{{$contract.Type}}{{.Normalized.Name}}Iterator) Next() bool {
@@ -579,7 +579,7 @@ const tmplSourceJava = `
 
 package {{.Package}};
 
-import org.ethereum.geth.*;
+import org.sdcereum.gsdc.*;
 import java.util.*;
 
 {{$structs := .Structs}}
@@ -601,21 +601,21 @@ import java.util.*;
 	// BYTECODE is the compiled bytecode used for deploying new contracts.
 	public final static String BYTECODE = "0x{{.InputBin}}";
 
-	// deploy deploys a new Ethereum contract, binding an instance of {{.Type}} to it.
-	public static {{.Type}} deploy(TransactOpts auth, EthereumClient client{{range .Constructor.Inputs}}, {{bindtype .Type $structs}} {{.Name}}{{end}}) throws Exception {
-		Interfaces args = Geth.newInterfaces({{(len .Constructor.Inputs)}});
+	// deploy deploys a new sdcereum contract, binding an instance of {{.Type}} to it.
+	public static {{.Type}} deploy(TransactOpts auth, sdcereumClient client{{range .Constructor.Inputs}}, {{bindtype .Type $structs}} {{.Name}}{{end}}) throws Exception {
+		Interfaces args = Gsdc.newInterfaces({{(len .Constructor.Inputs)}});
 		String bytecode = BYTECODE;
 		{{if .Libraries}}
 
 		// "link" contract to dependent libraries by deploying them first.
 		{{range $pattern, $name := .Libraries}}
 		{{capitalise $name}} {{decapitalise $name}}Inst = {{capitalise $name}}.deploy(auth, client);
-		bytecode = bytecode.replace("__${{$pattern}}$__", {{decapitalise $name}}Inst.Address.getHex().substring(2));
+		bytecode = bytecode.replace("__${{$pattern}}$__", {{decapitalise $name}}Inst.Address.gsdcex().substring(2));
 		{{end}}
 		{{end}}
-		{{range $index, $element := .Constructor.Inputs}}Interface arg{{$index}} = Geth.newInterface();arg{{$index}}.set{{namedtype (bindtype .Type $structs) .Type}}({{.Name}});args.set({{$index}},arg{{$index}});
+		{{range $index, $element := .Constructor.Inputs}}Interface arg{{$index}} = Gsdc.newInterface();arg{{$index}}.set{{namedtype (bindtype .Type $structs) .Type}}({{.Name}});args.set({{$index}},arg{{$index}});
 		{{end}}
-		return new {{.Type}}(Geth.deployContract(auth, ABI, Geth.decodeFromHex(bytecode), client, args));
+		return new {{.Type}}(Gsdc.deployContract(auth, ABI, Gsdc.decodeFromHex(bytecode), client, args));
 	}
 
 	// Internal constructor used by contract deployment.
@@ -626,18 +626,18 @@ import java.util.*;
 	}
 	{{end}}
 
-	// Ethereum address where this contract is located at.
+	// sdcereum address where this contract is located at.
 	public final Address Address;
 
-	// Ethereum transaction in which this contract was deployed (if known!).
+	// sdcereum transaction in which this contract was deployed (if known!).
 	public final Transaction Deployer;
 
 	// Contract instance bound to a blockchain address.
 	private final BoundContract Contract;
 
 	// Creates a new instance of {{.Type}}, bound to a specific deployed contract.
-	public {{.Type}}(Address address, EthereumClient client) throws Exception {
-		this(Geth.bindContract(address, ABI, client));
+	public {{.Type}}(Address address, sdcereumClient client) throws Exception {
+		this(Gsdc.bindContract(address, ABI, client));
 	}
 
 	{{range .Calls}}
@@ -649,20 +649,20 @@ import java.util.*;
 	}
 	{{end}}
 
-	// {{.Normalized.Name}} is a free data retrieval call binding the contract method 0x{{printf "%x" .Original.ID}}.
+	// {{.Normalized.Name}} is a free data retrieval call binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 	//
 	// Solidity: {{.Original.String}}
 	public {{if gt (len .Normalized.Outputs) 1}}{{capitalise .Normalized.Name}}Results{{else if eq (len .Normalized.Outputs) 0}}void{{else}}{{range .Normalized.Outputs}}{{bindtype .Type $structs}}{{end}}{{end}} {{.Normalized.Name}}(CallOpts opts{{range .Normalized.Inputs}}, {{bindtype .Type $structs}} {{.Name}}{{end}}) throws Exception {
-		Interfaces args = Geth.newInterfaces({{(len .Normalized.Inputs)}});
-		{{range $index, $item := .Normalized.Inputs}}Interface arg{{$index}} = Geth.newInterface();arg{{$index}}.set{{namedtype (bindtype .Type $structs) .Type}}({{.Name}});args.set({{$index}},arg{{$index}});
+		Interfaces args = Gsdc.newInterfaces({{(len .Normalized.Inputs)}});
+		{{range $index, $item := .Normalized.Inputs}}Interface arg{{$index}} = Gsdc.newInterface();arg{{$index}}.set{{namedtype (bindtype .Type $structs) .Type}}({{.Name}});args.set({{$index}},arg{{$index}});
 		{{end}}
 
-		Interfaces results = Geth.newInterfaces({{(len .Normalized.Outputs)}});
-		{{range $index, $item := .Normalized.Outputs}}Interface result{{$index}} = Geth.newInterface(); result{{$index}}.setDefault{{namedtype (bindtype .Type $structs) .Type}}(); results.set({{$index}}, result{{$index}});
+		Interfaces results = Gsdc.newInterfaces({{(len .Normalized.Outputs)}});
+		{{range $index, $item := .Normalized.Outputs}}Interface result{{$index}} = Gsdc.newInterface(); result{{$index}}.setDefault{{namedtype (bindtype .Type $structs) .Type}}(); results.set({{$index}}, result{{$index}});
 		{{end}}
 
 		if (opts == null) {
-			opts = Geth.newCallOpts();
+			opts = Gsdc.newCallOpts();
 		}
 		this.Contract.call(opts, results, "{{.Original.Name}}", args);
 		{{if gt (len .Normalized.Outputs) 1}}
@@ -676,12 +676,12 @@ import java.util.*;
 	{{end}}
 
 	{{range .Transacts}}
-	// {{.Normalized.Name}} is a paid mutator transaction binding the contract method 0x{{printf "%x" .Original.ID}}.
+	// {{.Normalized.Name}} is a paid mutator transaction binding the contract msdcod 0x{{printf "%x" .Original.ID}}.
 	//
 	// Solidity: {{.Original.String}}
 	public Transaction {{.Normalized.Name}}(TransactOpts opts{{range .Normalized.Inputs}}, {{bindtype .Type $structs}} {{.Name}}{{end}}) throws Exception {
-		Interfaces args = Geth.newInterfaces({{(len .Normalized.Inputs)}});
-		{{range $index, $item := .Normalized.Inputs}}Interface arg{{$index}} = Geth.newInterface();arg{{$index}}.set{{namedtype (bindtype .Type $structs) .Type}}({{.Name}});args.set({{$index}},arg{{$index}});
+		Interfaces args = Gsdc.newInterfaces({{(len .Normalized.Inputs)}});
+		{{range $index, $item := .Normalized.Inputs}}Interface arg{{$index}} = Gsdc.newInterface();arg{{$index}}.set{{namedtype (bindtype .Type $structs) .Type}}({{.Name}});args.set({{$index}},arg{{$index}});
 		{{end}}
 		return this.Contract.transact(opts, "{{.Original.Name}}"	, args);
 	}

@@ -1,30 +1,30 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"errors"
 	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/eth/protocols/snap"
-	"github.com/ethereum/go-ethereum/p2p"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/snap"
+	"github.com/sdcereum/go-sdcereum/p2p"
 )
 
 var (
@@ -40,19 +40,19 @@ var (
 	// a peer set, but no peer with the given id exists.
 	errPeerNotRegistered = errors.New("peer not registered")
 
-	// errSnapWithoutEth is returned if a peer attempts to connect only on the
-	// snap protocol without advertising the eth main protocol.
-	errSnapWithoutEth = errors.New("peer connected on snap without compatible eth support")
+	// errSnapWithoutsdc is returned if a peer attempts to connect only on the
+	// snap protocol without advertising the sdc main protocol.
+	errSnapWithoutsdc = errors.New("peer connected on snap without compatible sdc support")
 )
 
 // peerSet represents the collection of active peers currently participating in
-// the `eth` protocol, with or without the `snap` extension.
+// the `sdc` protocol, with or without the `snap` extension.
 type peerSet struct {
-	peers     map[string]*ethPeer // Peers connected on the `eth` protocol
+	peers     map[string]*sdcPeer // Peers connected on the `sdc` protocol
 	snapPeers int                 // Number of `snap` compatible peers for connection prioritization
 
-	snapWait map[string]chan *snap.Peer // Peers connected on `eth` waiting for their snap extension
-	snapPend map[string]*snap.Peer      // Peers connected on the `snap` protocol, but not yet on `eth`
+	snapWait map[string]chan *snap.Peer // Peers connected on `sdc` waiting for their snap extension
+	snapPend map[string]*snap.Peer      // Peers connected on the `snap` protocol, but not yet on `sdc`
 
 	lock   sync.RWMutex
 	closed bool
@@ -61,20 +61,20 @@ type peerSet struct {
 // newPeerSet creates a new peer set to track the active participants.
 func newPeerSet() *peerSet {
 	return &peerSet{
-		peers:    make(map[string]*ethPeer),
+		peers:    make(map[string]*sdcPeer),
 		snapWait: make(map[string]chan *snap.Peer),
 		snapPend: make(map[string]*snap.Peer),
 	}
 }
 
-// registerSnapExtension unblocks an already connected `eth` peer waiting for its
+// registerSnapExtension unblocks an already connected `sdc` peer waiting for its
 // `snap` extension, or if no such peer exists, tracks the extension for the time
-// being until the `eth` main protocol starts looking for it.
+// being until the `sdc` main protocol starts looking for it.
 func (ps *peerSet) registerSnapExtension(peer *snap.Peer) error {
-	// Reject the peer if it advertises `snap` without `eth` as `snap` is only a
-	// satellite protocol meaningful with the chain selection of `eth`
-	if !peer.RunningCap(eth.ProtocolName, eth.ProtocolVersions) {
-		return errSnapWithoutEth
+	// Reject the peer if it advertises `snap` without `sdc` as `snap` is only a
+	// satellite protocol meaningful with the chain selection of `sdc`
+	if !peer.RunningCap(sdc.ProtocolName, sdc.ProtocolVersions) {
+		return errSnapWithoutsdc
 	}
 	// Ensure nobody can double connect
 	ps.lock.Lock()
@@ -87,7 +87,7 @@ func (ps *peerSet) registerSnapExtension(peer *snap.Peer) error {
 	if _, ok := ps.snapPend[id]; ok {
 		return errPeerAlreadyRegistered // avoid connections with the same id as pending ones
 	}
-	// Inject the peer into an `eth` counterpart is available, otherwise save for later
+	// Inject the peer into an `sdc` counterpart is available, otherwise save for later
 	if wait, ok := ps.snapWait[id]; ok {
 		delete(ps.snapWait, id)
 		wait <- peer
@@ -99,7 +99,7 @@ func (ps *peerSet) registerSnapExtension(peer *snap.Peer) error {
 
 // waitExtensions blocks until all satellite protocols are connected and tracked
 // by the peerset.
-func (ps *peerSet) waitSnapExtension(peer *eth.Peer) (*snap.Peer, error) {
+func (ps *peerSet) waitSnapExtension(peer *sdc.Peer) (*snap.Peer, error) {
 	// If the peer does not support a compatible `snap`, don't wait
 	if !peer.RunningCap(snap.ProtocolName, snap.ProtocolVersions) {
 		return nil, nil
@@ -131,9 +131,9 @@ func (ps *peerSet) waitSnapExtension(peer *eth.Peer) (*snap.Peer, error) {
 	return <-wait, nil
 }
 
-// registerPeer injects a new `eth` peer into the working set, or returns an error
+// registerPeer injects a new `sdc` peer into the working set, or returns an error
 // if the peer is already known.
-func (ps *peerSet) registerPeer(peer *eth.Peer, ext *snap.Peer) error {
+func (ps *peerSet) registerPeer(peer *sdc.Peer, ext *snap.Peer) error {
 	// Start tracking the new peer
 	ps.lock.Lock()
 	defer ps.lock.Unlock()
@@ -145,14 +145,14 @@ func (ps *peerSet) registerPeer(peer *eth.Peer, ext *snap.Peer) error {
 	if _, ok := ps.peers[id]; ok {
 		return errPeerAlreadyRegistered
 	}
-	eth := &ethPeer{
+	sdc := &sdcPeer{
 		Peer: peer,
 	}
 	if ext != nil {
-		eth.snapExt = &snapPeer{ext}
+		sdc.snapExt = &snapPeer{ext}
 		ps.snapPeers++
 	}
-	ps.peers[id] = eth
+	ps.peers[id] = sdc
 	return nil
 }
 
@@ -174,7 +174,7 @@ func (ps *peerSet) unregisterPeer(id string) error {
 }
 
 // peer retrieves the registered peer with the given id.
-func (ps *peerSet) peer(id string) *ethPeer {
+func (ps *peerSet) peer(id string) *sdcPeer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
@@ -183,11 +183,11 @@ func (ps *peerSet) peer(id string) *ethPeer {
 
 // peersWithoutBlock retrieves a list of peers that do not have a given block in
 // their set of known hashes so it might be propagated to them.
-func (ps *peerSet) peersWithoutBlock(hash common.Hash) []*ethPeer {
+func (ps *peerSet) peersWithoutBlock(hash common.Hash) []*sdcPeer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
-	list := make([]*ethPeer, 0, len(ps.peers))
+	list := make([]*sdcPeer, 0, len(ps.peers))
 	for _, p := range ps.peers {
 		if !p.KnownBlock(hash) {
 			list = append(list, p)
@@ -198,11 +198,11 @@ func (ps *peerSet) peersWithoutBlock(hash common.Hash) []*ethPeer {
 
 // peersWithoutTransaction retrieves a list of peers that do not have a given
 // transaction in their set of known hashes.
-func (ps *peerSet) peersWithoutTransaction(hash common.Hash) []*ethPeer {
+func (ps *peerSet) peersWithoutTransaction(hash common.Hash) []*sdcPeer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
-	list := make([]*ethPeer, 0, len(ps.peers))
+	list := make([]*sdcPeer, 0, len(ps.peers))
 	for _, p := range ps.peers {
 		if !p.KnownTransaction(hash) {
 			list = append(list, p)
@@ -211,9 +211,9 @@ func (ps *peerSet) peersWithoutTransaction(hash common.Hash) []*ethPeer {
 	return list
 }
 
-// len returns if the current number of `eth` peers in the set. Since the `snap`
-// peers are tied to the existence of an `eth` connection, that will always be a
-// subset of `eth`.
+// len returns if the current number of `sdc` peers in the set. Since the `snap`
+// peers are tied to the existence of an `sdc` connection, that will always be a
+// subset of `sdc`.
 func (ps *peerSet) len() int {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
@@ -231,12 +231,12 @@ func (ps *peerSet) snapLen() int {
 
 // peerWithHighestTD retrieves the known peer with the currently highest total
 // difficulty, but below the given PoS switchover threshold.
-func (ps *peerSet) peerWithHighestTD() *eth.Peer {
+func (ps *peerSet) peerWithHighestTD() *sdc.Peer {
 	ps.lock.RLock()
 	defer ps.lock.RUnlock()
 
 	var (
-		bestPeer *eth.Peer
+		bestPeer *sdc.Peer
 		bestTd   *big.Int
 	)
 	for _, p := range ps.peers {

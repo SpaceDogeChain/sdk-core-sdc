@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package tracers
 
@@ -28,21 +28,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/tracers/logger"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdc/tracers/logger"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/internal/sdcapi"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 const (
@@ -83,7 +83,7 @@ type Backend interface {
 	RPCGasCap() uint64
 	ChainConfig() *params.ChainConfig
 	Engine() consensus.Engine
-	ChainDb() ethdb.Database
+	ChainDb() sdcdb.Database
 	StateAtBlock(ctx context.Context, block *types.Block, reexec uint64, base *state.StateDB, readOnly bool, preferDisk bool) (*state.StateDB, StateReleaseFunc, error)
 	StateAtTransaction(ctx context.Context, block *types.Block, txIndex int, reexec uint64) (core.Message, vm.BlockContext, *state.StateDB, StateReleaseFunc, error)
 }
@@ -93,7 +93,7 @@ type API struct {
 	backend Backend
 }
 
-// NewAPI creates a new API definition for the tracing methods of the Ethereum service.
+// NewAPI creates a new API definition for the tracing msdcods of the sdcereum service.
 func NewAPI(backend Backend) *API {
 	return &API{backend: backend}
 }
@@ -107,7 +107,7 @@ func (context *chainContext) Engine() consensus.Engine {
 	return context.api.backend.Engine()
 }
 
-func (context *chainContext) GetHeader(hash common.Hash, number uint64) *types.Header {
+func (context *chainContext) Gsdceader(hash common.Hash, number uint64) *types.Header {
 	header, err := context.api.backend.HeaderByNumber(context.ctx, rpc.BlockNumber(number))
 	if err != nil {
 		return nil
@@ -185,8 +185,8 @@ type TraceConfig struct {
 // field to override the state for tracing.
 type TraceCallConfig struct {
 	TraceConfig
-	StateOverrides *ethapi.StateOverride
-	BlockOverrides *ethapi.BlockOverrides
+	StateOverrides *sdcapi.StateOverride
+	BlockOverrides *sdcapi.BlockOverrides
 }
 
 // StdTraceConfig holds extra parameters to standard-json trace functions.
@@ -787,7 +787,7 @@ func (api *API) standardTraceBlockToFile(ctx context.Context, block *types.Block
 	return dumps, nil
 }
 
-// containsTx reports whether the transaction with a certain hash
+// containsTx reports whsdcer the transaction with a certain hash
 // is contained within the specified block.
 func containsTx(block *types.Block, hash common.Hash) bool {
 	for _, tx := range block.Transactions() {
@@ -831,10 +831,10 @@ func (api *API) TraceTransaction(ctx context.Context, hash common.Hash, config *
 	return api.traceTx(ctx, msg, txctx, vmctx, statedb, config)
 }
 
-// TraceCall lets you trace a given eth_call. It collects the structured logs
+// TraceCall lets you trace a given sdc_call. It collects the structured logs
 // created during the execution of EVM if the given transaction was added on
 // top of the provided block and returns them as a JSON object.
-func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, blockNrOrHash rpc.BlockNumberOrHash, config *TraceCallConfig) (interface{}, error) {
+func (api *API) TraceCall(ctx context.Context, args sdcapi.TransactionArgs, blockNrOrHash rpc.BlockNumberOrHash, config *TraceCallConfig) (interface{}, error) {
 	// Try to retrieve the specified block
 	var (
 		err   error

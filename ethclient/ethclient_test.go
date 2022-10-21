@@ -1,20 +1,20 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ethclient
+package sdcclient
 
 import (
 	"bytes"
@@ -26,32 +26,32 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
-// Verify that Client implements the ethereum interfaces.
+// Verify that Client implements the sdcereum interfaces.
 var (
-	_ = ethereum.ChainReader(&Client{})
-	_ = ethereum.TransactionReader(&Client{})
-	_ = ethereum.ChainStateReader(&Client{})
-	_ = ethereum.ChainSyncReader(&Client{})
-	_ = ethereum.ContractCaller(&Client{})
-	_ = ethereum.GasEstimator(&Client{})
-	_ = ethereum.GasPricer(&Client{})
-	_ = ethereum.LogFilterer(&Client{})
-	_ = ethereum.PendingStateReader(&Client{})
-	// _ = ethereum.PendingStateEventer(&Client{})
-	_ = ethereum.PendingContractCaller(&Client{})
+	_ = sdcereum.ChainReader(&Client{})
+	_ = sdcereum.TransactionReader(&Client{})
+	_ = sdcereum.ChainStateReader(&Client{})
+	_ = sdcereum.ChainSyncReader(&Client{})
+	_ = sdcereum.ContractCaller(&Client{})
+	_ = sdcereum.GasEstimator(&Client{})
+	_ = sdcereum.GasPricer(&Client{})
+	_ = sdcereum.LogFilterer(&Client{})
+	_ = sdcereum.PendingStateReader(&Client{})
+	// _ = sdcereum.PendingStateEventer(&Client{})
+	_ = sdcereum.PendingContractCaller(&Client{})
 )
 
 func TestToFilterArg(t *testing.T) {
@@ -65,13 +65,13 @@ func TestToFilterArg(t *testing.T) {
 
 	for _, testCase := range []struct {
 		name   string
-		input  ethereum.FilterQuery
+		input  sdcereum.FilterQuery
 		output interface{}
 		err    error
 	}{
 		{
 			"without BlockHash",
-			ethereum.FilterQuery{
+			sdcereum.FilterQuery{
 				Addresses: addresses,
 				FromBlock: big.NewInt(1),
 				ToBlock:   big.NewInt(2),
@@ -87,7 +87,7 @@ func TestToFilterArg(t *testing.T) {
 		},
 		{
 			"with nil fromBlock and nil toBlock",
-			ethereum.FilterQuery{
+			sdcereum.FilterQuery{
 				Addresses: addresses,
 				Topics:    [][]common.Hash{},
 			},
@@ -101,7 +101,7 @@ func TestToFilterArg(t *testing.T) {
 		},
 		{
 			"with negative fromBlock and negative toBlock",
-			ethereum.FilterQuery{
+			sdcereum.FilterQuery{
 				Addresses: addresses,
 				FromBlock: big.NewInt(-1),
 				ToBlock:   big.NewInt(-1),
@@ -117,7 +117,7 @@ func TestToFilterArg(t *testing.T) {
 		},
 		{
 			"with blockhash",
-			ethereum.FilterQuery{
+			sdcereum.FilterQuery{
 				Addresses: addresses,
 				BlockHash: &blockHash,
 				Topics:    [][]common.Hash{},
@@ -131,7 +131,7 @@ func TestToFilterArg(t *testing.T) {
 		},
 		{
 			"with blockhash and from block",
-			ethereum.FilterQuery{
+			sdcereum.FilterQuery{
 				Addresses: addresses,
 				BlockHash: &blockHash,
 				FromBlock: big.NewInt(1),
@@ -142,7 +142,7 @@ func TestToFilterArg(t *testing.T) {
 		},
 		{
 			"with blockhash and to block",
-			ethereum.FilterQuery{
+			sdcereum.FilterQuery{
 				Addresses: addresses,
 				BlockHash: &blockHash,
 				ToBlock:   big.NewInt(1),
@@ -153,7 +153,7 @@ func TestToFilterArg(t *testing.T) {
 		},
 		{
 			"with blockhash and both from / to block",
-			ethereum.FilterQuery{
+			sdcereum.FilterQuery{
 				Addresses: addresses,
 				BlockHash: &blockHash,
 				FromBlock: big.NewInt(1),
@@ -187,7 +187,7 @@ var (
 )
 
 var genesis = &core.Genesis{
-	Config:    params.AllEthashProtocolChanges,
+	Config:    params.AllsdcashProtocolChanges,
 	Alloc:     core.GenesisAlloc{testAddr: {Balance: testBalance}},
 	ExtraData: []byte("test genesis"),
 	Timestamp: 9000,
@@ -219,18 +219,18 @@ func newTestBackend(t *testing.T) (*node.Node, []*types.Block) {
 	if err != nil {
 		t.Fatalf("can't create new node: %v", err)
 	}
-	// Create Ethereum Service
-	config := &ethconfig.Config{Genesis: genesis}
-	config.Ethash.PowMode = ethash.ModeFake
-	ethservice, err := eth.New(n, config)
+	// Create sdcereum Service
+	config := &sdcconfig.Config{Genesis: genesis}
+	config.sdcash.PowMode = sdcash.ModeFake
+	sdcservice, err := sdc.New(n, config)
 	if err != nil {
-		t.Fatalf("can't create new ethereum service: %v", err)
+		t.Fatalf("can't create new sdcereum service: %v", err)
 	}
 	// Import the test chain.
 	if err := n.Start(); err != nil {
 		t.Fatalf("can't start test node: %v", err)
 	}
-	if _, err := ethservice.BlockChain().InsertChain(blocks[1:]); err != nil {
+	if _, err := sdcservice.BlockChain().InsertChain(blocks[1:]); err != nil {
 		t.Fatalf("can't import test blocks: %v", err)
 	}
 	return n, blocks
@@ -246,11 +246,11 @@ func generateTestChain() []*types.Block {
 			g.AddTx(testTx2)
 		}
 	}
-	_, blocks, _ := core.GenerateChainWithGenesis(genesis, ethash.NewFaker(), 2, generate)
+	_, blocks, _ := core.GenerateChainWithGenesis(genesis, sdcash.NewFaker(), 2, generate)
 	return append([]*types.Block{genesis.ToBlock()}, blocks...)
 }
 
-func TestEthClient(t *testing.T) {
+func TestsdcClient(t *testing.T) {
 	backend, chain := newTestBackend(t)
 	client, _ := backend.Attach()
 	defer backend.Close()
@@ -314,7 +314,7 @@ func testHeader(t *testing.T, chain []*types.Block, client *rpc.Client) {
 		"future_block": {
 			block:   big.NewInt(1000000000),
 			want:    nil,
-			wantErr: ethereum.NotFound,
+			wantErr: sdcereum.NotFound,
 		},
 	}
 	for name, tt := range tests {
@@ -399,13 +399,13 @@ func testTransactionInBlockInterrupted(t *testing.T, client *rpc.Client) {
 	if tx != nil {
 		t.Fatal("transaction should be nil")
 	}
-	if err == nil || err == ethereum.NotFound {
+	if err == nil || err == sdcereum.NotFound {
 		t.Fatal("error should not be nil/notfound")
 	}
 
 	// Test tx in block not found.
-	if _, err := ec.TransactionInBlock(context.Background(), block.Hash(), 20); err != ethereum.NotFound {
-		t.Fatal("error should be ethereum.NotFound")
+	if _, err := ec.TransactionInBlock(context.Background(), block.Hash(), 20); err != sdcereum.NotFound {
+		t.Fatal("error should be sdcereum.NotFound")
 	}
 }
 
@@ -415,7 +415,7 @@ func testChainID(t *testing.T, client *rpc.Client) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if id == nil || id.Cmp(params.AllEthashProtocolChanges.ChainID) != 0 {
+	if id == nil || id.Cmp(params.AllsdcashProtocolChanges.ChainID) != 0 {
 		t.Fatalf("ChainID returned wrong number: %+v", id)
 	}
 }
@@ -509,7 +509,7 @@ func testStatusFunctions(t *testing.T, client *rpc.Client) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	want := &ethereum.FeeHistory{
+	want := &sdcereum.FeeHistory{
 		OldestBlock: big.NewInt(2),
 		Reward: [][]*big.Int{
 			{
@@ -532,7 +532,7 @@ func testCallContractAtHash(t *testing.T, client *rpc.Client) {
 	ec := NewClient(client)
 
 	// EstimateGas
-	msg := ethereum.CallMsg{
+	msg := sdcereum.CallMsg{
 		From:  testAddr,
 		To:    &common.Address{},
 		Gas:   21000,
@@ -559,7 +559,7 @@ func testCallContract(t *testing.T, client *rpc.Client) {
 	ec := NewClient(client)
 
 	// EstimateGas
-	msg := ethereum.CallMsg{
+	msg := sdcereum.CallMsg{
 		From:  testAddr,
 		To:    &common.Address{},
 		Gas:   21000,

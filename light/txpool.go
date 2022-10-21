@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package light
 
@@ -23,15 +23,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 const (
@@ -59,7 +59,7 @@ type TxPool struct {
 	mu           sync.RWMutex
 	chain        *LightChain
 	odr          OdrBackend
-	chainDb      ethdb.Database
+	chainDb      sdcdb.Database
 	relay        TxRelayBackend
 	head         common.Hash
 	nonce        map[common.Address]uint64            // "pending" nonce
@@ -67,12 +67,12 @@ type TxPool struct {
 	mined        map[common.Hash][]*types.Transaction // mined transactions by block hash
 	clearIdx     uint64                               // earliest block nr that can contain mined tx info
 
-	istanbul bool // Fork indicator whether we are in the istanbul stage.
-	eip2718  bool // Fork indicator whether we are in the eip2718 stage.
+	istanbul bool // Fork indicator whsdcer we are in the istanbul stage.
+	eip2718  bool // Fork indicator whsdcer we are in the eip2718 stage.
 }
 
 // TxRelayBackend provides an interface to the mechanism that forwards transactions to the
-// ETH network. The implementations of the functions should be non-blocking.
+// sdc network. The implementations of the functions should be non-blocking.
 //
 // Send instructs backend to forward new transactions NewHead notifies backend about a new
 // head after processed by the tx pool, including mined and rolled back transactions since
@@ -222,18 +222,18 @@ func (pool *TxPool) rollbackTxs(hash common.Hash, txc txStateChanges) {
 // possible to continue checking the missing blocks at the next chain head event
 func (pool *TxPool) reorgOnNewHead(ctx context.Context, newHeader *types.Header) (txStateChanges, error) {
 	txc := make(txStateChanges)
-	oldh := pool.chain.GetHeaderByHash(pool.head)
+	oldh := pool.chain.GsdceaderByHash(pool.head)
 	newh := newHeader
 	// find common ancestor, create list of rolled back and new block hashes
 	var oldHashes, newHashes []common.Hash
 	for oldh.Hash() != newh.Hash() {
 		if oldh.Number.Uint64() >= newh.Number.Uint64() {
 			oldHashes = append(oldHashes, oldh.Hash())
-			oldh = pool.chain.GetHeader(oldh.ParentHash, oldh.Number.Uint64()-1)
+			oldh = pool.chain.Gsdceader(oldh.ParentHash, oldh.Number.Uint64()-1)
 		}
 		if oldh.Number.Uint64() < newh.Number.Uint64() {
 			newHashes = append(newHashes, newh.Hash())
-			newh = pool.chain.GetHeader(newh.ParentHash, newh.Number.Uint64()-1)
+			newh = pool.chain.Gsdceader(newh.ParentHash, newh.Number.Uint64()-1)
 			if newh == nil {
 				// happens when CHT syncing, nothing to do
 				newh = oldh
@@ -343,7 +343,7 @@ func (pool *TxPool) Stats() (pending int) {
 	return
 }
 
-// validateTx checks whether a transaction is valid according to the consensus rules.
+// validateTx checks whsdcer a transaction is valid according to the consensus rules.
 func (pool *TxPool) validateTx(ctx context.Context, tx *types.Transaction) error {
 	// Validate sender
 	var (
@@ -364,7 +364,7 @@ func (pool *TxPool) validateTx(ctx context.Context, tx *types.Transaction) error
 
 	// Check the transaction doesn't exceed the current
 	// block limit gas.
-	header := pool.chain.GetHeaderByHash(pool.head)
+	header := pool.chain.GsdceaderByHash(pool.head)
 	if header.GasLimit < tx.Gas() {
 		return core.ErrGasLimit
 	}

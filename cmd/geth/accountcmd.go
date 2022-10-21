@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2016 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -20,18 +20,18 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/spacedogechain/go-spacedogechain/accounts"
+	"github.com/spacedogechain/go-spacedogechain/accounts/keystore"
+	"github.com/spacedogechain/go-spacedogechain/cmd/utils"
+	"github.com/spacedogechain/go-spacedogechain/crypto"
+	"github.com/spacedogechain/go-spacedogechain/log"
 	"github.com/urfave/cli/v2"
 )
 
 var (
 	walletCommand = &cli.Command{
 		Name:      "wallet",
-		Usage:     "Manage Ethereum presale wallets",
+		Usage:     "Manage spacedogechain presale wallets",
 		ArgsUsage: "",
 		Description: `
     geth wallet import /path/to/my/presale.wallet
@@ -43,7 +43,7 @@ passwordfile as argument containing the wallet password in plaintext.`,
 			{
 
 				Name:      "import",
-				Usage:     "Import Ethereum presale wallet",
+				Usage:     "Import spacedogechain presale wallet",
 				ArgsUsage: "<keyFile>",
 				Action:    importWallet,
 				Flags: []cli.Flag{
@@ -82,7 +82,7 @@ Note that exporting your key in unencrypted format is NOT supported.
 
 Keys are stored under <DATADIR>/keystore.
 It is safe to transfer the entire directory or the individual keys therein
-between ethereum nodes by simply copying.
+between spacedogechain nodes by simply copying.
 
 Make sure you backup your keys regularly.`,
 		Subcommands: []*cli.Command{
@@ -179,7 +179,7 @@ For non-interactive use the password can be specified with the -password flag:
     geth account import [options] <keyfile>
 
 Note:
-As you can directly copy your encrypted accounts to another ethereum instance,
+As you can directly copy your encrypted accounts to another spacedogechain instance,
 this import mechanism is not needed when you transfer an account between
 nodes.
 `,

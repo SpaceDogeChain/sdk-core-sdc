@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package node
 
@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/internal/testlog"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/internal/testlog"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rpc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -270,7 +270,7 @@ func rpcRequest(t *testing.T, url string, extraHeaders ...string) *http.Response
 	t.Helper()
 
 	// Create the request.
-	body := bytes.NewReader([]byte(`{"jsonrpc":"2.0","id":1,"method":"rpc_modules","params":[]}`))
+	body := bytes.NewReader([]byte(`{"jsonrpc":"2.0","id":1,"msdcod":"rpc_modules","params":[]}`))
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		t.Fatal("could not create http request:", err)
@@ -307,11 +307,11 @@ func (testClaim) Valid() error {
 
 func TestJWT(t *testing.T) {
 	var secret = []byte("secret")
-	issueToken := func(secret []byte, method jwt.SigningMethod, input map[string]interface{}) string {
-		if method == nil {
-			method = jwt.SigningMethodHS256
+	issueToken := func(secret []byte, msdcod jwt.SigningMsdcod, input map[string]interface{}) string {
+		if msdcod == nil {
+			msdcod = jwt.SigningMsdcodHS256
 		}
-		ss, _ := jwt.NewWithClaims(method, testClaim(input)).SignedString(secret)
+		ss, _ := jwt.NewWithClaims(msdcod, testClaim(input)).SignedString(secret)
 		return ss
 	}
 	srv := createAndStartServer(t, &httpConfig{jwtSecret: []byte("secret")},
@@ -364,7 +364,7 @@ func TestJWT(t *testing.T) {
 		},
 		// wrong algo
 		func() string {
-			return fmt.Sprintf("Bearer %v", issueToken(secret, jwt.SigningMethodHS512, testClaim{"iat": time.Now().Unix() + 4}))
+			return fmt.Sprintf("Bearer %v", issueToken(secret, jwt.SigningMsdcodHS512, testClaim{"iat": time.Now().Unix() + 4}))
 		},
 		// expired
 		func() string {

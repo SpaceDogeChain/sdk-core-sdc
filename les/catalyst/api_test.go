@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package catalyst
 
@@ -20,32 +20,32 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/beacon"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/les"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/beacon"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/les"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 var (
 	// testKey is a private key to use for funding a tester account.
 	testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 
-	// testAddr is the Ethereum address of the tester account.
+	// testAddr is the sdcereum address of the tester account.
 	testAddr = crypto.PubkeyToAddress(testKey.PublicKey)
 
 	testBalance = big.NewInt(2e18)
 )
 
 func generatePreMergeChain(n int) (*core.Genesis, []*types.Header, []*types.Block) {
-	config := *params.AllEthashProtocolChanges
+	config := *params.AllsdcashProtocolChanges
 	genesis := &core.Genesis{
 		Config:    &config,
 		Alloc:     core.GenesisAlloc{testAddr: {Balance: testBalance}},
@@ -53,7 +53,7 @@ func generatePreMergeChain(n int) (*core.Genesis, []*types.Header, []*types.Bloc
 		Timestamp: 9000,
 		BaseFee:   big.NewInt(params.InitialBaseFee),
 	}
-	_, blocks, _ := core.GenerateChainWithGenesis(genesis, ethash.NewFaker(), n, nil)
+	_, blocks, _ := core.GenerateChainWithGenesis(genesis, sdcash.NewFaker(), n, nil)
 	totalDifficulty := big.NewInt(0)
 
 	var headers []*types.Header
@@ -66,7 +66,7 @@ func generatePreMergeChain(n int) (*core.Genesis, []*types.Header, []*types.Bloc
 	return genesis, headers, blocks
 }
 
-func TestSetHeadBeforeTotalDifficulty(t *testing.T) {
+func TestSsdceadBeforeTotalDifficulty(t *testing.T) {
 	genesis, headers, blocks := generatePreMergeChain(10)
 	n, lesService := startLesService(t, genesis, headers)
 	defer n.Close()
@@ -155,20 +155,20 @@ func TestExecutePayloadV1(t *testing.T) {
 	}
 }
 
-func TestEth2DeepReorg(t *testing.T) {
-	// TODO (MariusVanDerWijden) TestEth2DeepReorg is currently broken, because it tries to reorg
+func Testsdc2DeepReorg(t *testing.T) {
+	// TODO (MariusVanDerWijden) Testsdc2DeepReorg is currently broken, because it tries to reorg
 	// before the totalTerminalDifficulty threshold
 	/*
 		genesis, preMergeBlocks := generatePreMergeChain(core.TriesInMemory * 2)
-		n, ethservice := startEthService(t, genesis, preMergeBlocks)
+		n, sdcservice := startsdcService(t, genesis, preMergeBlocks)
 		defer n.Close()
 
 		var (
-			api    = NewConsensusAPI(ethservice, nil)
+			api    = NewConsensusAPI(sdcservice, nil)
 			parent = preMergeBlocks[len(preMergeBlocks)-core.TriesInMemory-1]
-			head   = ethservice.BlockChain().CurrentBlock().NumberU64()
+			head   = sdcservice.BlockChain().CurrentBlock().NumberU64()
 		)
-		if ethservice.BlockChain().HasBlockAndState(parent.Hash(), parent.NumberU64()) {
+		if sdcservice.BlockChain().HasBlockAndState(parent.Hash(), parent.NumberU64()) {
 			t.Errorf("Block %d not pruned", parent.NumberU64())
 		}
 		for i := 0; i < 10; i++ {
@@ -179,7 +179,7 @@ func TestEth2DeepReorg(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to create the executable data %v", err)
 			}
-			block, err := ExecutableDataToBlock(ethservice.BlockChain().Config(), parent.Header(), *execData)
+			block, err := ExecutableDataToBlock(sdcservice.BlockChain().Config(), parent.Header(), *execData)
 			if err != nil {
 				t.Fatalf("Failed to convert executable data to block %v", err)
 			}
@@ -187,13 +187,13 @@ func TestEth2DeepReorg(t *testing.T) {
 			if err != nil || newResp.Status != "VALID" {
 				t.Fatalf("Failed to insert block: %v", err)
 			}
-			if ethservice.BlockChain().CurrentBlock().NumberU64() != head {
+			if sdcservice.BlockChain().CurrentBlock().NumberU64() != head {
 				t.Fatalf("Chain head shouldn't be updated")
 			}
 			if err := api.setCanonical(block.Hash()); err != nil {
 				t.Fatalf("Failed to set head: %v", err)
 			}
-			if ethservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64() {
+			if sdcservice.BlockChain().CurrentBlock().NumberU64() != block.NumberU64() {
 				t.Fatalf("Chain head should be updated")
 			}
 			parent, head = block, block.NumberU64()
@@ -201,25 +201,25 @@ func TestEth2DeepReorg(t *testing.T) {
 	*/
 }
 
-// startEthService creates a full node instance for testing.
-func startLesService(t *testing.T, genesis *core.Genesis, headers []*types.Header) (*node.Node, *les.LightEthereum) {
+// startsdcService creates a full node instance for testing.
+func startLesService(t *testing.T, genesis *core.Genesis, headers []*types.Header) (*node.Node, *les.Lightsdcereum) {
 	t.Helper()
 
 	n, err := node.New(&node.Config{})
 	if err != nil {
 		t.Fatal("can't create node:", err)
 	}
-	ethcfg := &ethconfig.Config{
+	sdccfg := &sdcconfig.Config{
 		Genesis:        genesis,
-		Ethash:         ethash.Config{PowMode: ethash.ModeFake},
+		sdcash:         sdcash.Config{PowMode: sdcash.ModeFake},
 		SyncMode:       downloader.LightSync,
 		TrieDirtyCache: 256,
 		TrieCleanCache: 256,
 		LightPeers:     10,
 	}
-	lesService, err := les.New(n, ethcfg)
+	lesService, err := les.New(n, sdccfg)
 	if err != nil {
-		t.Fatal("can't create eth service:", err)
+		t.Fatal("can't create sdc service:", err)
 	}
 	if err := n.Start(); err != nil {
 		t.Fatal("can't start node:", err)

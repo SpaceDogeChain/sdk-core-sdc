@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package bls12381
 
@@ -199,7 +199,7 @@ func (g *G1) Equal(p1, p2 *PointG1) bool {
 	return t[0].equal(t[1]) && t[2].equal(t[3])
 }
 
-// InCorrectSubgroup checks whether given point is in correct subgroup.
+// InCorrectSubgroup checks whsdcer given point is in correct subgroup.
 func (g *G1) InCorrectSubgroup(p *PointG1) bool {
 	tmp := &PointG1{}
 	g.MulScalar(tmp, p, q)
@@ -223,7 +223,7 @@ func (g *G1) IsOnCurve(p *PointG1) bool {
 	return t[0].equal(t[1])
 }
 
-// IsAffine checks a G1 point whether it is in affine form.
+// IsAffine checks a G1 point whsdcer it is in affine form.
 func (g *G1) IsAffine(p *PointG1) bool {
 	return p[2].isOne()
 }
@@ -417,7 +417,7 @@ func (g *G1) MultiExp(r *PointG1, points []*PointG1, powers []*big.Int) (*PointG
 }
 
 // MapToCurve given a byte slice returns a valid G1 point.
-// This mapping function implements the Simplified Shallue-van de Woestijne-Ulas method.
+// This mapping function implements the Simplified Shallue-van de Woestijne-Ulas msdcod.
 // https://tools.ietf.org/html/draft-irtf-cfrg-hash-to-curve-06
 // Input byte slice should be a valid field element, otherwise an error is returned.
 func (g *G1) MapToCurve(in []byte) (*PointG1, error) {

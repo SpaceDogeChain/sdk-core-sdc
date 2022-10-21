@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2019 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
 // checkpoint-admin is a utility that can be used to query checkpoint information
 // and register stable checkpoints into an oracle contract.
@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common/fdlimit"
-	"github.com/ethereum/go-ethereum/internal/flags"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/spacedogechain/go-spacedogechain/common/fdlimit"
+	"github.com/spacedogechain/go-spacedogechain/internal/flags"
+	"github.com/spacedogechain/go-spacedogechain/log"
 	"github.com/urfave/cli/v2"
 )
 
-var app = flags.NewApp("ethereum checkpoint helper tool")
+var app = flags.NewApp("spacedogechain checkpoint helper tool")
 
 func init() {
 	app.Commands = []*cli.Command{

@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Tests that abnormal program termination (i.e.crash) and restart can recovery
 // the snapshot properly if the snapshot is enabled.
@@ -28,13 +28,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // snapshotTestBasic wraps the common testing fields in the snapshot tests.
@@ -51,8 +51,8 @@ type snapshotTestBasic struct {
 
 	// share fields, set in runtime
 	datadir string
-	db      ethdb.Database
-	genDb   ethdb.Database
+	db      sdcdb.Database
+	genDb   sdcdb.Database
 	engine  consensus.Engine
 	gspec   *Genesis
 }
@@ -69,9 +69,9 @@ func (basic *snapshotTestBasic) prepare(t *testing.T) (*BlockChain, []*types.Blo
 	var (
 		gspec = &Genesis{
 			BaseFee: big.NewInt(params.InitialBaseFee),
-			Config:  params.AllEthashProtocolChanges,
+			Config:  params.AllsdcashProtocolChanges,
 		}
-		engine = ethash.NewFullFaker()
+		engine = sdcash.NewFullFaker()
 
 		// Snapshot is enabled, the first snapshot is created from the Genesis.
 		// The snapshot memory allowance is 256MB, it means no snapshot flush
@@ -179,7 +179,7 @@ func (basic *snapshotTestBasic) dump() string {
 	//if crash {
 	//	fmt.Fprintf(buffer, "\nCRASH\n\n")
 	//} else {
-	//	fmt.Fprintf(buffer, "\nSetHead(%d)\n\n", basic.setHead)
+	//	fmt.Fprintf(buffer, "\nSsdcead(%d)\n\n", basic.ssdcead)
 	//}
 	fmt.Fprintf(buffer, "------------------------------\n\n")
 
@@ -210,14 +210,14 @@ func (basic *snapshotTestBasic) teardown() {
 }
 
 // snapshotTest is a test case type for normal snapshot recovery.
-// It can be used for testing that restart Geth normally.
+// It can be used for testing that restart Gsdc normally.
 type snapshotTest struct {
 	snapshotTestBasic
 }
 
 func (snaptest *snapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
@@ -233,14 +233,14 @@ func (snaptest *snapshotTest) test(t *testing.T) {
 }
 
 // crashSnapshotTest is a test case type for innormal snapshot recovery.
-// It can be used for testing that restart Geth after the crash.
+// It can be used for testing that restart Gsdc after the crash.
 type crashSnapshotTest struct {
 	snapshotTestBasic
 }
 
 func (snaptest *crashSnapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
@@ -287,7 +287,7 @@ type gappedSnapshotTest struct {
 
 func (snaptest *gappedSnapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
@@ -319,23 +319,23 @@ func (snaptest *gappedSnapshotTest) test(t *testing.T) {
 	snaptest.verify(t, newchain, blocks)
 }
 
-// setHeadSnapshotTest is the test type used to test this scenario:
+// ssdceadSnapshotTest is the test type used to test this scenario:
 // - have a complete snapshot
 // - set the head to a lower point
 // - restart
-type setHeadSnapshotTest struct {
+type ssdceadSnapshotTest struct {
 	snapshotTestBasic
-	setHead uint64 // Block number to set head back to
+	ssdcead uint64 // Block number to set head back to
 }
 
-func (snaptest *setHeadSnapshotTest) test(t *testing.T) {
+func (snaptest *ssdceadSnapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
-	// Rewind the chain if setHead operation is required.
-	chain.SetHead(snaptest.setHead)
+	// Rewind the chain if ssdcead operation is required.
+	chain.Ssdcead(snaptest.ssdcead)
 	chain.Stop()
 
 	newchain, err := NewBlockChain(snaptest.db, nil, snaptest.gspec, nil, snaptest.engine, vm.Config{}, nil, nil)
@@ -359,7 +359,7 @@ type wipeCrashSnapshotTest struct {
 
 func (snaptest *wipeCrashSnapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
@@ -405,7 +405,7 @@ func (snaptest *wipeCrashSnapshotTest) test(t *testing.T) {
 	snaptest.verify(t, newchain, blocks)
 }
 
-// Tests a Geth restart with valid snapshot. Before the shutdown, all snapshot
+// Tests a Gsdc restart with valid snapshot. Before the shutdown, all snapshot
 // journal will be persisted correctly. In this case no snapshot recovery is
 // required.
 func TestRestartWithNewSnapshot(t *testing.T) {
@@ -415,7 +415,7 @@ func TestRestartWithNewSnapshot(t *testing.T) {
 	// Commit:   G
 	// Snapshot: G
 	//
-	// SetHead(0)
+	// Ssdcead(0)
 	//
 	// ------------------------------
 	//
@@ -442,7 +442,7 @@ func TestRestartWithNewSnapshot(t *testing.T) {
 	test.teardown()
 }
 
-// Tests a Geth was crashed and restarts with a broken snapshot. In this case the
+// Tests a Gsdc was crashed and restarts with a broken snapshot. In this case the
 // chain head should be rewound to the point with available state. And also the
 // new head should must be lower than disk layer. But there is no committed point
 // so the chain should be rewound to genesis and the disk layer should be left
@@ -481,7 +481,7 @@ func TestNoCommitCrashWithNewSnapshot(t *testing.T) {
 	test.teardown()
 }
 
-// Tests a Geth was crashed and restarts with a broken snapshot. In this case the
+// Tests a Gsdc was crashed and restarts with a broken snapshot. In this case the
 // chain head should be rewound to the point with available state. And also the
 // new head should must be lower than disk layer. But there is only a low committed
 // point so the chain should be rewound to committed point and the disk layer
@@ -520,7 +520,7 @@ func TestLowCommitCrashWithNewSnapshot(t *testing.T) {
 	test.teardown()
 }
 
-// Tests a Geth was crashed and restarts with a broken snapshot. In this case
+// Tests a Gsdc was crashed and restarts with a broken snapshot. In this case
 // the chain head should be rewound to the point with available state. And also
 // the new head should must be lower than disk layer. But there is only a high
 // committed point so the chain should be rewound to genesis and the disk layer
@@ -559,7 +559,7 @@ func TestHighCommitCrashWithNewSnapshot(t *testing.T) {
 	test.teardown()
 }
 
-// Tests a Geth was running with snapshot enabled. Then restarts without
+// Tests a Gsdc was running with snapshot enabled. Then restarts without
 // enabling snapshot and after that re-enable the snapshot again. In this
 // case the snapshot should be rebuilt with latest chain head.
 func TestGappedNewSnapshot(t *testing.T) {
@@ -569,7 +569,7 @@ func TestGappedNewSnapshot(t *testing.T) {
 	// Commit:   G
 	// Snapshot: G
 	//
-	// SetHead(0)
+	// Ssdcead(0)
 	//
 	// ------------------------------
 	//
@@ -597,17 +597,17 @@ func TestGappedNewSnapshot(t *testing.T) {
 	test.teardown()
 }
 
-// Tests the Geth was running with snapshot enabled and resetHead is applied.
+// Tests the Gsdc was running with snapshot enabled and ressdcead is applied.
 // In this case the head is rewound to the target(with state available). After
 // that the chain is restarted and the original disk layer is kept.
-func TestSetHeadWithNewSnapshot(t *testing.T) {
+func TestSsdceadWithNewSnapshot(t *testing.T) {
 	// Chain:
 	//   G->C1->C2->C3->C4->C5->C6->C7->C8 (HEAD)
 	//
 	// Commit:   G
 	// Snapshot: G
 	//
-	// SetHead(4)
+	// Ssdcead(4)
 	//
 	// ------------------------------
 	//
@@ -618,7 +618,7 @@ func TestSetHeadWithNewSnapshot(t *testing.T) {
 	// Expected head fast block: C4
 	// Expected head block     : C4
 	// Expected snapshot disk  : G
-	test := &setHeadSnapshotTest{
+	test := &ssdceadSnapshotTest{
 		snapshotTestBasic: snapshotTestBasic{
 			chainBlocks:        8,
 			snapshotBlock:      0,
@@ -629,13 +629,13 @@ func TestSetHeadWithNewSnapshot(t *testing.T) {
 			expHeadBlock:       4,
 			expSnapshotBottom:  0, // The initial disk layer is built from the genesis
 		},
-		setHead: 4,
+		ssdcead: 4,
 	}
 	test.test(t)
 	test.teardown()
 }
 
-// Tests the Geth was running with a complete snapshot and then imports a few
+// Tests the Gsdc was running with a complete snapshot and then imports a few
 // more new blocks on top without enabling the snapshot. After the restart,
 // crash happens. Check everything is ok after the restart.
 func TestRecoverSnapshotFromWipingCrash(t *testing.T) {
@@ -645,7 +645,7 @@ func TestRecoverSnapshotFromWipingCrash(t *testing.T) {
 	// Commit:   G
 	// Snapshot: G
 	//
-	// SetHead(0)
+	// Ssdcead(0)
 	//
 	// ------------------------------
 	//

@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/accounts/abi/bind"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // Test light syncing which will download all headers from genesis.
@@ -193,10 +193,10 @@ func testMissOracleBackend(t *testing.T, hasCheckpoint bool, protocol int) {
 	expected += 1
 
 	// Explicitly set the oracle as nil. In normal use case it can happen
-	// that user wants to unlock something which blocks the oracle backend
+	// that user wants to unlock somsdcing which blocks the oracle backend
 	// initialisation. But at the same time syncing starts.
 	//
-	// See https://github.com/ethereum/go-ethereum/issues/20097 for more detail.
+	// See https://github.com/sdcereum/go-sdcereum/issues/20097 for more detail.
 	//
 	// In this case, client should run light sync or legacy checkpoint sync
 	// if hardcoded checkpoint is configured.
@@ -258,7 +258,7 @@ func testSyncFromConfiguredCheckpoint(t *testing.T, protocol int) {
 	defer tearDown()
 
 	// Configure the local checkpoint(the first section)
-	head := server.handler.blockchain.GetHeaderByNumber(config.ChtSize - 1).Hash()
+	head := server.handler.blockchain.GsdceaderByNumber(config.ChtSize - 1).Hash()
 	cp := &params.TrustedCheckpoint{
 		SectionIndex: 0,
 		SectionHead:  head,

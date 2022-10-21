@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -23,8 +23,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/light"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/light"
 )
 
 func TestLightPruner(t *testing.T) {
@@ -138,13 +138,13 @@ func TestLightPruner(t *testing.T) {
 	// Ensure all APIs still work after pruning.
 	var cases = []struct {
 		from, to   uint64
-		methodName string
-		method     func(uint64) bool
+		msdcodName string
+		msdcod     func(uint64) bool
 	}{
 		{
-			1, 10, "GetHeaderByNumber",
+			1, 10, "GsdceaderByNumber",
 			func(n uint64) bool {
-				_, err := light.GetHeaderByNumber(context.Background(), client.handler.backend.odr, n)
+				_, err := light.GsdceaderByNumber(context.Background(), client.handler.backend.odr, n)
 				return err == nil
 			},
 		},
@@ -158,36 +158,36 @@ func TestLightPruner(t *testing.T) {
 		{
 			21, 30, "GetTd",
 			func(n uint64) bool {
-				_, err := light.GetTd(context.Background(), client.handler.backend.odr, server.handler.blockchain.GetHeaderByNumber(n).Hash(), n)
+				_, err := light.GetTd(context.Background(), client.handler.backend.odr, server.handler.blockchain.GsdceaderByNumber(n).Hash(), n)
 				return err == nil
 			},
 		},
 		{
 			31, 40, "GetBodyRLP",
 			func(n uint64) bool {
-				_, err := light.GetBodyRLP(context.Background(), client.handler.backend.odr, server.handler.blockchain.GetHeaderByNumber(n).Hash(), n)
+				_, err := light.GetBodyRLP(context.Background(), client.handler.backend.odr, server.handler.blockchain.GsdceaderByNumber(n).Hash(), n)
 				return err == nil
 			},
 		},
 		{
 			41, 50, "GetBlock",
 			func(n uint64) bool {
-				_, err := light.GetBlock(context.Background(), client.handler.backend.odr, server.handler.blockchain.GetHeaderByNumber(n).Hash(), n)
+				_, err := light.GetBlock(context.Background(), client.handler.backend.odr, server.handler.blockchain.GsdceaderByNumber(n).Hash(), n)
 				return err == nil
 			},
 		},
 		{
 			51, 60, "GetBlockReceipts",
 			func(n uint64) bool {
-				_, err := light.GetBlockReceipts(context.Background(), client.handler.backend.odr, server.handler.blockchain.GetHeaderByNumber(n).Hash(), n)
+				_, err := light.GetBlockReceipts(context.Background(), client.handler.backend.odr, server.handler.blockchain.GsdceaderByNumber(n).Hash(), n)
 				return err == nil
 			},
 		},
 	}
 	for _, c := range cases {
 		for i := c.from; i <= c.to; i++ {
-			if !c.method(i) {
-				t.Fatalf("rpc method %s failed, number %d", c.methodName, i)
+			if !c.msdcod(i) {
+				t.Fatalf("rpc msdcod %s failed, number %d", c.msdcodName, i)
 			}
 		}
 	}

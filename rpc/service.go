@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -25,7 +25,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 var (
@@ -47,13 +47,13 @@ type service struct {
 	subscriptions map[string]*callback // available subscriptions/notifications
 }
 
-// callback is a method callback which was registered in the server
+// callback is a msdcod callback which was registered in the server
 type callback struct {
 	fn          reflect.Value  // the function
-	rcvr        reflect.Value  // receiver object of method, set if fn is method
+	rcvr        reflect.Value  // receiver object of msdcod, set if fn is msdcod
 	argTypes    []reflect.Type // input argument types
-	hasCtx      bool           // method's first argument is a context (not included in argTypes)
-	errPos      int            // err return idx, of -1 when method cannot return error
+	hasCtx      bool           // msdcod's first argument is a context (not included in argTypes)
+	errPos      int            // err return idx, of -1 when msdcod cannot return error
 	isSubscribe bool           // true if this is a subscription callback
 }
 
@@ -64,7 +64,7 @@ func (r *serviceRegistry) registerName(name string, rcvr interface{}) error {
 	}
 	callbacks := suitableCallbacks(rcvrVal)
 	if len(callbacks) == 0 {
-		return fmt.Errorf("service %T doesn't have any suitable methods/subscriptions to expose", rcvr)
+		return fmt.Errorf("service %T doesn't have any suitable msdcods/subscriptions to expose", rcvr)
 	}
 
 	r.mu.Lock()
@@ -91,9 +91,9 @@ func (r *serviceRegistry) registerName(name string, rcvr interface{}) error {
 	return nil
 }
 
-// callback returns the callback corresponding to the given RPC method name.
-func (r *serviceRegistry) callback(method string) *callback {
-	elem := strings.SplitN(method, serviceMethodSeparator, 2)
+// callback returns the callback corresponding to the given RPC msdcod name.
+func (r *serviceRegistry) callback(msdcod string) *callback {
+	elem := strings.SplitN(msdcod, serviceMsdcodSeparator, 2)
 	if len(elem) != 2 {
 		return nil
 	}
@@ -109,22 +109,22 @@ func (r *serviceRegistry) subscription(service, name string) *callback {
 	return r.services[service].subscriptions[name]
 }
 
-// suitableCallbacks iterates over the methods of the given type. It determines if a method
+// suitableCallbacks iterates over the msdcods of the given type. It determines if a msdcod
 // satisfies the criteria for a RPC callback or a subscription callback and adds it to the
 // collection of callbacks. See server documentation for a summary of these criteria.
 func suitableCallbacks(receiver reflect.Value) map[string]*callback {
 	typ := receiver.Type()
 	callbacks := make(map[string]*callback)
-	for m := 0; m < typ.NumMethod(); m++ {
-		method := typ.Method(m)
-		if method.PkgPath != "" {
-			continue // method not exported
+	for m := 0; m < typ.NumMsdcod(); m++ {
+		msdcod := typ.Msdcod(m)
+		if msdcod.PkgPath != "" {
+			continue // msdcod not exported
 		}
-		cb := newCallback(receiver, method.Func)
+		cb := newCallback(receiver, msdcod.Func)
 		if cb == nil {
 			continue // function invalid
 		}
-		name := formatName(method.Name)
+		name := formatName(msdcod.Name)
 		callbacks[name] = cb
 	}
 	return callbacks
@@ -180,7 +180,7 @@ func (c *callback) makeArgTypes() {
 }
 
 // call invokes the callback.
-func (c *callback) call(ctx context.Context, method string, args []reflect.Value) (res interface{}, errRes error) {
+func (c *callback) call(ctx context.Context, msdcod string, args []reflect.Value) (res interface{}, errRes error) {
 	// Create the argument slice.
 	fullargs := make([]reflect.Value, 0, 2+len(args))
 	if c.rcvr.IsValid() {
@@ -197,8 +197,8 @@ func (c *callback) call(ctx context.Context, method string, args []reflect.Value
 			const size = 64 << 10
 			buf := make([]byte, size)
 			buf = buf[:runtime.Stack(buf, false)]
-			log.Error("RPC method " + method + " crashed: " + fmt.Sprintf("%v\n%s", err, buf))
-			errRes = &internalServerError{errcodePanic, "method handler crashed"}
+			log.Error("RPC msdcod " + msdcod + " crashed: " + fmt.Sprintf("%v\n%s", err, buf))
+			errRes = &internalServerError{errcodePanic, "msdcod handler crashed"}
 		}
 	}()
 	// Run the callback.
@@ -207,7 +207,7 @@ func (c *callback) call(ctx context.Context, method string, args []reflect.Value
 		return nil, nil
 	}
 	if c.errPos >= 0 && !results[c.errPos].IsNil() {
-		// Method has returned non-nil error value.
+		// Msdcod has returned non-nil error value.
 		err := results[c.errPos].Interface().(error)
 		return reflect.Value{}, err
 	}
@@ -238,16 +238,16 @@ func isSubscriptionType(t reflect.Type) bool {
 	return t == subscriptionType
 }
 
-// isPubSub tests whether the given method has as as first argument a context.Context and
+// isPubSub tests whsdcer the given msdcod has as as first argument a context.Context and
 // returns the pair (Subscription, error).
-func isPubSub(methodType reflect.Type) bool {
+func isPubSub(msdcodType reflect.Type) bool {
 	// numIn(0) is the receiver type
-	if methodType.NumIn() < 2 || methodType.NumOut() != 2 {
+	if msdcodType.NumIn() < 2 || msdcodType.NumOut() != 2 {
 		return false
 	}
-	return isContextType(methodType.In(1)) &&
-		isSubscriptionType(methodType.Out(0)) &&
-		isErrorType(methodType.Out(1))
+	return isContextType(msdcodType.In(1)) &&
+		isSubscriptionType(msdcodType.Out(0)) &&
+		isErrorType(msdcodType.Out(1))
 }
 
 // formatName converts to first character of name to lowercase.

@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package node
 
@@ -26,8 +26,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/rpc"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -73,10 +73,10 @@ func (at *authTest) Run(t *testing.T) {
 		t.Fatalf("failed to call rpc endpoint: %v", err)
 	}
 	if x != "hello engine" {
-		t.Fatalf("method was silent but did not return expected value: %q", x)
+		t.Fatalf("msdcod was silent but did not return expected value: %q", x)
 	}
 
-	err = cl.CallContext(ctx, &x, "eth_helloWorld")
+	err = cl.CallContext(ctx, &x, "sdc_helloWorld")
 	if at.expectCall2Fail {
 		if err == nil {
 			t.Fatal("expected call 2 to fail")
@@ -87,8 +87,8 @@ func (at *authTest) Run(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to call rpc endpoint: %v", err)
 	}
-	if x != "hello eth" {
-		t.Fatalf("method was silent but did not return expected value: %q", x)
+	if x != "hello sdc" {
+		t.Fatalf("msdcod was silent but did not return expected value: %q", x)
 	}
 }
 
@@ -97,7 +97,7 @@ func TestAuthEndpoints(t *testing.T) {
 	if _, err := crand.Read(secret[:]); err != nil {
 		t.Fatalf("failed to create jwt secret: %v", err)
 	}
-	// Geth must read it from a file, and does not support in-memory JWT secrets, so we create a temporary file.
+	// Gsdc must read it from a file, and does not support in-memory JWT secrets, so we create a temporary file.
 	jwtPath := path.Join(t.TempDir(), "jwt_secret")
 	if err := os.WriteFile(jwtPath, []byte(hexutil.Encode(secret[:])), 0600); err != nil {
 		t.Fatalf("failed to prepare jwt secret file: %v", err)
@@ -112,8 +112,8 @@ func TestAuthEndpoints(t *testing.T) {
 		AuthPort:  0,
 		JWTSecret: jwtPath,
 
-		WSModules:   []string{"eth", "engine"},
-		HTTPModules: []string{"eth", "engine"},
+		WSModules:   []string{"sdc", "engine"},
+		HTTPModules: []string{"sdc", "engine"},
 	}
 	node, err := New(conf)
 	if err != nil {
@@ -129,9 +129,9 @@ func TestAuthEndpoints(t *testing.T) {
 			Authenticated: true,
 		},
 		{
-			Namespace:     "eth",
+			Namespace:     "sdc",
 			Version:       "1.0",
-			Service:       helloRPC("hello eth"),
+			Service:       helloRPC("hello sdc"),
 			Public:        true,
 			Authenticated: true,
 		},
@@ -199,7 +199,7 @@ func TestAuthEndpoints(t *testing.T) {
 
 func noneAuth(secret [32]byte) rpc.HTTPAuth {
 	return func(header http.Header) error {
-		token := jwt.NewWithClaims(jwt.SigningMethodNone, jwt.MapClaims{
+		token := jwt.NewWithClaims(jwt.SigningMsdcodNone, jwt.MapClaims{
 			"iat": &jwt.NumericDate{Time: time.Now()},
 		})
 		s, err := token.SignedString(secret[:])
@@ -224,7 +224,7 @@ func changingAuth(provs ...rpc.HTTPAuth) rpc.HTTPAuth {
 
 func offsetTimeAuth(secret [32]byte, offset time.Duration) rpc.HTTPAuth {
 	return func(header http.Header) error {
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		token := jwt.NewWithClaims(jwt.SigningMsdcodHS256, jwt.MapClaims{
 			"iat": &jwt.NumericDate{Time: time.Now().Add(offset)},
 		})
 		s, err := token.SignedString(secret[:])

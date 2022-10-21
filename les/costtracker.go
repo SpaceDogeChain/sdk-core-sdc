@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -23,12 +23,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/les/flowcontrol"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/les/flowcontrol"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
 )
 
 const makeCostStats = false // make request cost statistics during operation
@@ -41,7 +41,7 @@ var (
 		GetReceiptsMsg:         {0, 1000000},
 		GetCodeMsg:             {0, 450000},
 		GetProofsV2Msg:         {0, 600000},
-		GetHelperTrieProofsMsg: {0, 1000000},
+		GsdcelperTrieProofsMsg: {0, 1000000},
 		SendTxV2Msg:            {0, 450000},
 		GetTxStatusMsg:         {0, 250000},
 	}
@@ -52,7 +52,7 @@ var (
 		GetReceiptsMsg:         {0, 40},
 		GetCodeMsg:             {0, 80},
 		GetProofsV2Msg:         {0, 80},
-		GetHelperTrieProofsMsg: {0, 20},
+		GsdcelperTrieProofsMsg: {0, 20},
 		SendTxV2Msg:            {0, 16500},
 		GetTxStatusMsg:         {0, 50},
 	}
@@ -63,7 +63,7 @@ var (
 		GetReceiptsMsg:         {0, 200000},
 		GetCodeMsg:             {0, 50000},
 		GetProofsV2Msg:         {0, 4000},
-		GetHelperTrieProofsMsg: {0, 4000},
+		GsdcelperTrieProofsMsg: {0, 4000},
 		SendTxV2Msg:            {0, 100},
 		GetTxStatusMsg:         {0, 100},
 	}
@@ -74,7 +74,7 @@ var (
 		GetReceiptsMsg:         1,
 		GetCodeMsg:             1,
 		GetProofsV2Msg:         1,
-		GetHelperTrieProofsMsg: 16,
+		GsdcelperTrieProofsMsg: 16,
 		SendTxV2Msg:            8,
 		GetTxStatusMsg:         64,
 	}
@@ -84,7 +84,7 @@ var (
 const (
 	maxCostFactor    = 2    // ratio of maximum and average cost estimates
 	bufLimitRatio    = 6000 // fixed bufLimit/MRR ratio
-	gfUsageThreshold = 0.5
+	gfUsagsdcreshold = 0.5
 	gfUsageTC        = time.Second
 	gfRaiseTC        = time.Second * 200
 	gfDropTC         = time.Second * 50
@@ -115,7 +115,7 @@ const (
 // changes in the cost factor can be applied immediately without always notifying
 // the clients about the changed cost tables.
 type costTracker struct {
-	db     ethdb.Database
+	db     sdcdb.Database
 	stopCh chan chan struct{}
 
 	inSizeFactor  float64
@@ -137,7 +137,7 @@ type costTracker struct {
 
 // newCostTracker creates a cost tracker and loads the cost factor statistics from the database.
 // It also returns the minimum capacity that can be assigned to any peer.
-func newCostTracker(db ethdb.Database, config *ethconfig.Config) (*costTracker, uint64) {
+func newCostTracker(db sdcdb.Database, config *sdcconfig.Config) (*costTracker, uint64) {
 	utilTarget := float64(config.LightServ) * flowcontrol.FixedPointMultiplier / 100
 	ct := &costTracker{
 		db:         db,
@@ -259,7 +259,7 @@ func (ct *costTracker) gfLoop() {
 
 	// In order to perform factor data statistics under the high request pressure,
 	// we only adjust factor when recent factor usage beyond the threshold.
-	threshold := gfUsageThreshold * float64(gfUsageTC) * ct.utilTarget / flowcontrol.FixedPointMultiplier
+	threshold := gfUsagsdcreshold * float64(gfUsageTC) * ct.utilTarget / flowcontrol.FixedPointMultiplier
 
 	go func() {
 		saveCostFactor := func() {
@@ -289,7 +289,7 @@ func (ct *costTracker) gfLoop() {
 						relativeCostCodeHistogram.Update(relCost)
 					case GetProofsV2Msg:
 						relativeCostProofHistogram.Update(relCost)
-					case GetHelperTrieProofsMsg:
+					case GsdcelperTrieProofsMsg:
 						relativeCostHelperProofHistogram.Update(relCost)
 					case SendTxV2Msg:
 						relativeCostSendTxHistogram.Update(relCost)

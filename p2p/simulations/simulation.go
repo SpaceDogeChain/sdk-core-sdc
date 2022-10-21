@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package simulations
 
@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
 )
 
 // Simulation provides a framework for running actions in a simulated network
@@ -129,7 +129,7 @@ type Expectation struct {
 	// Nodes is a list of nodes to check
 	Nodes []enode.ID
 
-	// Check checks whether a given node meets the expectation
+	// Check checks whsdcer a given node meets the expectation
 	Check func(context.Context, enode.ID) (bool, error)
 }
 

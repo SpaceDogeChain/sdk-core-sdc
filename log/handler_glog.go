@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package log
 
@@ -40,8 +40,8 @@ type GlogHandler struct {
 	origin Handler // The origin handler this wraps
 
 	level     uint32 // Current log level, atomically accessible
-	override  uint32 // Flag whether overrides are used, atomically accessible
-	backtrace uint32 // Flag whether backtrace location is set
+	override  uint32 // Flag whsdcer overrides are used, atomically accessible
+	backtrace uint32 // Flag whsdcer backtrace location is set
 
 	patterns  []pattern       // Current list of patterns to override with
 	siteCache map[uintptr]Lvl // Cache of callsite pattern evaluations
@@ -57,8 +57,8 @@ func NewGlogHandler(h Handler) *GlogHandler {
 	}
 }
 
-// SetHandler updates the handler to write records to the specified sub-handler.
-func (h *GlogHandler) SetHandler(nh Handler) {
+// Ssdcandler updates the handler to write records to the specified sub-handler.
+func (h *GlogHandler) Ssdcandler(nh Handler) {
 	h.origin = nh
 }
 
@@ -179,7 +179,7 @@ func (h *GlogHandler) BacktraceAt(location string) error {
 // Log implements Handler.Log, filtering a log record through the global, local
 // and backtrace filters, finally emitting it if either allow it through.
 func (h *GlogHandler) Log(r *Record) error {
-	// If backtracing is requested, check whether this is the callsite
+	// If backtracing is requested, check whsdcer this is the callsite
 	if atomic.LoadUint32(&h.backtrace) > 0 {
 		// Everything below here is slow. Although we could cache the call sites the
 		// same way as for vmodule, backtracing is so rare it's not worth the extra

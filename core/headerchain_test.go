@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
@@ -23,11 +23,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 func verifyUnbrokenCanonchain(hc *HeaderChain) error {
@@ -45,7 +45,7 @@ func verifyUnbrokenCanonchain(hc *HeaderChain) error {
 		if h.Number.Uint64() == 0 {
 			break
 		}
-		h = hc.GetHeader(h.ParentHash, h.Number.Uint64()-1)
+		h = hc.Gsdceader(h.ParentHash, h.Number.Uint64()-1)
 	}
 	return nil
 }
@@ -70,17 +70,17 @@ func testInsert(t *testing.T, hc *HeaderChain, chain []*types.Header, wantStatus
 func TestHeaderInsertion(t *testing.T) {
 	var (
 		db    = rawdb.NewMemoryDatabase()
-		gspec = &Genesis{BaseFee: big.NewInt(params.InitialBaseFee), Config: params.AllEthashProtocolChanges}
+		gspec = &Genesis{BaseFee: big.NewInt(params.InitialBaseFee), Config: params.AllsdcashProtocolChanges}
 	)
 	gspec.Commit(db)
-	hc, err := NewHeaderChain(db, gspec.Config, ethash.NewFaker(), func() bool { return false })
+	hc, err := NewHeaderChain(db, gspec.Config, sdcash.NewFaker(), func() bool { return false })
 	if err != nil {
 		t.Fatal(err)
 	}
 	// chain A: G->A1->A2...A128
-	genDb, chainA := makeHeaderChainWithGenesis(gspec, 128, ethash.NewFaker(), 10)
+	genDb, chainA := makeHeaderChainWithGenesis(gspec, 128, sdcash.NewFaker(), 10)
 	// chain B: G->A1->B1...B128
-	chainB := makeHeaderChain(gspec.Config, chainA[0], 128, ethash.NewFaker(), genDb, 10)
+	chainB := makeHeaderChain(gspec.Config, chainA[0], 128, sdcash.NewFaker(), genDb, 10)
 
 	forker := NewForkChoice(hc, nil)
 	// Inserting 64 headers on an empty chain, expecting

@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2021 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -27,18 +27,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/console/prompt"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/internal/flags"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/spacedogechain/go-spacedogechain/cmd/utils"
+	"github.com/spacedogechain/go-spacedogechain/common"
+	"github.com/spacedogechain/go-spacedogechain/common/hexutil"
+	"github.com/spacedogechain/go-spacedogechain/console/prompt"
+	"github.com/spacedogechain/go-spacedogechain/core/rawdb"
+	"github.com/spacedogechain/go-spacedogechain/core/state/snapshot"
+	"github.com/spacedogechain/go-spacedogechain/core/types"
+	"github.com/spacedogechain/go-spacedogechain/crypto"
+	"github.com/spacedogechain/go-spacedogechain/ethdb"
+	"github.com/spacedogechain/go-spacedogechain/internal/flags"
+	"github.com/spacedogechain/go-spacedogechain/log"
+	"github.com/spacedogechain/go-spacedogechain/trie"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 )

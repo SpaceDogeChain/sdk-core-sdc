@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -23,19 +23,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/les/downloader"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/les/downloader"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 func expectResponse(r p2p.MsgReader, msgcode, reqID, bv uint64, data interface{}) error {
@@ -171,7 +171,7 @@ func testGetBlockHeaders(t *testing.T, protocol int) {
 		// Collect the headers to expect in the response
 		var headers []*types.Header
 		for _, hash := range tt.expect {
-			headers = append(headers, bc.GetHeaderByHash(hash))
+			headers = append(headers, bc.GsdceaderByHash(hash))
 		}
 		// Send the hash request and verify the response
 		reqID++
@@ -292,7 +292,7 @@ func testGetCode(t *testing.T, protocol int) {
 	var codereqs []*CodeReq
 	var codes [][]byte
 	for i := uint64(0); i <= bc.CurrentBlock().NumberU64(); i++ {
-		header := bc.GetHeaderByNumber(i)
+		header := bc.GsdceaderByNumber(i)
 		req := &CodeReq{
 			BHash:  header.Hash(),
 			AccKey: crypto.Keccak256(testContractAddr[:]),
@@ -330,7 +330,7 @@ func testGetStaleCode(t *testing.T, protocol int) {
 
 	check := func(number uint64, expected [][]byte) {
 		req := &CodeReq{
-			BHash:  bc.GetHeaderByNumber(number).Hash(),
+			BHash:  bc.GsdceaderByNumber(number).Hash(),
 			AccKey: crypto.Keccak256(testContractAddr[:]),
 		}
 		sendRequest(rawPeer.app, GetCodeMsg, 42, []*CodeReq{req})
@@ -404,7 +404,7 @@ func testGetProofs(t *testing.T, protocol int) {
 
 	accounts := []common.Address{bankAddr, userAddr1, userAddr2, signerAddr, {}}
 	for i := uint64(0); i <= bc.CurrentBlock().NumberU64(); i++ {
-		header := bc.GetHeaderByNumber(i)
+		header := bc.GsdceaderByNumber(i)
 		trie, _ := trie.New(trie.StateTrieID(header.Root), trie.NewDatabase(server.db))
 
 		for _, acc := range accounts {
@@ -444,7 +444,7 @@ func testGetStaleProof(t *testing.T, protocol int) {
 
 	check := func(number uint64, wantOK bool) {
 		var (
-			header  = bc.GetHeaderByNumber(number)
+			header  = bc.GsdceaderByNumber(number)
 			account = crypto.Keccak256(userAddr1.Bytes())
 		)
 		req := &ProofReq{
@@ -502,7 +502,7 @@ func testGetCHTProofs(t *testing.T, protocol int) {
 	bc := server.handler.blockchain
 
 	// Assemble the proofs from the different protocols
-	header := bc.GetHeaderByNumber(config.ChtSize - 1)
+	header := bc.GsdceaderByNumber(config.ChtSize - 1)
 	rlp, _ := rlp.EncodeToBytes(header)
 
 	key := make([]byte, 8)
@@ -511,7 +511,7 @@ func testGetCHTProofs(t *testing.T, protocol int) {
 	proofsV2 := HelperTrieResps{
 		AuxData: [][]byte{rlp},
 	}
-	root := light.GetChtRoot(server.db, 0, bc.GetHeaderByNumber(config.ChtSize-1).Hash())
+	root := light.GetChtRoot(server.db, 0, bc.GsdceaderByNumber(config.ChtSize-1).Hash())
 	trie, _ := trie.New(trie.TrieID(root), trie.NewDatabase(rawdb.NewTable(server.db, string(rawdb.ChtTablePrefix))))
 	trie.Prove(key, 0, &proofsV2.Proofs)
 	// Assemble the requests for the different protocols
@@ -522,7 +522,7 @@ func testGetCHTProofs(t *testing.T, protocol int) {
 		AuxReq:  htAuxHeader,
 	}}
 	// Send the proof request and verify the response
-	sendRequest(rawPeer.app, GetHelperTrieProofsMsg, 42, requestsV2)
+	sendRequest(rawPeer.app, GsdcelperTrieProofsMsg, 42, requestsV2)
 	if err := expectResponse(rawPeer.app, HelperTrieProofsMsg, 42, testBufLimit, proofsV2); err != nil {
 		t.Errorf("proofs mismatch: %v", err)
 	}
@@ -576,12 +576,12 @@ func testGetBloombitsProofs(t *testing.T, protocol int) {
 		}}
 		var proofs HelperTrieResps
 
-		root := light.GetBloomTrieRoot(server.db, 0, bc.GetHeaderByNumber(config.BloomTrieSize-1).Hash())
+		root := light.GetBloomTrieRoot(server.db, 0, bc.GsdceaderByNumber(config.BloomTrieSize-1).Hash())
 		trie, _ := trie.New(trie.TrieID(root), trie.NewDatabase(rawdb.NewTable(server.db, string(rawdb.BloomTrieTablePrefix))))
 		trie.Prove(key, 0, &proofs.Proofs)
 
 		// Send the proof request and verify the response
-		sendRequest(rawPeer.app, GetHelperTrieProofsMsg, 42, requests)
+		sendRequest(rawPeer.app, GsdcelperTrieProofsMsg, 42, requests)
 		if err := expectResponse(rawPeer.app, HelperTrieProofsMsg, 42, testBufLimit, proofs); err != nil {
 			t.Errorf("bit %d: proofs mismatch: %v", bit, err)
 		}
@@ -640,7 +640,7 @@ func testTransactionStatus(t *testing.T, protocol int) {
 	test(tx3, false, light.TxStatus{Status: core.TxStatusPending})
 
 	// generate and add a block with tx1 and tx2 included
-	gchain, _ := core.GenerateChain(params.TestChainConfig, chain.GetBlockByNumber(0), ethash.NewFaker(), server.db, 1, func(i int, block *core.BlockGen) {
+	gchain, _ := core.GenerateChain(params.TestChainConfig, chain.GetBlockByNumber(0), sdcash.NewFaker(), server.db, 1, func(i int, block *core.BlockGen) {
 		block.AddTx(tx1)
 		block.AddTx(tx2)
 	})
@@ -668,7 +668,7 @@ func testTransactionStatus(t *testing.T, protocol int) {
 	test(tx2, false, light.TxStatus{Status: core.TxStatusIncluded, Lookup: &rawdb.LegacyTxLookupEntry{BlockHash: block1hash, BlockIndex: 1, Index: 1}})
 
 	// create a reorg that rolls them back
-	gchain, _ = core.GenerateChain(params.TestChainConfig, chain.GetBlockByNumber(0), ethash.NewFaker(), server.db, 2, func(i int, block *core.BlockGen) {})
+	gchain, _ = core.GenerateChain(params.TestChainConfig, chain.GetBlockByNumber(0), sdcash.NewFaker(), server.db, 2, func(i int, block *core.BlockGen) {})
 	if _, err := chain.InsertChain(gchain); err != nil {
 		panic(err)
 	}

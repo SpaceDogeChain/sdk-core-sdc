@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package flowcontrol
 
@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/common/prque"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/common/prque"
 )
 
 // cmNodeFields are ClientNode fields used by the client manager
@@ -49,7 +49,7 @@ const FixedPointMultiplier = 1000000
 var (
 	capacityDropFactor          = 0.1
 	capacityRaiseTC             = 1 / (3 * float64(time.Hour)) // time constant for raising the capacity factor
-	capacityRaiseThresholdRatio = 1.125                        // total/connected capacity ratio threshold for raising the capacity factor
+	capacityRaissdcresholdRatio = 1.125                        // total/connected capacity ratio threshold for raising the capacity factor
 )
 
 // ClientManager controls the capacity assigned to the clients of a server.
@@ -67,7 +67,7 @@ type ClientManager struct {
 	logTotalCap, totalCapacity                 float64
 	logTotalCapRaiseLimit                      float64
 	minLogTotalCap, maxLogTotalCap             float64
-	capacityRaiseThreshold                     uint64
+	capacityRaissdcreshold                     uint64
 	capLastUpdate                              mclock.AbsTime
 	totalCapacityCh                            chan uint64
 
@@ -155,9 +155,9 @@ func (cm *ClientManager) SetRechargeCurve(curve PieceWiseLinear) {
 
 // SetCapacityLimits sets a threshold value used for raising capFactor.
 // Either if the difference between total allowed and connected capacity is less
-// than this threshold or if their ratio is less than capacityRaiseThresholdRatio
+// than this threshold or if their ratio is less than capacityRaissdcresholdRatio
 // then capFactor is allowed to slowly raise.
-func (cm *ClientManager) SetCapacityLimits(min, max, raiseThreshold uint64) {
+func (cm *ClientManager) SetCapacityLimits(min, max, raissdcreshold uint64) {
 	if min < 1 {
 		min = 1
 	}
@@ -167,7 +167,7 @@ func (cm *ClientManager) SetCapacityLimits(min, max, raiseThreshold uint64) {
 	}
 	cm.maxLogTotalCap = math.Log(float64(max))
 	cm.logTotalCap = cm.maxLogTotalCap
-	cm.capacityRaiseThreshold = raiseThreshold
+	cm.capacityRaissdcreshold = raissdcreshold
 	cm.refreshCapacity()
 }
 
@@ -253,12 +253,12 @@ func (cm *ClientManager) updateParams(node *ClientNode, params ServerParams, now
 // updateRaiseLimit recalculates the limiting value until which logTotalCap
 // can be raised when no client freeze events occur
 func (cm *ClientManager) updateRaiseLimit() {
-	if cm.capacityRaiseThreshold == 0 {
+	if cm.capacityRaissdcreshold == 0 {
 		cm.logTotalCapRaiseLimit = 0
 		return
 	}
-	limit := float64(cm.totalConnected + cm.capacityRaiseThreshold)
-	limit2 := float64(cm.totalConnected) * capacityRaiseThresholdRatio
+	limit := float64(cm.totalConnected + cm.capacityRaissdcreshold)
+	limit2 := float64(cm.totalConnected) * capacityRaissdcresholdRatio
 	if limit2 > limit {
 		limit = limit2
 	}
@@ -289,7 +289,7 @@ func (cm *ClientManager) updateRecharge(now mclock.AbsTime) {
 		dt := now - lastUpdate
 		// fetch the client that finishes first
 		rcqNode := cm.rcQueue.PopItem().(*ClientNode) // if sumRecharge > 0 then the queue cannot be empty
-		// check whether it has already finished
+		// check whsdcer it has already finished
 		dtNext := mclock.AbsTime(float64(rcqNode.rcFullIntValue-cm.rcLastIntValue) / bonusRatio)
 		if dt < dtNext {
 			// not finished yet, put it back, update integrator according

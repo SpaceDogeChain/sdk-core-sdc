@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rawdb
 
@@ -25,19 +25,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/leveldb"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb/leveldb"
+	"github.com/sdcereum/go-sdcereum/sdcdb/memorydb"
+	"github.com/sdcereum/go-sdcereum/log"
 	"github.com/olekukonko/tablewriter"
 )
 
 // freezerdb is a database wrapper that enabled freezer data retrievals.
 type freezerdb struct {
 	ancientRoot string
-	ethdb.KeyValueStore
-	ethdb.AncientStore
+	sdcdb.KeyValueStore
+	sdcdb.AncientStore
 }
 
 // AncientDatadir returns the path of root ancient directory.
@@ -61,7 +61,7 @@ func (frdb *freezerdb) Close() error {
 	return nil
 }
 
-// Freeze is a helper method used for external testing to trigger and block until
+// Freeze is a helper msdcod used for external testing to trigger and block until
 // a freeze cycle completes, without having to sleep for a minute to trigger the
 // automatic background run.
 func (frdb *freezerdb) Freeze(threshold uint64) error {
@@ -83,7 +83,7 @@ func (frdb *freezerdb) Freeze(threshold uint64) error {
 
 // nofreezedb is a database wrapper that disables freezer data retrievals.
 type nofreezedb struct {
-	ethdb.KeyValueStore
+	sdcdb.KeyValueStore
 }
 
 // HasAncient returns an error as we don't have a backing chain freezer.
@@ -117,7 +117,7 @@ func (db *nofreezedb) AncientSize(kind string) (uint64, error) {
 }
 
 // ModifyAncients is not supported.
-func (db *nofreezedb) ModifyAncients(func(ethdb.AncientWriteOp) error) (int64, error) {
+func (db *nofreezedb) ModifyAncients(func(sdcdb.AncientWriteOp) error) (int64, error) {
 	return 0, errNotSupported
 }
 
@@ -136,11 +136,11 @@ func (db *nofreezedb) Sync() error {
 	return errNotSupported
 }
 
-func (db *nofreezedb) ReadAncients(fn func(reader ethdb.AncientReaderOp) error) (err error) {
-	// Unlike other ancient-related methods, this method does not return
+func (db *nofreezedb) ReadAncients(fn func(reader sdcdb.AncientReaderOp) error) (err error) {
+	// Unlike other ancient-related msdcods, this msdcod does not return
 	// errNotSupported when invoked.
 	// The reason for this is that the caller might want to do several things:
-	// 1. Check if something is in freezer,
+	// 1. Check if somsdcing is in freezer,
 	// 2. If not, check leveldb.
 	//
 	// This will work, since the ancient-checks inside 'fn' will return errors,
@@ -165,7 +165,7 @@ func (db *nofreezedb) AncientDatadir() (string, error) {
 
 // NewDatabase creates a high level database on top of a given key-value data
 // store without a freezer moving immutable chain segments into cold storage.
-func NewDatabase(db ethdb.KeyValueStore) ethdb.Database {
+func NewDatabase(db sdcdb.KeyValueStore) sdcdb.Database {
 	return &nofreezedb{KeyValueStore: db}
 }
 
@@ -196,7 +196,7 @@ func resolveChainFreezerDir(ancient string) string {
 // value data store with a freezer moving immutable chain segments into cold
 // storage. The passed ancient indicates the path of root ancient directory
 // where the chain freezer can be opened.
-func NewDatabaseWithFreezer(db ethdb.KeyValueStore, ancient string, namespace string, readonly bool) (ethdb.Database, error) {
+func NewDatabaseWithFreezer(db sdcdb.KeyValueStore, ancient string, namespace string, readonly bool) (sdcdb.Database, error) {
 	// Create the idle freezer instance
 	frdb, err := newChainFreezer(resolveChainFreezerDir(ancient), namespace, readonly, freezerTableSize, chainFreezerNoSnappy)
 	if err != nil {
@@ -222,11 +222,11 @@ func NewDatabaseWithFreezer(db ethdb.KeyValueStore, ancient string, namespace st
 	//     key-value store, since that would mean we already had an old freezer.
 
 	// If the genesis hash is empty, we have a new key-value store, so nothing to
-	// validate in this method. If, however, the genesis hash is not nil, compare
+	// validate in this msdcod. If, however, the genesis hash is not nil, compare
 	// it to the freezer content.
 	if kvgenesis, _ := db.Get(headerHashKey(0)); len(kvgenesis) > 0 {
 		if frozen, _ := frdb.Ancients(); frozen > 0 {
-			// If the freezer already contains something, ensure that the genesis blocks
+			// If the freezer already contains somsdcing, ensure that the genesis blocks
 			// match, otherwise we might mix up freezers across chains and destroy both
 			// the freezer and the key-value store.
 			frgenesis, err := frdb.Ancient(chainFreezerHashTable, 0)
@@ -283,20 +283,20 @@ func NewDatabaseWithFreezer(db ethdb.KeyValueStore, ancient string, namespace st
 
 // NewMemoryDatabase creates an ephemeral in-memory key-value database without a
 // freezer moving immutable chain segments into cold storage.
-func NewMemoryDatabase() ethdb.Database {
+func NewMemoryDatabase() sdcdb.Database {
 	return NewDatabase(memorydb.New())
 }
 
 // NewMemoryDatabaseWithCap creates an ephemeral in-memory key-value database
 // with an initial starting capacity, but without a freezer moving immutable
 // chain segments into cold storage.
-func NewMemoryDatabaseWithCap(size int) ethdb.Database {
+func NewMemoryDatabaseWithCap(size int) sdcdb.Database {
 	return NewDatabase(memorydb.NewWithCap(size))
 }
 
 // NewLevelDBDatabase creates a persistent key-value database without a freezer
 // moving immutable chain segments into cold storage.
-func NewLevelDBDatabase(file string, cache int, handles int, namespace string, readonly bool) (ethdb.Database, error) {
+func NewLevelDBDatabase(file string, cache int, handles int, namespace string, readonly bool) (sdcdb.Database, error) {
 	db, err := leveldb.New(file, cache, handles, namespace, readonly)
 	if err != nil {
 		return nil, err
@@ -308,7 +308,7 @@ func NewLevelDBDatabase(file string, cache int, handles int, namespace string, r
 // freezer moving immutable chain segments into cold storage. The passed ancient
 // indicates the path of root ancient directory where the chain freezer can be
 // opened.
-func NewLevelDBDatabaseWithFreezer(file string, cache int, handles int, ancient string, namespace string, readonly bool) (ethdb.Database, error) {
+func NewLevelDBDatabaseWithFreezer(file string, cache int, handles int, ancient string, namespace string, readonly bool) (sdcdb.Database, error) {
 	kvdb, err := leveldb.New(file, cache, handles, namespace, readonly)
 	if err != nil {
 		return nil, err
@@ -353,7 +353,7 @@ func (s *stat) Count() string {
 
 // InspectDatabase traverses the entire database and checks the size
 // of all different categories of data.
-func InspectDatabase(db ethdb.Database, keyPrefix, keyStart []byte) error {
+func InspectDatabase(db sdcdb.Database, keyPrefix, keyStart []byte) error {
 	it := db.NewIterator(keyPrefix, keyStart)
 	defer it.Release()
 
@@ -513,7 +513,7 @@ func InspectDatabase(db ethdb.Database, keyPrefix, keyStart []byte) error {
 		{"Light client", "Bloom trie nodes", bloomTrieNodes.Size(), bloomTrieNodes.Count()},
 	}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Database", "Category", "Size", "Items"})
+	table.Ssdceader([]string{"Database", "Category", "Size", "Items"})
 	table.SetFooter([]string{"", "Total", total.String(), " "})
 	table.AppendBulk(stats)
 	table.Render()

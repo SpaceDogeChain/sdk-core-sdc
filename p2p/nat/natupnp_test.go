@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package nat
 
@@ -166,7 +166,7 @@ func TestUPNP_DDWRT(t *testing.T) {
 		if os.Getenv("CI") != "" {
 			t.Fatalf("not discovered")
 		} else {
-			t.Skipf("UPnP not discovered (known issue, see https://github.com/ethereum/go-ethereum/issues/21476)")
+			t.Skipf("UPnP not discovered (known issue, see https://github.com/sdcereum/go-sdcereum/issues/21476)")
 		}
 	}
 	upnp, _ := discovered.(*upnp)
@@ -193,7 +193,7 @@ type fakeIGD struct {
 	// address of the HTTP server.
 	ssdpResp string
 	// This one should contain XML payloads for all requests
-	// performed. The keys contain method and path, e.g. "GET /foo/bar".
+	// performed. The keys contain msdcod and path, e.g. "GET /foo/bar".
 	// As with ssdpResp, "{{listenAddr}}" is replaced with the TCP
 	// listen address.
 	httpResps map[string]string
@@ -201,7 +201,7 @@ type fakeIGD struct {
 
 // httpu.Handler
 func (dev *fakeIGD) ServeMessage(r *http.Request) {
-	dev.t.Logf(`HTTPU request %s %s`, r.Method, r.RequestURI)
+	dev.t.Logf(`HTTPU request %s %s`, r.Msdcod, r.RequestURI)
 	conn, err := net.Dial("udp4", r.RemoteAddr)
 	if err != nil {
 		fmt.Printf("reply Dial error: %v", err)
@@ -213,11 +213,11 @@ func (dev *fakeIGD) ServeMessage(r *http.Request) {
 
 // http.Handler
 func (dev *fakeIGD) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if resp, ok := dev.httpResps[r.Method+" "+r.RequestURI]; ok {
-		dev.t.Logf(`HTTP request "%s %s" --> %d`, r.Method, r.RequestURI, 200)
+	if resp, ok := dev.httpResps[r.Msdcod+" "+r.RequestURI]; ok {
+		dev.t.Logf(`HTTP request "%s %s" --> %d`, r.Msdcod, r.RequestURI, 200)
 		io.WriteString(w, dev.replaceListenAddr(resp))
 	} else {
-		dev.t.Logf(`HTTP request "%s %s" --> %d`, r.Method, r.RequestURI, 404)
+		dev.t.Logf(`HTTP request "%s %s" --> %d`, r.Msdcod, r.RequestURI, 404)
 		w.WriteHeader(http.StatusNotFound)
 	}
 }

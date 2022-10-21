@@ -1,18 +1,18 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2014 The go-sdcereum Authors
+// This file is part of go-sdcereum.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-sdcereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-sdcereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-sdcereum. If not, see <http://www.gnu.org/licenses/>.
 
 // evm executes EVM code snippets.
 package main
@@ -22,8 +22,8 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ethereum/go-ethereum/cmd/evm/internal/t8ntool"
-	"github.com/ethereum/go-ethereum/internal/flags"
+	"github.com/sdcereum/go-sdcereum/cmd/evm/internal/t8ntool"
+	"github.com/sdcereum/go-sdcereum/internal/flags"
 	"github.com/urfave/cli/v2"
 )
 
@@ -178,9 +178,9 @@ var blockBuilderCommand = &cli.Command{
 		t8ntool.InputOmmersFlag,
 		t8ntool.InputTxsRlpFlag,
 		t8ntool.SealCliqueFlag,
-		t8ntool.SealEthashFlag,
-		t8ntool.SealEthashDirFlag,
-		t8ntool.SealEthashModeFlag,
+		t8ntool.SealsdcashFlag,
+		t8ntool.SealsdcashDirFlag,
+		t8ntool.SealsdcashModeFlag,
 		t8ntool.VerbosityFlag,
 	},
 }

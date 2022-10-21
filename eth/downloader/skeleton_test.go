@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package downloader
 
@@ -25,14 +25,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
-// hookedBackfiller is a tester backfiller with all interface methods mocked and
+// hookedBackfiller is a tester backfiller with all interface msdcods mocked and
 // hooked so tests can implement only the things they need.
 type hookedBackfiller struct {
 	// suspendHook is an optional hook to be called when the filler is requested
@@ -74,7 +74,7 @@ func (hf *hookedBackfiller) resume() {
 // pre-perated header chain (which may be arbitrarily wrong for testing).
 //
 // Requesting anything else from these peers will hard panic. Note, do *not*
-// implement any other methods. We actually want to make sure that the skeleton
+// implement any other msdcods. We actually want to make sure that the skeleton
 // syncer only depends on - and will only ever do so - on header requests.
 type skeletonTestPeer struct {
 	id      string          // Unique identifier of the mock peer
@@ -83,7 +83,7 @@ type skeletonTestPeer struct {
 	serve func(origin uint64) []*types.Header // Hook to allow custom responses
 
 	served  uint64 // Number of headers served by this peer
-	dropped uint64 // Flag whether the peer was dropped (stop responding)
+	dropped uint64 // Flag whsdcer the peer was dropped (stop responding)
 }
 
 // newSkeletonTestPeer creates a new mock peer to test the skeleton sync with.
@@ -109,7 +109,7 @@ func newSkeletonTestPeerWithHook(id string, headers []*types.Header, serve func(
 // RequestHeadersByNumber constructs a GetBlockHeaders function based on a numbered
 // origin; associated with a particular peer in the download tester. The returned
 // function can be used to retrieve batches of headers from the particular peer.
-func (p *skeletonTestPeer) RequestHeadersByNumber(origin uint64, amount int, skip int, reverse bool, sink chan *eth.Response) (*eth.Request, error) {
+func (p *skeletonTestPeer) RequestHeadersByNumber(origin uint64, amount int, skip int, reverse bool, sink chan *sdc.Response) (*sdc.Request, error) {
 	// Since skeleton test peer are in-memory mocks, dropping the does not make
 	// them inaccessible. As such, check a local `dropped` field to see if the
 	// peer has been dropped and should not respond any more.
@@ -152,7 +152,7 @@ func (p *skeletonTestPeer) RequestHeadersByNumber(origin uint64, amount int, ski
 			for i := 0; i < amount; i++ {
 				// Consider nil headers as a form of attack and withhold them. Nil
 				// cannot be decoded from RLP, so it's not possible to produce an
-				// attack by sending/receiving those over eth.
+				// attack by sending/receiving those over sdc.
 				header := p.headers[int(origin)-i]
 				if header == nil {
 					continue
@@ -168,12 +168,12 @@ func (p *skeletonTestPeer) RequestHeadersByNumber(origin uint64, amount int, ski
 		hashes[i] = header.Hash()
 	}
 	// Deliver the headers to the downloader
-	req := &eth.Request{
+	req := &sdc.Request{
 		Peer: p.id,
 	}
-	res := &eth.Response{
+	res := &sdc.Response{
 		Req:  req,
-		Res:  (*eth.BlockHeadersPacket)(&headers),
+		Res:  (*sdc.BlockHeadersPacket)(&headers),
 		Meta: hashes,
 		Time: 1,
 		Done: make(chan error),
@@ -192,15 +192,15 @@ func (p *skeletonTestPeer) Head() (common.Hash, *big.Int) {
 	panic("skeleton sync must not request the remote head")
 }
 
-func (p *skeletonTestPeer) RequestHeadersByHash(common.Hash, int, int, bool, chan *eth.Response) (*eth.Request, error) {
+func (p *skeletonTestPeer) RequestHeadersByHash(common.Hash, int, int, bool, chan *sdc.Response) (*sdc.Request, error) {
 	panic("skeleton sync must not request headers by hash")
 }
 
-func (p *skeletonTestPeer) RequestBodies([]common.Hash, chan *eth.Response) (*eth.Request, error) {
+func (p *skeletonTestPeer) RequestBodies([]common.Hash, chan *sdc.Response) (*sdc.Request, error) {
 	panic("skeleton sync must not request block bodies")
 }
 
-func (p *skeletonTestPeer) RequestReceipts([]common.Hash, chan *eth.Response) (*eth.Request, error) {
+func (p *skeletonTestPeer) RequestReceipts([]common.Hash, chan *sdc.Response) (*sdc.Request, error) {
 	panic("skeleton sync must not request receipts")
 }
 
@@ -409,7 +409,7 @@ func TestSkeletonSyncExtend(t *testing.T) {
 		head     *types.Header // New head header to announce to reorg to
 		extend   *types.Header // New head header to announce to extend with
 		newstate []*subchain   // Expected sync state after the reorg
-		err      error         // Whether extension succeeds or not
+		err      error         // Whsdcer extension succeeds or not
 	}{
 		// Initialize a sync and try to extend it with a subsequent block.
 		{
@@ -514,7 +514,7 @@ func TestSkeletonSyncExtend(t *testing.T) {
 // Tests that the skeleton sync correctly retrieves headers from one or more
 // peers without duplicates or other strange side effects.
 func TestSkeletonSyncRetrievals(t *testing.T) {
-	//log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	//log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 
 	// Since skeleton headers don't need to be meaningful, beyond a parent hash
 	// progression, create a long fake chain to test with.
@@ -769,7 +769,7 @@ func TestSkeletonSyncRetrievals(t *testing.T) {
 		// Create a peer set to feed headers through
 		peerset := newPeerSet()
 		for _, peer := range tt.peers {
-			peerset.Register(newPeerConnection(peer.id, eth.ETH66, peer, log.New("id", peer.id)))
+			peerset.Register(newPeerConnection(peer.id, sdc.sdc66, peer, log.New("id", peer.id)))
 		}
 		// Create a peer dropper to track malicious peers
 		dropped := make(map[string]int)
@@ -834,7 +834,7 @@ func TestSkeletonSyncRetrievals(t *testing.T) {
 			skeleton.Sync(tt.newHead, true)
 		}
 		if tt.newPeer != nil {
-			if err := peerset.Register(newPeerConnection(tt.newPeer.id, eth.ETH66, tt.newPeer, log.New("id", tt.newPeer.id))); err != nil {
+			if err := peerset.Register(newPeerConnection(tt.newPeer.id, sdc.sdc66, tt.newPeer, log.New("id", tt.newPeer.id))); err != nil {
 				t.Errorf("test %d: failed to register new peer: %v", i, err)
 			}
 		}

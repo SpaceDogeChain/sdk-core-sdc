@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -27,20 +27,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/eth"
-	ethdownloader "github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/les/downloader"
-	"github.com/ethereum/go-ethereum/les/flowcontrol"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/sdc"
+	sdcdownloader "github.com/sdcereum/go-sdcereum/sdc/downloader"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/les/downloader"
+	"github.com/sdcereum/go-sdcereum/les/flowcontrol"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/p2p/simulations"
+	"github.com/sdcereum/go-sdcereum/p2p/simulations/adapters"
+	"github.com/sdcereum/go-sdcereum/rpc"
 	"github.com/mattn/go-colorable"
 )
 
@@ -53,7 +53,7 @@ var (
 func TestMain(m *testing.M) {
 	flag.Parse()
 	log.PrintOrigins(true)
-	log.Root().SetHandler(log.LvlFilterHandler(log.Lvl(*loglevel), log.StreamHandler(colorable.NewColorableStderr(), log.TerminalFormat(true))))
+	log.Root().Ssdcandler(log.LvlFilterHandler(log.Lvl(*loglevel), log.StreamHandler(colorable.NewColorableStderr(), log.TerminalFormat(true))))
 	// register the Delivery service which will run as a devp2p
 	// protocol when using the exec adapter
 	adapters.RegisterLifecycles(services)
@@ -87,7 +87,7 @@ func TestCapacityAPI10(t *testing.T) {
 // testCapacityAPI runs an end-to-end simulation test connecting one server with
 // a given number of clients. It sets different priority capacities to all clients
 // except a randomly selected one which runs in free client mode. All clients send
-// similar requests at the maximum allowed rate and the test verifies whether the
+// similar requests at the maximum allowed rate and the test verifies whsdcer the
 // ratio of processed requests is close enough to the ratio of assigned capacities.
 // Running multiple rounds with different settings ensures that changing capacity
 // while connected and going back and forth between free and priority mode with
@@ -107,7 +107,7 @@ func testCapacityAPI(t *testing.T, clientCount int) {
 		if err != nil {
 			t.Fatalf("Failed to obtain rpc client: %v", err)
 		}
-		headNum, headHash := getHead(ctx, t, serverRpcClient)
+		headNum, headHash := gsdcead(ctx, t, serverRpcClient)
 		minCap, totalCap := getCapacityInfo(ctx, t, serverRpcClient)
 		testCap := totalCap * 3 / 4
 		t.Logf("Server testCap: %d  minCap: %d  head number: %d  head hash: %064x\n", testCap, minCap, headNum, headHash)
@@ -136,7 +136,7 @@ func testCapacityAPI(t *testing.T, clientCount int) {
 					t.Fatalf("Timeout")
 				default:
 				}
-				num, hash := getHead(ctx, t, clientRpcClients[i])
+				num, hash := gsdcead(ctx, t, clientRpcClients[i])
 				if num == headNum && hash == headHash {
 					t.Log("client", i, "synced")
 					break
@@ -302,9 +302,9 @@ func testCapacityAPI(t *testing.T, clientCount int) {
 	}
 }
 
-func getHead(ctx context.Context, t *testing.T, client *rpc.Client) (uint64, common.Hash) {
+func gsdcead(ctx context.Context, t *testing.T, client *rpc.Client) (uint64, common.Hash) {
 	res := make(map[string]interface{})
-	if err := client.CallContext(ctx, &res, "eth_getBlockByNumber", "latest", false); err != nil {
+	if err := client.CallContext(ctx, &res, "sdc_getBlockByNumber", "latest", false); err != nil {
 		t.Fatalf("Failed to obtain head block: %v", err)
 	}
 	numStr, ok := res["number"].(string)
@@ -329,7 +329,7 @@ func testRequest(ctx context.Context, t *testing.T, client *rpc.Client) bool {
 	rand.Read(addr[:])
 	c, cancel := context.WithTimeout(ctx, time.Second*12)
 	defer cancel()
-	err := client.CallContext(c, &res, "eth_getBalance", addr, "latest")
+	err := client.CallContext(c, &res, "sdc_getBalance", addr, "latest")
 	if err != nil {
 		t.Log("request error:", err)
 	}
@@ -492,24 +492,24 @@ func testSim(t *testing.T, serverCount, clientCount int, serverDir, clientDir []
 }
 
 func newLesClientService(ctx *adapters.ServiceContext, stack *node.Node) (node.Lifecycle, error) {
-	config := ethconfig.Defaults
-	config.SyncMode = (ethdownloader.SyncMode)(downloader.LightSync)
-	config.Ethash.PowMode = ethash.ModeFake
+	config := sdcconfig.Defaults
+	config.SyncMode = (sdcdownloader.SyncMode)(downloader.LightSync)
+	config.sdcash.PowMode = sdcash.ModeFake
 	return New(stack, &config)
 }
 
 func newLesServerService(ctx *adapters.ServiceContext, stack *node.Node) (node.Lifecycle, error) {
-	config := ethconfig.Defaults
-	config.SyncMode = (ethdownloader.SyncMode)(downloader.FullSync)
+	config := sdcconfig.Defaults
+	config.SyncMode = (sdcdownloader.SyncMode)(downloader.FullSync)
 	config.LightServ = testServerCapacity
 	config.LightPeers = testMaxClients
-	ethereum, err := eth.New(stack, &config)
+	sdcereum, err := sdc.New(stack, &config)
 	if err != nil {
 		return nil, err
 	}
-	_, err = NewLesServer(stack, ethereum, &config)
+	_, err = NewLesServer(stack, sdcereum, &config)
 	if err != nil {
 		return nil, err
 	}
-	return ethereum, nil
+	return sdcereum, nil
 }

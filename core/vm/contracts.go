@@ -1,18 +1,18 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2014 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package vm
 
@@ -22,25 +22,25 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/blake2b"
-	"github.com/ethereum/go-ethereum/crypto/bls12381"
-	"github.com/ethereum/go-ethereum/crypto/bn256"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/crypto/blake2b"
+	"github.com/sdcereum/go-sdcereum/crypto/bls12381"
+	"github.com/sdcereum/go-sdcereum/crypto/bn256"
+	"github.com/sdcereum/go-sdcereum/params"
 	"golang.org/x/crypto/ripemd160"
 )
 
 // PrecompiledContract is the basic interface for native Go contracts. The implementation
-// requires a deterministic gas count based on the input size of the Run method of the
+// requires a deterministic gas count based on the input size of the Run msdcod of the
 // contract.
 type PrecompiledContract interface {
 	RequiredGas(input []byte) uint64  // RequiredPrice calculates the contract gas use
 	Run(input []byte) ([]byte, error) // Run runs the precompiled contract
 }
 
-// PrecompiledContractsHomestead contains the default set of pre-compiled Ethereum
+// PrecompiledContractsHomestead contains the default set of pre-compiled sdcereum
 // contracts used in the Frontier and Homestead releases.
 var PrecompiledContractsHomestead = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{1}): &ecrecover{},
@@ -49,7 +49,7 @@ var PrecompiledContractsHomestead = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{4}): &dataCopy{},
 }
 
-// PrecompiledContractsByzantium contains the default set of pre-compiled Ethereum
+// PrecompiledContractsByzantium contains the default set of pre-compiled sdcereum
 // contracts used in the Byzantium release.
 var PrecompiledContractsByzantium = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{1}): &ecrecover{},
@@ -62,7 +62,7 @@ var PrecompiledContractsByzantium = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{8}): &bn256PairingByzantium{},
 }
 
-// PrecompiledContractsIstanbul contains the default set of pre-compiled Ethereum
+// PrecompiledContractsIstanbul contains the default set of pre-compiled sdcereum
 // contracts used in the Istanbul release.
 var PrecompiledContractsIstanbul = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{1}): &ecrecover{},
@@ -76,7 +76,7 @@ var PrecompiledContractsIstanbul = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{9}): &blake2F{},
 }
 
-// PrecompiledContractsBerlin contains the default set of pre-compiled Ethereum
+// PrecompiledContractsBerlin contains the default set of pre-compiled sdcereum
 // contracts used in the Berlin release.
 var PrecompiledContractsBerlin = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{1}): &ecrecover{},
@@ -90,7 +90,7 @@ var PrecompiledContractsBerlin = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{9}): &blake2F{},
 }
 
-// PrecompiledContractsBLS contains the set of pre-compiled Ethereum
+// PrecompiledContractsBLS contains the set of pre-compiled sdcereum
 // contracts specified in EIP-2537. These are exported for testing purposes.
 var PrecompiledContractsBLS = map[common.Address]PrecompiledContract{
 	common.BytesToAddress([]byte{10}): &bls12381G1Add{},
@@ -198,7 +198,7 @@ type sha256hash struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 //
-// This method does not require any overflow checking as the input size gas costs
+// This msdcod does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *sha256hash) RequiredGas(input []byte) uint64 {
 	return uint64(len(input)+31)/32*params.Sha256PerWordGas + params.Sha256BaseGas
@@ -213,7 +213,7 @@ type ripemd160hash struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 //
-// This method does not require any overflow checking as the input size gas costs
+// This msdcod does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *ripemd160hash) RequiredGas(input []byte) uint64 {
 	return uint64(len(input)+31)/32*params.Ripemd160PerWordGas + params.Ripemd160BaseGas
@@ -229,7 +229,7 @@ type dataCopy struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 //
-// This method does not require any overflow checking as the input size gas costs
+// This msdcod does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *dataCopy) RequiredGas(input []byte) uint64 {
 	return uint64(len(input)+31)/32*params.IdentityPerWordGas + params.IdentityBaseGas
@@ -328,7 +328,7 @@ func (c *bigModExp) RequiredGas(input []byte) uint64 {
 	if c.eip2565 {
 		// EIP-2565 has three changes
 		// 1. Different multComplexity (inlined here)
-		// in EIP-2565 (https://eips.ethereum.org/EIPS/eip-2565):
+		// in EIP-2565 (https://eips.sdcereum.org/EIPS/eip-2565):
 		//
 		// def mult_complexity(x):
 		//    ceiling(x/8)^2

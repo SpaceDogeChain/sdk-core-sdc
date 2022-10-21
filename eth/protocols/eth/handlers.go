@@ -1,34 +1,34 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
-// handleGetBlockHeaders66 is the eth/66 version of handleGetBlockHeaders
+// handleGetBlockHeaders66 is the sdc/66 version of handleGetBlockHeaders
 func handleGetBlockHeaders66(backend Backend, msg Decoder, peer *Peer) error {
 	// Decode the complex header query
 	var query GetBlockHeadersPacket66
@@ -70,15 +70,15 @@ func serviceNonContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBloc
 		if hashMode {
 			if first {
 				first = false
-				origin = chain.GetHeaderByHash(query.Origin.Hash)
+				origin = chain.GsdceaderByHash(query.Origin.Hash)
 				if origin != nil {
 					query.Origin.Number = origin.Number.Uint64()
 				}
 			} else {
-				origin = chain.GetHeader(query.Origin.Hash, query.Origin.Number)
+				origin = chain.Gsdceader(query.Origin.Hash, query.Origin.Number)
 			}
 		} else {
-			origin = chain.GetHeaderByNumber(query.Origin.Number)
+			origin = chain.GsdceaderByNumber(query.Origin.Number)
 		}
 		if origin == nil {
 			break
@@ -111,7 +111,7 @@ func serviceNonContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBloc
 				peer.Log().Warn("GetBlockHeaders skip overflow attack", "current", current, "skip", query.Skip, "next", next, "attacker", infos)
 				unknown = true
 			} else {
-				if header := chain.GetHeaderByNumber(next); header != nil {
+				if header := chain.GsdceaderByNumber(next); header != nil {
 					nextHash := header.Hash()
 					expOldHash, _ := chain.GetAncestor(nextHash, next, query.Skip+1, &maxNonCanonical)
 					if expOldHash == query.Origin.Hash {
@@ -152,7 +152,7 @@ func serviceContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBlockHe
 		if !query.Reverse {
 			from = from + count - 1
 		}
-		headers := chain.GetHeadersFrom(from, count)
+		headers := chain.GsdceadersFrom(from, count)
 		if !query.Reverse {
 			for i, j := 0, len(headers)-1; i < j; i, j = i+1, j-1 {
 				headers[i], headers[j] = headers[j], headers[i]
@@ -164,7 +164,7 @@ func serviceContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBlockHe
 	var (
 		headers []rlp.RawValue
 		hash    = query.Origin.Hash
-		header  = chain.GetHeaderByHash(hash)
+		header  = chain.GsdceaderByHash(hash)
 	)
 	if header != nil {
 		rlpData, _ := rlp.EncodeToBytes(header)
@@ -182,7 +182,7 @@ func serviceContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBlockHe
 			// Not canon, we can't deliver descendants
 			return headers
 		}
-		descendants := chain.GetHeadersFrom(num+count-1, count-1)
+		descendants := chain.GsdceadersFrom(num+count-1, count-1)
 		for i, j := 0, len(descendants)-1; i < j; i, j = i+1, j-1 {
 			descendants[i], descendants[j] = descendants[j], descendants[i]
 		}
@@ -191,7 +191,7 @@ func serviceContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBlockHe
 	}
 	{ // Last mode: deliver ancestors of H
 		for i := uint64(1); header != nil && i < count; i++ {
-			header = chain.GetHeaderByHash(header.ParentHash)
+			header = chain.GsdceaderByHash(header.ParentHash)
 			if header == nil {
 				break
 			}
@@ -296,7 +296,7 @@ func ServiceGetReceiptsQuery(chain *core.BlockChain, query GetReceiptsPacket) []
 		// Retrieve the requested block's receipts
 		results := chain.GetReceiptsByHash(hash)
 		if results == nil {
-			if header := chain.GetHeaderByHash(hash); header == nil || header.ReceiptHash != types.EmptyRootHash {
+			if header := chain.GsdceaderByHash(hash); header == nil || header.ReceiptHash != types.EmptyRootHash {
 				continue
 			}
 		}

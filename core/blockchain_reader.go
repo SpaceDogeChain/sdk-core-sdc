@@ -1,34 +1,34 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/state/snapshot"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 // CurrentHeader retrieves the current head header of the canonical chain. The
@@ -67,28 +67,28 @@ func (bc *BlockChain) HasHeader(hash common.Hash, number uint64) bool {
 	return bc.hc.HasHeader(hash, number)
 }
 
-// GetHeader retrieves a block header from the database by hash and number,
+// Gsdceader retrieves a block header from the database by hash and number,
 // caching it if found.
-func (bc *BlockChain) GetHeader(hash common.Hash, number uint64) *types.Header {
-	return bc.hc.GetHeader(hash, number)
+func (bc *BlockChain) Gsdceader(hash common.Hash, number uint64) *types.Header {
+	return bc.hc.Gsdceader(hash, number)
 }
 
-// GetHeaderByHash retrieves a block header from the database by hash, caching it if
+// GsdceaderByHash retrieves a block header from the database by hash, caching it if
 // found.
-func (bc *BlockChain) GetHeaderByHash(hash common.Hash) *types.Header {
-	return bc.hc.GetHeaderByHash(hash)
+func (bc *BlockChain) GsdceaderByHash(hash common.Hash) *types.Header {
+	return bc.hc.GsdceaderByHash(hash)
 }
 
-// GetHeaderByNumber retrieves a block header from the database by number,
+// GsdceaderByNumber retrieves a block header from the database by number,
 // caching it (associated with its hash) if found.
-func (bc *BlockChain) GetHeaderByNumber(number uint64) *types.Header {
-	return bc.hc.GetHeaderByNumber(number)
+func (bc *BlockChain) GsdceaderByNumber(number uint64) *types.Header {
+	return bc.hc.GsdceaderByNumber(number)
 }
 
-// GetHeadersFrom returns a contiguous segment of headers, in rlp-form, going
+// GsdceadersFrom returns a contiguous segment of headers, in rlp-form, going
 // backwards from the given number.
-func (bc *BlockChain) GetHeadersFrom(number, count uint64) []rlp.RawValue {
-	return bc.hc.GetHeadersFrom(number, count)
+func (bc *BlockChain) GsdceadersFrom(number, count uint64) []rlp.RawValue {
+	return bc.hc.GsdceadersFrom(number, count)
 }
 
 // GetBody retrieves a block body (transactions and uncles) from the database by
@@ -190,7 +190,7 @@ func (bc *BlockChain) GetBlockByNumber(number uint64) *types.Block {
 }
 
 // GetBlocksFromHash returns the block corresponding to hash and up to n-1 ancestors.
-// [deprecated by eth/62]
+// [deprecated by sdc/62]
 func (bc *BlockChain) GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block) {
 	number := bc.hc.GetBlockNumber(hash)
 	if number == nil {

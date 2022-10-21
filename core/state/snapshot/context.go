@@ -1,18 +1,18 @@
-// Copyright 2022 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2022 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package snapshot
 
@@ -22,12 +22,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/sdcdb/memorydb"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 const (
@@ -53,7 +53,7 @@ func (gs *generatorStats) Log(msg string, root common.Hash, marker []byte) {
 	if root != (common.Hash{}) {
 		ctx = append(ctx, []interface{}{"root", root}...)
 	}
-	// Figure out whether we're after or within an account
+	// Figure out whsdcer we're after or within an account
 	switch len(marker) {
 	case common.HashLength:
 		ctx = append(ctx, []interface{}{"at", common.BytesToHash(marker)}...)
@@ -88,15 +88,15 @@ func (gs *generatorStats) Log(msg string, root common.Hash, marker []byte) {
 // generatorContext carries a few global values to be shared by all generation functions.
 type generatorContext struct {
 	stats   *generatorStats     // Generation statistic collection
-	db      ethdb.KeyValueStore // Key-value store containing the snapshot data
+	db      sdcdb.KeyValueStore // Key-value store containing the snapshot data
 	account *holdableIterator   // Iterator of account snapshot data
 	storage *holdableIterator   // Iterator of storage snapshot data
-	batch   ethdb.Batch         // Database batch for writing batch data atomically
+	batch   sdcdb.Batch         // Database batch for writing batch data atomically
 	logged  time.Time           // The timestamp when last generation progress was displayed
 }
 
 // newGeneratorContext initializes the context for generation.
-func newGeneratorContext(stats *generatorStats, db ethdb.KeyValueStore, accMarker []byte, storageMarker []byte) *generatorContext {
+func newGeneratorContext(stats *generatorStats, db sdcdb.KeyValueStore, accMarker []byte, storageMarker []byte) *generatorContext {
 	ctx := &generatorContext{
 		stats:  stats,
 		db:     db,
@@ -178,7 +178,7 @@ func (ctx *generatorContext) removeStorageBefore(account common.Hash) {
 		}
 		count++
 		ctx.batch.Delete(key)
-		if ctx.batch.ValueSize() > ethdb.IdealBatchSize {
+		if ctx.batch.ValueSize() > sdcdb.IdealBatchSize {
 			ctx.batch.Write()
 			ctx.batch.Reset()
 		}
@@ -209,7 +209,7 @@ func (ctx *generatorContext) removeStorageAt(account common.Hash) error {
 		}
 		count++
 		ctx.batch.Delete(key)
-		if ctx.batch.ValueSize() > ethdb.IdealBatchSize {
+		if ctx.batch.ValueSize() > sdcdb.IdealBatchSize {
 			ctx.batch.Write()
 			ctx.batch.Reset()
 		}
@@ -230,7 +230,7 @@ func (ctx *generatorContext) removeStorageLeft() {
 	for iter.Next() {
 		count++
 		ctx.batch.Delete(iter.Key())
-		if ctx.batch.ValueSize() > ethdb.IdealBatchSize {
+		if ctx.batch.ValueSize() > sdcdb.IdealBatchSize {
 			ctx.batch.Write()
 			ctx.batch.Reset()
 		}

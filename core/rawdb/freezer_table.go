@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rawdb
 
@@ -27,9 +27,9 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
 	"github.com/golang/snappy"
 )
 
@@ -347,7 +347,7 @@ func (t *freezerTable) repair() error {
 	return nil
 }
 
-// preopen opens all files that the freezer will need. This method should be called from an init-context,
+// preopen opens all files that the freezer will need. This msdcod should be called from an init-context,
 // since it assumes that it doesn't have to bother with locking
 // The rationale for doing preopen is to not have to do it from within Retrieve, thus not needing to ever
 // obtain a write-lock within Retrieve.
@@ -388,7 +388,7 @@ func (t *freezerTable) truncateHead(items uint64) error {
 	if err != nil {
 		return err
 	}
-	// Something's out of sync, truncate the table's offset index
+	// Somsdcing's out of sync, truncate the table's offset index
 	log := t.logger.Debug
 	if existing > items+1 {
 		log = t.logger.Warn // Only loud warn if we delete multiple items
@@ -633,8 +633,8 @@ func (t *freezerTable) releaseFilesBefore(num uint32, remove bool) {
 // getIndices returns the index entries for the given from-item, covering 'count' items.
 // N.B: The actual number of returned indices for N items will always be N+1 (unless an
 // error is returned).
-// OBS: This method assumes that the caller has already verified (and/or trimmed) the range
-// so that the items are within bounds. If this method is used to read out of bounds,
+// OBS: This msdcod assumes that the caller has already verified (and/or trimmed) the range
+// so that the items are within bounds. If this msdcod is used to read out of bounds,
 // it will return error.
 func (t *freezerTable) getIndices(from, count uint64) ([]*indexEntry, error) {
 	// Apply the table-offset
@@ -732,7 +732,7 @@ func (t *freezerTable) retrieveItems(start, count, maxBytes uint64) ([]byte, []i
 		hidden = atomic.LoadUint64(&t.itemHidden) // the number of hidden items
 	)
 	// Ensure the start is written, not deleted from the tail, and that the
-	// caller actually wants something
+	// caller actually wants somsdcing
 	if items <= start || hidden > start || count == 0 {
 		return nil, nil, errOutOfBounds
 	}
@@ -743,7 +743,7 @@ func (t *freezerTable) retrieveItems(start, count, maxBytes uint64) ([]byte, []i
 		output     = make([]byte, maxBytes) // Buffer to read data into
 		outputSize int                      // Used size of that buffer
 	)
-	// readData is a helper method to read a single data item from disk.
+	// readData is a helper msdcod to read a single data item from disk.
 	readData := func(fileId, start uint32, length int) error {
 		// In case a small limit is used, and the elements are large, may need to
 		// realloc the read-buffer when reading the first (and only) item.
@@ -813,7 +813,7 @@ func (t *freezerTable) retrieveItems(start, count, maxBytes uint64) ([]byte, []i
 	return output[:outputSize], sizes, nil
 }
 
-// has returns an indicator whether the specified number data is still accessible
+// has returns an indicator whsdcer the specified number data is still accessible
 // in the freezer table.
 func (t *freezerTable) has(number uint64) bool {
 	return atomic.LoadUint64(&t.items) > number && atomic.LoadUint64(&t.itemHidden) <= number
@@ -839,8 +839,8 @@ func (t *freezerTable) sizeNolock() (uint64, error) {
 }
 
 // advanceHead should be called when the current head file would outgrow the file limits,
-// and a new file must be opened. The caller of this method must hold the write-lock
-// before calling this method.
+// and a new file must be opened. The caller of this msdcod must hold the write-lock
+// before calling this msdcod.
 func (t *freezerTable) advanceHead() error {
 	t.lock.Lock()
 	defer t.lock.Unlock()

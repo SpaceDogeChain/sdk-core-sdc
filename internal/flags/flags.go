@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package flags
 
@@ -26,7 +26,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/sdcereum/go-sdcereum/common/math"
 	"github.com/urfave/cli/v2"
 )
 
@@ -53,7 +53,7 @@ var (
 )
 
 // DirectoryFlag is custom cli.Flag type which expand the received string to an absolute path.
-// e.g. ~/.ethereum -> /home/username/.ethereum
+// e.g. ~/.sdcereum -> /home/username/.sdcereum
 type DirectoryFlag struct {
 	Name string
 

@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package filters
 
@@ -27,21 +27,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/bloombits"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/bloombits"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 type testBackend struct {
-	db              ethdb.Database
+	db              sdcdb.Database
 	sections        uint64
 	txFeed          event.Feed
 	logsFeed        event.Feed
@@ -50,7 +50,7 @@ type testBackend struct {
 	chainFeed       event.Feed
 }
 
-func (b *testBackend) ChainDb() ethdb.Database {
+func (b *testBackend) ChainDb() sdcdb.Database {
 	return b.db
 }
 
@@ -158,7 +158,7 @@ func (b *testBackend) ServiceFilter(ctx context.Context, session *bloombits.Matc
 	}()
 }
 
-func newTestFilterSystem(t testing.TB, db ethdb.Database, cfg Config) (*testBackend, *FilterSystem) {
+func newTestFilterSystem(t testing.TB, db sdcdb.Database, cfg Config) (*testBackend, *FilterSystem) {
 	backend := &testBackend{db: db}
 	sys := NewFilterSystem(backend, cfg)
 	return backend, sys
@@ -180,7 +180,7 @@ func TestBlockSubscription(t *testing.T) {
 			Config:  params.TestChainConfig,
 			BaseFee: big.NewInt(params.InitialBaseFee),
 		}
-		_, chain, _ = core.GenerateChainWithGenesis(genesis, ethash.NewFaker(), 10, func(i int, gen *core.BlockGen) {})
+		_, chain, _ = core.GenerateChainWithGenesis(genesis, sdcash.NewFaker(), 10, func(i int, gen *core.BlockGen) {})
 		chainEvents = []core.ChainEvent{}
 	)
 
@@ -223,7 +223,7 @@ func TestBlockSubscription(t *testing.T) {
 	<-sub1.Err()
 }
 
-// TestPendingTxFilter tests whether pending tx filters retrieve all pending transactions that are posted to the event mux.
+// TestPendingTxFilter tests whsdcer pending tx filters retrieve all pending transactions that are posted to the event mux.
 func TestPendingTxFilter(t *testing.T) {
 	t.Parallel()
 
@@ -279,7 +279,7 @@ func TestPendingTxFilter(t *testing.T) {
 	}
 }
 
-// TestLogFilterCreation test whether a given filter criteria makes sense.
+// TestLogFilterCreation test whsdcer a given filter criteria makes sense.
 // If not it must return an error.
 func TestLogFilterCreation(t *testing.T) {
 	var (
@@ -324,7 +324,7 @@ func TestLogFilterCreation(t *testing.T) {
 	}
 }
 
-// TestInvalidLogFilterCreation tests whether invalid filter log criteria results in an error
+// TestInvalidLogFilterCreation tests whsdcer invalid filter log criteria results in an error
 // when the filter is created.
 func TestInvalidLogFilterCreation(t *testing.T) {
 	t.Parallel()
@@ -372,7 +372,7 @@ func TestInvalidGetLogsRequest(t *testing.T) {
 	}
 }
 
-// TestLogFilter tests whether log filters match the correct logs that are posted to the event feed.
+// TestLogFilter tests whsdcer log filters match the correct logs that are posted to the event feed.
 func TestLogFilter(t *testing.T) {
 	t.Parallel()
 
@@ -522,7 +522,7 @@ func TestPendingLogsSubscription(t *testing.T) {
 		pendingBlockNumber = big.NewInt(rpc.PendingBlockNumber.Int64())
 
 		testCases = []struct {
-			crit     ethereum.FilterQuery
+			crit     sdcereum.FilterQuery
 			expected []*types.Log
 			c        chan []*types.Log
 			sub      *Subscription
@@ -530,67 +530,67 @@ func TestPendingLogsSubscription(t *testing.T) {
 		}{
 			// match all
 			{
-				ethereum.FilterQuery{FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
+				sdcereum.FilterQuery{FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
 				flattenLogs(allLogs),
 				nil, nil, nil,
 			},
 			// match none due to no matching addresses
 			{
-				ethereum.FilterQuery{Addresses: []common.Address{{}, notUsedAddress}, Topics: [][]common.Hash{nil}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
+				sdcereum.FilterQuery{Addresses: []common.Address{{}, notUsedAddress}, Topics: [][]common.Hash{nil}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
 				nil,
 				nil, nil, nil,
 			},
 			// match logs based on addresses, ignore topics
 			{
-				ethereum.FilterQuery{Addresses: []common.Address{firstAddr}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
+				sdcereum.FilterQuery{Addresses: []common.Address{firstAddr}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
 				append(flattenLogs(allLogs[:2]), allLogs[5][3]),
 				nil, nil, nil,
 			},
 			// match none due to no matching topics (match with address)
 			{
-				ethereum.FilterQuery{Addresses: []common.Address{secondAddr}, Topics: [][]common.Hash{{notUsedTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
+				sdcereum.FilterQuery{Addresses: []common.Address{secondAddr}, Topics: [][]common.Hash{{notUsedTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
 				nil,
 				nil, nil, nil,
 			},
 			// match logs based on addresses and topics
 			{
-				ethereum.FilterQuery{Addresses: []common.Address{thirdAddress}, Topics: [][]common.Hash{{firstTopic, secondTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
+				sdcereum.FilterQuery{Addresses: []common.Address{thirdAddress}, Topics: [][]common.Hash{{firstTopic, secondTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
 				append(flattenLogs(allLogs[3:5]), allLogs[5][0]),
 				nil, nil, nil,
 			},
 			// match logs based on multiple addresses and "or" topics
 			{
-				ethereum.FilterQuery{Addresses: []common.Address{secondAddr, thirdAddress}, Topics: [][]common.Hash{{firstTopic, secondTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
+				sdcereum.FilterQuery{Addresses: []common.Address{secondAddr, thirdAddress}, Topics: [][]common.Hash{{firstTopic, secondTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
 				append(flattenLogs(allLogs[2:5]), allLogs[5][0]),
 				nil, nil, nil,
 			},
 			// multiple pending logs, should match only 2 topics from the logs in block 5
 			{
-				ethereum.FilterQuery{Addresses: []common.Address{thirdAddress}, Topics: [][]common.Hash{{firstTopic, fourthTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
+				sdcereum.FilterQuery{Addresses: []common.Address{thirdAddress}, Topics: [][]common.Hash{{firstTopic, fourthTopic}}, FromBlock: pendingBlockNumber, ToBlock: pendingBlockNumber},
 				[]*types.Log{allLogs[5][0], allLogs[5][2]},
 				nil, nil, nil,
 			},
 			// match none due to only matching new mined logs
 			{
-				ethereum.FilterQuery{},
+				sdcereum.FilterQuery{},
 				nil,
 				nil, nil, nil,
 			},
 			// match none due to only matching mined logs within a specific block range
 			{
-				ethereum.FilterQuery{FromBlock: big.NewInt(1), ToBlock: big.NewInt(2)},
+				sdcereum.FilterQuery{FromBlock: big.NewInt(1), ToBlock: big.NewInt(2)},
 				nil,
 				nil, nil, nil,
 			},
 			// match all due to matching mined and pending logs
 			{
-				ethereum.FilterQuery{FromBlock: big.NewInt(rpc.LatestBlockNumber.Int64()), ToBlock: big.NewInt(rpc.PendingBlockNumber.Int64())},
+				sdcereum.FilterQuery{FromBlock: big.NewInt(rpc.LatestBlockNumber.Int64()), ToBlock: big.NewInt(rpc.PendingBlockNumber.Int64())},
 				flattenLogs(allLogs),
 				nil, nil, nil,
 			},
 			// match none due to matching logs from a specific block number to new mined blocks
 			{
-				ethereum.FilterQuery{FromBlock: big.NewInt(1), ToBlock: big.NewInt(rpc.LatestBlockNumber.Int64())},
+				sdcereum.FilterQuery{FromBlock: big.NewInt(1), ToBlock: big.NewInt(rpc.LatestBlockNumber.Int64())},
 				nil,
 				nil, nil, nil,
 			},

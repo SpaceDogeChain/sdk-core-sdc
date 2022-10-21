@@ -110,11 +110,11 @@ type Logger interface {
 	// New returns a new Logger that has this logger's context plus the given context
 	New(ctx ...interface{}) Logger
 
-	// GetHandler gets the handler associated with the logger.
-	GetHandler() Handler
+	// Gsdcandler gets the handler associated with the logger.
+	Gsdcandler() Handler
 
-	// SetHandler updates the logger to write records to the specified handler.
-	SetHandler(h Handler)
+	// Ssdcandler updates the logger to write records to the specified handler.
+	Ssdcandler(h Handler)
 
 	// Log a message at the given level with context key/value pairs
 	Trace(msg string, ctx ...interface{})
@@ -148,7 +148,7 @@ func (l *logger) write(msg string, lvl Lvl, ctx []interface{}, skip int) {
 
 func (l *logger) New(ctx ...interface{}) Logger {
 	child := &logger{newContext(l.ctx, ctx), new(swapHandler)}
-	child.SetHandler(l.h)
+	child.Ssdcandler(l.h)
 	return child
 }
 
@@ -185,11 +185,11 @@ func (l *logger) Crit(msg string, ctx ...interface{}) {
 	os.Exit(1)
 }
 
-func (l *logger) GetHandler() Handler {
+func (l *logger) Gsdcandler() Handler {
 	return l.h.Get()
 }
 
-func (l *logger) SetHandler(h Handler) {
+func (l *logger) Ssdcandler(h Handler) {
 	l.h.Swap(h)
 }
 

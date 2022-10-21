@@ -1,28 +1,28 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains perverted wrappers to allow crossing over empty interfaces.
 
-package geth
+package gsdc
 
 import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/sdcereum/go-sdcereum/common"
 )
 
 // Interface represents a wrapped version of Go's interface{}, with the capacity
@@ -50,8 +50,8 @@ func (i *Interface) SetBinary(binary []byte)        { b := common.CopyBytes(bina
 func (i *Interface) SetBinaries(binaries *Binaries) { i.object = &binaries.binaries }
 func (i *Interface) SetAddress(address *Address)    { i.object = &address.address }
 func (i *Interface) SetAddresses(addrs *Addresses)  { i.object = &addrs.addresses }
-func (i *Interface) SetHash(hash *Hash)             { i.object = &hash.hash }
-func (i *Interface) SetHashes(hashes *Hashes)       { i.object = &hashes.hashes }
+func (i *Interface) Ssdcash(hash *Hash)             { i.object = &hash.hash }
+func (i *Interface) Ssdcashes(hashes *Hashes)       { i.object = &hashes.hashes }
 func (i *Interface) SetInt8(n int8)                 { i.object = &n }
 func (i *Interface) SetInt16(n int16)               { i.object = &n }
 func (i *Interface) SetInt32(n int32)               { i.object = &n }
@@ -156,8 +156,8 @@ func (i *Interface) GetBinary() []byte        { return *i.object.(*[]byte) }
 func (i *Interface) GetBinaries() *Binaries   { return &Binaries{*i.object.(*[][]byte)} }
 func (i *Interface) GetAddress() *Address     { return &Address{*i.object.(*common.Address)} }
 func (i *Interface) GetAddresses() *Addresses { return &Addresses{*i.object.(*[]common.Address)} }
-func (i *Interface) GetHash() *Hash           { return &Hash{*i.object.(*common.Hash)} }
-func (i *Interface) GetHashes() *Hashes       { return &Hashes{*i.object.(*[]common.Hash)} }
+func (i *Interface) Gsdcash() *Hash           { return &Hash{*i.object.(*common.Hash)} }
+func (i *Interface) Gsdcashes() *Hashes       { return &Hashes{*i.object.(*[]common.Hash)} }
 func (i *Interface) GetInt8() int8            { return *i.object.(*int8) }
 func (i *Interface) GetInt16() int16          { return *i.object.(*int16) }
 func (i *Interface) GetInt32() int32          { return *i.object.(*int32) }

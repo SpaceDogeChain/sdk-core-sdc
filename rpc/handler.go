@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // handler handles JSON-RPC messages. There is one handler per connection. Note that
@@ -232,7 +232,7 @@ func (h *handler) handleImmediate(msg *jsonrpcMessage) bool {
 	start := time.Now()
 	switch {
 	case msg.isNotification():
-		if strings.HasSuffix(msg.Method, notificationMethodSuffix) {
+		if strings.HasSuffix(msg.Msdcod, notificationMsdcodSuffix) {
 			h.handleSubscriptionResult(msg)
 			return true
 		}
@@ -258,7 +258,7 @@ func (h *handler) handleSubscriptionResult(msg *jsonrpcMessage) {
 	}
 }
 
-// handleResponse processes method call responses.
+// handleResponse processes msdcod call responses.
 func (h *handler) handleResponse(msg *jsonrpcMessage) {
 	op := h.respWait[string(msg.ID)]
 	if op == nil {
@@ -272,7 +272,7 @@ func (h *handler) handleResponse(msg *jsonrpcMessage) {
 		return
 	}
 	// For subscription responses, start the subscription if the server
-	// indicates success. EthSubscribe gets unblocked in either case through
+	// indicates success. sdcSubscribe gets unblocked in either case through
 	// the op.resp channel.
 	defer close(op.resp)
 	if msg.Error != nil {
@@ -291,7 +291,7 @@ func (h *handler) handleCallMsg(ctx *callProc, msg *jsonrpcMessage) *jsonrpcMess
 	switch {
 	case msg.isNotification():
 		h.handleCall(ctx, msg)
-		h.log.Debug("Served "+msg.Method, "duration", time.Since(start))
+		h.log.Debug("Served "+msg.Msdcod, "duration", time.Since(start))
 		return nil
 	case msg.isCall():
 		resp := h.handleCall(ctx, msg)
@@ -302,9 +302,9 @@ func (h *handler) handleCallMsg(ctx *callProc, msg *jsonrpcMessage) *jsonrpcMess
 			if resp.Error.Data != nil {
 				ctx = append(ctx, "errdata", resp.Error.Data)
 			}
-			h.log.Warn("Served "+msg.Method, ctx...)
+			h.log.Warn("Served "+msg.Msdcod, ctx...)
 		} else {
-			h.log.Debug("Served "+msg.Method, ctx...)
+			h.log.Debug("Served "+msg.Msdcod, ctx...)
 		}
 		return resp
 	case msg.hasValidID():
@@ -314,7 +314,7 @@ func (h *handler) handleCallMsg(ctx *callProc, msg *jsonrpcMessage) *jsonrpcMess
 	}
 }
 
-// handleCall processes method calls.
+// handleCall processes msdcod calls.
 func (h *handler) handleCall(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage {
 	if msg.isSubscribe() {
 		return h.handleSubscribe(cp, msg)
@@ -323,17 +323,17 @@ func (h *handler) handleCall(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage 
 	if msg.isUnsubscribe() {
 		callb = h.unsubscribeCb
 	} else {
-		callb = h.reg.callback(msg.Method)
+		callb = h.reg.callback(msg.Msdcod)
 	}
 	if callb == nil {
-		return msg.errorResponse(&methodNotFoundError{method: msg.Method})
+		return msg.errorResponse(&msdcodNotFoundError{msdcod: msg.Msdcod})
 	}
 	args, err := parsePositionalArguments(msg.Params, callb.argTypes)
 	if err != nil {
 		return msg.errorResponse(&invalidParamsError{err.Error()})
 	}
 	start := time.Now()
-	answer := h.runMethod(cp.ctx, msg, callb, args)
+	answer := h.runMsdcod(cp.ctx, msg, callb, args)
 
 	// Collect the statistics for RPC calls if metrics is enabled.
 	// We only care about pure rpc call. Filter out subscription.
@@ -345,12 +345,12 @@ func (h *handler) handleCall(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage 
 			successfulRequestGauge.Inc(1)
 		}
 		rpcServingTimer.UpdateSince(start)
-		updateServeTimeHistogram(msg.Method, answer.Error == nil, time.Since(start))
+		updateServeTimeHistogram(msg.Msdcod, answer.Error == nil, time.Since(start))
 	}
 	return answer
 }
 
-// handleSubscribe processes *_subscribe method calls.
+// handleSubscribe processes *_subscribe msdcod calls.
 func (h *handler) handleSubscribe(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage {
 	if !h.allowSubscribe {
 		return msg.errorResponse(&internalServerError{
@@ -359,7 +359,7 @@ func (h *handler) handleSubscribe(cp *callProc, msg *jsonrpcMessage) *jsonrpcMes
 		})
 	}
 
-	// Subscription method name is first argument.
+	// Subscription msdcod name is first argument.
 	name, err := parseSubscriptionName(msg.Params)
 	if err != nil {
 		return msg.errorResponse(&invalidParamsError{err.Error()})
@@ -383,12 +383,12 @@ func (h *handler) handleSubscribe(cp *callProc, msg *jsonrpcMessage) *jsonrpcMes
 	cp.notifiers = append(cp.notifiers, n)
 	ctx := context.WithValue(cp.ctx, notifierKey{}, n)
 
-	return h.runMethod(ctx, msg, callb, args)
+	return h.runMsdcod(ctx, msg, callb, args)
 }
 
-// runMethod runs the Go callback for an RPC method.
-func (h *handler) runMethod(ctx context.Context, msg *jsonrpcMessage, callb *callback, args []reflect.Value) *jsonrpcMessage {
-	result, err := callb.call(ctx, msg.Method, args)
+// runMsdcod runs the Go callback for an RPC msdcod.
+func (h *handler) runMsdcod(ctx context.Context, msg *jsonrpcMessage, callb *callback, args []reflect.Value) *jsonrpcMessage {
+	result, err := callb.call(ctx, msg.Msdcod, args)
 	if err != nil {
 		return msg.errorResponse(err)
 	}

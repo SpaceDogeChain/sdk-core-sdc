@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package graphql
 
@@ -27,17 +27,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/eth/filters"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc"
+	"github.com/sdcereum/go-sdcereum/sdc/sdcconfig"
+	"github.com/sdcereum/go-sdcereum/sdc/filters"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/params"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -63,7 +63,7 @@ func TestGraphQLBlockSerialization(t *testing.T) {
 	stack := createNode(t)
 	defer stack.Close()
 	genesis := &core.Genesis{
-		Config:     params.AllEthashProtocolChanges,
+		Config:     params.AllsdcashProtocolChanges,
 		GasLimit:   11500000,
 		Difficulty: big.NewInt(1048576),
 	}
@@ -179,7 +179,7 @@ func TestGraphQLBlockSerializationEIP2718(t *testing.T) {
 	stack := createNode(t)
 	defer stack.Close()
 	genesis := &core.Genesis{
-		Config:     params.AllEthashProtocolChanges,
+		Config:     params.AllsdcashProtocolChanges,
 		GasLimit:   11500000,
 		Difficulty: big.NewInt(1048576),
 		Alloc: core.GenesisAlloc{
@@ -274,11 +274,11 @@ func TestGraphQLTransactionLogs(t *testing.T) {
 		dadStr  = "0x0000000000000000000000000000000000000dad"
 		dad     = common.HexToAddress(dadStr)
 		genesis = &core.Genesis{
-			Config:     params.AllEthashProtocolChanges,
+			Config:     params.AllsdcashProtocolChanges,
 			GasLimit:   11500000,
 			Difficulty: big.NewInt(1048576),
 			Alloc: core.GenesisAlloc{
-				addr: {Balance: big.NewInt(params.Ether)},
+				addr: {Balance: big.NewInt(params.sdcer)},
 				dad: {
 					// LOG0(0, 0), LOG0(0, 0), RETURN(0, 0)
 					Code:    common.Hex2Bytes("60006000a060006000a060006000f3"),
@@ -333,10 +333,10 @@ func createNode(t *testing.T) *node.Node {
 }
 
 func newGQLService(t *testing.T, stack *node.Node, gspec *core.Genesis, genBlocks int, genfunc func(i int, gen *core.BlockGen)) *handler {
-	ethConf := &ethconfig.Config{
+	sdcConf := &sdcconfig.Config{
 		Genesis: gspec,
-		Ethash: ethash.Config{
-			PowMode: ethash.ModeFake,
+		sdcash: sdcash.Config{
+			PowMode: sdcash.ModeFake,
 		},
 		NetworkId:               1337,
 		TrieCleanCache:          5,
@@ -346,20 +346,20 @@ func newGQLService(t *testing.T, stack *node.Node, gspec *core.Genesis, genBlock
 		TrieTimeout:             60 * time.Minute,
 		SnapshotCache:           5,
 	}
-	ethBackend, err := eth.New(stack, ethConf)
+	sdcBackend, err := sdc.New(stack, sdcConf)
 	if err != nil {
-		t.Fatalf("could not create eth backend: %v", err)
+		t.Fatalf("could not create sdc backend: %v", err)
 	}
 	// Create some blocks and import them
-	chain, _ := core.GenerateChain(params.AllEthashProtocolChanges, ethBackend.BlockChain().Genesis(),
-		ethash.NewFaker(), ethBackend.ChainDb(), genBlocks, genfunc)
-	_, err = ethBackend.BlockChain().InsertChain(chain)
+	chain, _ := core.GenerateChain(params.AllsdcashProtocolChanges, sdcBackend.BlockChain().Genesis(),
+		sdcash.NewFaker(), sdcBackend.ChainDb(), genBlocks, genfunc)
+	_, err = sdcBackend.BlockChain().InsertChain(chain)
 	if err != nil {
 		t.Fatalf("could not create import blocks: %v", err)
 	}
 	// Set up handler
-	filterSystem := filters.NewFilterSystem(ethBackend.APIBackend, filters.Config{})
-	handler, err := newHandler(stack, ethBackend.APIBackend, filterSystem, []string{}, []string{})
+	filterSystem := filters.NewFilterSystem(sdcBackend.APIBackend, filters.Config{})
+	handler, err := newHandler(stack, sdcBackend.APIBackend, filterSystem, []string{}, []string{})
 	if err != nil {
 		t.Fatalf("could not create graphql service: %v", err)
 	}

@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package fetcher contains the announcement based header, blocks or transaction synchronisation.
 package fetcher
@@ -22,14 +22,14 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/prque"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 const (
@@ -47,23 +47,23 @@ const (
 )
 
 var (
-	blockAnnounceInMeter   = metrics.NewRegisteredMeter("eth/fetcher/block/announces/in", nil)
-	blockAnnounceOutTimer  = metrics.NewRegisteredTimer("eth/fetcher/block/announces/out", nil)
-	blockAnnounceDropMeter = metrics.NewRegisteredMeter("eth/fetcher/block/announces/drop", nil)
-	blockAnnounceDOSMeter  = metrics.NewRegisteredMeter("eth/fetcher/block/announces/dos", nil)
+	blockAnnounceInMeter   = metrics.NewRegisteredMeter("sdc/fetcher/block/announces/in", nil)
+	blockAnnounceOutTimer  = metrics.NewRegisteredTimer("sdc/fetcher/block/announces/out", nil)
+	blockAnnounceDropMeter = metrics.NewRegisteredMeter("sdc/fetcher/block/announces/drop", nil)
+	blockAnnounceDOSMeter  = metrics.NewRegisteredMeter("sdc/fetcher/block/announces/dos", nil)
 
-	blockBroadcastInMeter   = metrics.NewRegisteredMeter("eth/fetcher/block/broadcasts/in", nil)
-	blockBroadcastOutTimer  = metrics.NewRegisteredTimer("eth/fetcher/block/broadcasts/out", nil)
-	blockBroadcastDropMeter = metrics.NewRegisteredMeter("eth/fetcher/block/broadcasts/drop", nil)
-	blockBroadcastDOSMeter  = metrics.NewRegisteredMeter("eth/fetcher/block/broadcasts/dos", nil)
+	blockBroadcastInMeter   = metrics.NewRegisteredMeter("sdc/fetcher/block/broadcasts/in", nil)
+	blockBroadcastOutTimer  = metrics.NewRegisteredTimer("sdc/fetcher/block/broadcasts/out", nil)
+	blockBroadcastDropMeter = metrics.NewRegisteredMeter("sdc/fetcher/block/broadcasts/drop", nil)
+	blockBroadcastDOSMeter  = metrics.NewRegisteredMeter("sdc/fetcher/block/broadcasts/dos", nil)
 
-	headerFetchMeter = metrics.NewRegisteredMeter("eth/fetcher/block/headers", nil)
-	bodyFetchMeter   = metrics.NewRegisteredMeter("eth/fetcher/block/bodies", nil)
+	headerFetchMeter = metrics.NewRegisteredMeter("sdc/fetcher/block/headers", nil)
+	bodyFetchMeter   = metrics.NewRegisteredMeter("sdc/fetcher/block/bodies", nil)
 
-	headerFilterInMeter  = metrics.NewRegisteredMeter("eth/fetcher/block/filter/headers/in", nil)
-	headerFilterOutMeter = metrics.NewRegisteredMeter("eth/fetcher/block/filter/headers/out", nil)
-	bodyFilterInMeter    = metrics.NewRegisteredMeter("eth/fetcher/block/filter/bodies/in", nil)
-	bodyFilterOutMeter   = metrics.NewRegisteredMeter("eth/fetcher/block/filter/bodies/out", nil)
+	headerFilterInMeter  = metrics.NewRegisteredMeter("sdc/fetcher/block/filter/headers/in", nil)
+	headerFilterOutMeter = metrics.NewRegisteredMeter("sdc/fetcher/block/filter/headers/out", nil)
+	bodyFilterInMeter    = metrics.NewRegisteredMeter("sdc/fetcher/block/filter/bodies/in", nil)
+	bodyFilterOutMeter   = metrics.NewRegisteredMeter("sdc/fetcher/block/filter/bodies/out", nil)
 )
 
 var errTerminated = errors.New("terminated")
@@ -75,10 +75,10 @@ type HeaderRetrievalFn func(common.Hash) *types.Header
 type blockRetrievalFn func(common.Hash) *types.Block
 
 // headerRequesterFn is a callback type for sending a header retrieval request.
-type headerRequesterFn func(common.Hash, chan *eth.Response) (*eth.Request, error)
+type headerRequesterFn func(common.Hash, chan *sdc.Response) (*sdc.Request, error)
 
 // bodyRequesterFn is a callback type for sending a body retrieval request.
-type bodyRequesterFn func([]common.Hash, chan *eth.Response) (*eth.Request, error)
+type bodyRequesterFn func([]common.Hash, chan *sdc.Response) (*sdc.Request, error)
 
 // headerVerifierFn is a callback type to verify a block's header for fast propagation.
 type headerVerifierFn func(header *types.Header) error
@@ -155,7 +155,7 @@ func (inject *blockOrHeaderInject) hash() common.Hash {
 // BlockFetcher is responsible for accumulating block announcements from various peers
 // and scheduling them for retrieval.
 type BlockFetcher struct {
-	light bool // The indicator whether it's a light fetcher or normal one.
+	light bool // The indicator whsdcer it's a light fetcher or normal one.
 
 	// Various event channels
 	notify chan *blockAnnounce
@@ -180,7 +180,7 @@ type BlockFetcher struct {
 	queued map[common.Hash]*blockOrHeaderInject // Set of already queued blocks (to dedup imports)
 
 	// Callbacks
-	getHeader      HeaderRetrievalFn  // Retrieves a header from the local chain
+	gsdceader      HeaderRetrievalFn  // Retrieves a header from the local chain
 	getBlock       blockRetrievalFn   // Retrieves a block from the local chain
 	verifyHeader   headerVerifierFn   // Checks if a block's headers have a valid proof of work
 	broadcastBlock blockBroadcasterFn // Broadcasts a block to connected peers
@@ -190,15 +190,15 @@ type BlockFetcher struct {
 	dropPeer       peerDropFn         // Drops a peer for misbehaving
 
 	// Testing hooks
-	announceChangeHook func(common.Hash, bool)           // Method to call upon adding or deleting a hash from the blockAnnounce list
-	queueChangeHook    func(common.Hash, bool)           // Method to call upon adding or deleting a block from the import queue
-	fetchingHook       func([]common.Hash)               // Method to call upon starting a block (eth/61) or header (eth/62) fetch
-	completingHook     func([]common.Hash)               // Method to call upon starting a block body fetch (eth/62)
-	importedHook       func(*types.Header, *types.Block) // Method to call upon successful header or block import (both eth/61 and eth/62)
+	announceChangeHook func(common.Hash, bool)           // Msdcod to call upon adding or deleting a hash from the blockAnnounce list
+	queueChangeHook    func(common.Hash, bool)           // Msdcod to call upon adding or deleting a block from the import queue
+	fetchingHook       func([]common.Hash)               // Msdcod to call upon starting a block (sdc/61) or header (sdc/62) fetch
+	completingHook     func([]common.Hash)               // Msdcod to call upon starting a block body fetch (sdc/62)
+	importedHook       func(*types.Header, *types.Block) // Msdcod to call upon successful header or block import (both sdc/61 and sdc/62)
 }
 
 // NewBlockFetcher creates a block fetcher to retrieve blocks based on hash announcements.
-func NewBlockFetcher(light bool, getHeader HeaderRetrievalFn, getBlock blockRetrievalFn, verifyHeader headerVerifierFn, broadcastBlock blockBroadcasterFn, chainHeight chainHeightFn, insertHeaders headersInsertFn, insertChain chainInsertFn, dropPeer peerDropFn) *BlockFetcher {
+func NewBlockFetcher(light bool, gsdceader HeaderRetrievalFn, getBlock blockRetrievalFn, verifyHeader headerVerifierFn, broadcastBlock blockBroadcasterFn, chainHeight chainHeightFn, insertHeaders headersInsertFn, insertChain chainInsertFn, dropPeer peerDropFn) *BlockFetcher {
 	return &BlockFetcher{
 		light:          light,
 		notify:         make(chan *blockAnnounce),
@@ -215,7 +215,7 @@ func NewBlockFetcher(light bool, getHeader HeaderRetrievalFn, getBlock blockRetr
 		queue:          prque.New(nil),
 		queues:         make(map[string]int),
 		queued:         make(map[common.Hash]*blockOrHeaderInject),
-		getHeader:      getHeader,
+		gsdceader:      gsdceader,
 		getBlock:       getBlock,
 		verifyHeader:   verifyHeader,
 		broadcastBlock: broadcastBlock,
@@ -345,7 +345,7 @@ func (f *BlockFetcher) loop() {
 		// Clean up any expired block fetches
 		for hash, announce := range f.fetching {
 			if time.Since(announce.time) > fetchTimeout {
-				f.forgetHash(hash)
+				f.forgsdcash(hash)
 			}
 		}
 		// Import any queued blocks that could potentially fit
@@ -366,7 +366,7 @@ func (f *BlockFetcher) loop() {
 				break
 			}
 			// Otherwise if fresh and still unknown, try and import
-			if (number+maxUncleDist < height) || (f.light && f.getHeader(hash) != nil) || (!f.light && f.getBlock(hash) != nil) {
+			if (number+maxUncleDist < height) || (f.light && f.gsdceader(hash) != nil) || (!f.light && f.getBlock(hash) != nil) {
 				f.forgetBlock(hash)
 				continue
 			}
@@ -430,7 +430,7 @@ func (f *BlockFetcher) loop() {
 
 		case hash := <-f.done:
 			// A pending import finished, remove all traces of the notification
-			f.forgetHash(hash)
+			f.forgsdcash(hash)
 			f.forgetBlock(hash)
 
 		case <-fetchTimer.C:
@@ -447,10 +447,10 @@ func (f *BlockFetcher) loop() {
 				if time.Since(announces[0].time) > timeout {
 					// Pick a random peer to retrieve from, reset all others
 					announce := announces[rand.Intn(len(announces))]
-					f.forgetHash(hash)
+					f.forgsdcash(hash)
 
 					// If the block still didn't arrive, queue for fetching
-					if (f.light && f.getHeader(hash) == nil) || (!f.light && f.getBlock(hash) == nil) {
+					if (f.light && f.gsdceader(hash) == nil) || (!f.light && f.getBlock(hash) == nil) {
 						request[announce.origin] = append(request[announce.origin], hash)
 						f.fetching[hash] = announce
 					}
@@ -469,7 +469,7 @@ func (f *BlockFetcher) loop() {
 					for _, hash := range hashes {
 						headerFetchMeter.Mark(1)
 						go func(hash common.Hash) {
-							resCh := make(chan *eth.Response)
+							resCh := make(chan *sdc.Response)
 
 							req, err := fetchHeader(hash, resCh)
 							if err != nil {
@@ -483,7 +483,7 @@ func (f *BlockFetcher) loop() {
 							select {
 							case res := <-resCh:
 								res.Done <- nil
-								f.FilterHeaders(peer, *res.Res.(*eth.BlockHeadersPacket), time.Now().Add(res.Time))
+								f.FilterHeaders(peer, *res.Res.(*sdc.BlockHeadersPacket), time.Now().Add(res.Time))
 
 							case <-timeout.C:
 								// The peer didn't respond in time. The request
@@ -506,7 +506,7 @@ func (f *BlockFetcher) loop() {
 			for hash, announces := range f.fetched {
 				// Pick a random peer to retrieve from, reset all others
 				announce := announces[rand.Intn(len(announces))]
-				f.forgetHash(hash)
+				f.forgsdcash(hash)
 
 				// If the block still didn't arrive, queue for completion
 				if f.getBlock(hash) == nil {
@@ -526,7 +526,7 @@ func (f *BlockFetcher) loop() {
 				bodyFetchMeter.Mark(int64(len(hashes)))
 
 				go func(peer string, hashes []common.Hash) {
-					resCh := make(chan *eth.Response)
+					resCh := make(chan *sdc.Response)
 
 					req, err := fetchBodies(hashes, resCh)
 					if err != nil {
@@ -541,7 +541,7 @@ func (f *BlockFetcher) loop() {
 					case res := <-resCh:
 						res.Done <- nil
 
-						txs, uncles := res.Res.(*eth.BlockBodiesPacket).Unpack()
+						txs, uncles := res.Res.(*sdc.BlockBodiesPacket).Unpack()
 						f.FilterBodies(peer, txs, uncles, time.Now())
 
 					case <-timeout.C:
@@ -580,17 +580,17 @@ func (f *BlockFetcher) loop() {
 					if header.Number.Uint64() != announce.number {
 						log.Trace("Invalid block number fetched", "peer", announce.origin, "hash", header.Hash(), "announced", announce.number, "provided", header.Number)
 						f.dropPeer(announce.origin)
-						f.forgetHash(hash)
+						f.forgsdcash(hash)
 						continue
 					}
 					// Collect all headers only if we are running in light
 					// mode and the headers are not imported by other means.
 					if f.light {
-						if f.getHeader(hash) == nil {
+						if f.gsdceader(hash) == nil {
 							announce.header = header
 							lightHeaders = append(lightHeaders, announce)
 						}
-						f.forgetHash(hash)
+						f.forgsdcash(hash)
 						continue
 					}
 					// Only keep if not imported by other means
@@ -613,7 +613,7 @@ func (f *BlockFetcher) loop() {
 						incomplete = append(incomplete, announce)
 					} else {
 						log.Trace("Block already imported, discarding header", "peer", announce.origin, "number", header.Number, "hash", header.Hash())
-						f.forgetHash(hash)
+						f.forgsdcash(hash)
 					}
 				} else {
 					// BlockFetcher doesn't know about it, add to the return list
@@ -690,7 +690,7 @@ func (f *BlockFetcher) loop() {
 							block.ReceivedAt = task.time
 							blocks = append(blocks, block)
 						} else {
-							f.forgetHash(hash)
+							f.forgsdcash(hash)
 						}
 					}
 					if matched {
@@ -772,14 +772,14 @@ func (f *BlockFetcher) enqueue(peer string, header *types.Header, block *types.B
 	if count > blockLimit {
 		log.Debug("Discarded delivered header or block, exceeded allowance", "peer", peer, "number", number, "hash", hash, "limit", blockLimit)
 		blockBroadcastDOSMeter.Mark(1)
-		f.forgetHash(hash)
+		f.forgsdcash(hash)
 		return
 	}
 	// Discard any past or too distant blocks
 	if dist := int64(number) - int64(f.chainHeight()); dist < -maxUncleDist || dist > maxQueueDist {
 		log.Debug("Discarded delivered header or block, too far away", "peer", peer, "number", number, "hash", hash, "distance", dist)
 		blockBroadcastDropMeter.Mark(1)
-		f.forgetHash(hash)
+		f.forgsdcash(hash)
 		return
 	}
 	// Schedule the block for future importing
@@ -810,12 +810,12 @@ func (f *BlockFetcher) importHeaders(peer string, header *types.Header) {
 	go func() {
 		defer func() { f.done <- hash }()
 		// If the parent's unknown, abort insertion
-		parent := f.getHeader(header.ParentHash)
+		parent := f.gsdceader(header.ParentHash)
 		if parent == nil {
 			log.Debug("Unknown parent of propagated header", "peer", peer, "number", header.Number, "hash", hash, "parent", header.ParentHash)
 			return
 		}
-		// Validate the header and if something went wrong, drop the peer
+		// Validate the header and if somsdcing went wrong, drop the peer
 		if err := f.verifyHeader(header); err != nil && err != consensus.ErrFutureBlock {
 			log.Debug("Propagated header verification failed", "peer", peer, "number", header.Number, "hash", hash, "err", err)
 			f.dropPeer(peer)
@@ -861,7 +861,7 @@ func (f *BlockFetcher) importBlocks(peer string, block *types.Block) {
 			// Weird future block, don't fail, but neither propagate
 
 		default:
-			// Something went very wrong, drop the peer
+			// Somsdcing went very wrong, drop the peer
 			log.Debug("Propagated block verification failed", "peer", peer, "number", block.Number(), "hash", hash, "err", err)
 			f.dropPeer(peer)
 			return
@@ -882,9 +882,9 @@ func (f *BlockFetcher) importBlocks(peer string, block *types.Block) {
 	}()
 }
 
-// forgetHash removes all traces of a block announcement from the fetcher's
+// forgsdcash removes all traces of a block announcement from the fetcher's
 // internal state.
-func (f *BlockFetcher) forgetHash(hash common.Hash) {
+func (f *BlockFetcher) forgsdcash(hash common.Hash) {
 	// Remove all pending announces and decrement DOS counters
 	if announceMap, ok := f.announced[hash]; ok {
 		for _, announce := range announceMap {

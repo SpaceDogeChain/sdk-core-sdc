@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package params
 
@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/sdcereum/go-sdcereum/common"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -78,7 +78,7 @@ var (
 		GrayGlacierBlock:              big.NewInt(15_050_000),
 		TerminalTotalDifficulty:       MainnetTerminalTotalDifficulty, // 58_750_000_000_000_000_000_000
 		TerminalTotalDifficultyPassed: true,
-		Ethash:                        new(EthashConfig),
+		sdcash:                        new(sdcashConfig),
 	}
 
 	// MainnetTrustedCheckpoint contains the light client trusted checkpoint for the main network.
@@ -121,7 +121,7 @@ var (
 		LondonBlock:                   big.NewInt(10_499_401),
 		TerminalTotalDifficulty:       new(big.Int).SetUint64(50_000_000_000_000_000),
 		TerminalTotalDifficultyPassed: true,
-		Ethash:                        new(EthashConfig),
+		sdcash:                        new(sdcashConfig),
 	}
 
 	// RopstenTrustedCheckpoint contains the light client trusted checkpoint for the Ropsten test network.
@@ -164,7 +164,7 @@ var (
 		TerminalTotalDifficulty:       big.NewInt(17_000_000_000_000_000),
 		TerminalTotalDifficultyPassed: true,
 		MergeNetsplitBlock:            big.NewInt(1735371),
-		Ethash:                        new(EthashConfig),
+		sdcash:                        new(sdcashConfig),
 	}
 
 	// SepoliaTrustedCheckpoint contains the light client trusted checkpoint for the Sepolia test network.
@@ -265,22 +265,22 @@ var (
 		Threshold: 2,
 	}
 
-	// AllEthashProtocolChanges contains every protocol change (EIPs) introduced
-	// and accepted by the Ethereum core developers into the Ethash consensus.
+	// AllsdcashProtocolChanges contains every protocol change (EIPs) introduced
+	// and accepted by the sdcereum core developers into the sdcash consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, false, new(EthashConfig), nil}
+	AllsdcashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, false, new(sdcashConfig), nil}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
-	// and accepted by the Ethereum core developers into the Clique consensus.
+	// and accepted by the sdcereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
 	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, nil, nil, false, nil, &CliqueConfig{Period: 0, Epoch: 30000}}
 
-	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, false, new(EthashConfig), nil}
-	NonActivatedConfig = &ChainConfig{big.NewInt(1), nil, nil, false, nil, common.Hash{}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, new(EthashConfig), nil}
+	TestChainConfig    = &ChainConfig{big.NewInt(1), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, nil, nil, false, new(sdcashConfig), nil}
+	NonActivatedConfig = &ChainConfig{big.NewInt(1), nil, nil, false, nil, common.Hash{}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, new(sdcashConfig), nil}
 	TestRules          = TestChainConfig.Rules(new(big.Int), false)
 )
 
@@ -328,7 +328,7 @@ func (c *TrustedCheckpoint) Hash() common.Hash {
 	return h
 }
 
-// Empty returns an indicator whether the checkpoint is regarded as empty.
+// Empty returns an indicator whsdcer the checkpoint is regarded as empty.
 func (c *TrustedCheckpoint) Empty() bool {
 	return c.SectionHead == (common.Hash{}) || c.CHTRoot == (common.Hash{}) || c.BloomRoot == (common.Hash{})
 }
@@ -352,9 +352,9 @@ type ChainConfig struct {
 	HomesteadBlock *big.Int `json:"homesteadBlock,omitempty"` // Homestead switch block (nil = no fork, 0 = already homestead)
 
 	DAOForkBlock   *big.Int `json:"daoForkBlock,omitempty"`   // TheDAO hard-fork switch block (nil = no fork)
-	DAOForkSupport bool     `json:"daoForkSupport,omitempty"` // Whether the nodes supports or opposes the DAO hard-fork
+	DAOForkSupport bool     `json:"daoForkSupport,omitempty"` // Whsdcer the nodes supports or opposes the DAO hard-fork
 
-	// EIP150 implements the Gas price changes (https://github.com/ethereum/EIPs/issues/150)
+	// EIP150 implements the Gas price changes (https://github.com/sdcereum/EIPs/issues/150)
 	EIP150Block *big.Int    `json:"eip150Block,omitempty"` // EIP150 HF block (nil = no fork)
 	EIP150Hash  common.Hash `json:"eip150Hash,omitempty"`  // EIP150 HF hash (needed for header only clients as only gas pricing changed)
 
@@ -384,16 +384,16 @@ type ChainConfig struct {
 	TerminalTotalDifficultyPassed bool `json:"terminalTotalDifficultyPassed,omitempty"`
 
 	// Various consensus engines
-	Ethash *EthashConfig `json:"ethash,omitempty"`
+	sdcash *sdcashConfig `json:"sdcash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
 }
 
-// EthashConfig is the consensus engine configs for proof-of-work based sealing.
-type EthashConfig struct{}
+// sdcashConfig is the consensus engine configs for proof-of-work based sealing.
+type sdcashConfig struct{}
 
 // String implements the stringer interface, returning the consensus engine details.
-func (c *EthashConfig) String() string {
-	return "ethash"
+func (c *sdcashConfig) String() string {
+	return "sdcash"
 }
 
 // CliqueConfig is the consensus engine configs for proof-of-authority based sealing.
@@ -418,13 +418,13 @@ func (c *ChainConfig) Description() string {
 	}
 	banner += fmt.Sprintf("Chain ID:  %v (%s)\n", c.ChainID, network)
 	switch {
-	case c.Ethash != nil:
+	case c.sdcash != nil:
 		if c.TerminalTotalDifficulty == nil {
-			banner += "Consensus: Ethash (proof-of-work)\n"
+			banner += "Consensus: sdcash (proof-of-work)\n"
 		} else if !c.TerminalTotalDifficultyPassed {
-			banner += "Consensus: Beacon (proof-of-stake), merging from Ethash (proof-of-work)\n"
+			banner += "Consensus: Beacon (proof-of-stake), merging from sdcash (proof-of-work)\n"
 		} else {
-			banner += "Consensus: Beacon (proof-of-stake), merged from Ethash (proof-of-work)\n"
+			banner += "Consensus: Beacon (proof-of-stake), merged from sdcash (proof-of-work)\n"
 		}
 	case c.Clique != nil:
 		if c.TerminalTotalDifficulty == nil {
@@ -443,30 +443,30 @@ func (c *ChainConfig) Description() string {
 	// makes sense for mainnet should be optional at printing to avoid bloating
 	// the output for testnets and private networks.
 	banner += "Pre-Merge hard forks:\n"
-	banner += fmt.Sprintf(" - Homestead:                   %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/homestead.md)\n", c.HomesteadBlock)
+	banner += fmt.Sprintf(" - Homestead:                   %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/homestead.md)\n", c.HomesteadBlock)
 	if c.DAOForkBlock != nil {
-		banner += fmt.Sprintf(" - DAO Fork:                    %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/dao-fork.md)\n", c.DAOForkBlock)
+		banner += fmt.Sprintf(" - DAO Fork:                    %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/dao-fork.md)\n", c.DAOForkBlock)
 	}
-	banner += fmt.Sprintf(" - Tangerine Whistle (EIP 150): %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/tangerine-whistle.md)\n", c.EIP150Block)
-	banner += fmt.Sprintf(" - Spurious Dragon/1 (EIP 155): %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/spurious-dragon.md)\n", c.EIP155Block)
-	banner += fmt.Sprintf(" - Spurious Dragon/2 (EIP 158): %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/spurious-dragon.md)\n", c.EIP155Block)
-	banner += fmt.Sprintf(" - Byzantium:                   %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/byzantium.md)\n", c.ByzantiumBlock)
-	banner += fmt.Sprintf(" - Constantinople:              %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/constantinople.md)\n", c.ConstantinopleBlock)
-	banner += fmt.Sprintf(" - Petersburg:                  %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/petersburg.md)\n", c.PetersburgBlock)
-	banner += fmt.Sprintf(" - Istanbul:                    %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/istanbul.md)\n", c.IstanbulBlock)
+	banner += fmt.Sprintf(" - Tangerine Whistle (EIP 150): %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/tangerine-whistle.md)\n", c.EIP150Block)
+	banner += fmt.Sprintf(" - Spurious Dragon/1 (EIP 155): %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/spurious-dragon.md)\n", c.EIP155Block)
+	banner += fmt.Sprintf(" - Spurious Dragon/2 (EIP 158): %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/spurious-dragon.md)\n", c.EIP155Block)
+	banner += fmt.Sprintf(" - Byzantium:                   %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/byzantium.md)\n", c.ByzantiumBlock)
+	banner += fmt.Sprintf(" - Constantinople:              %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/constantinople.md)\n", c.ConstantinopleBlock)
+	banner += fmt.Sprintf(" - Petersburg:                  %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/petersburg.md)\n", c.PetersburgBlock)
+	banner += fmt.Sprintf(" - Istanbul:                    %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/istanbul.md)\n", c.IstanbulBlock)
 	if c.MuirGlacierBlock != nil {
-		banner += fmt.Sprintf(" - Muir Glacier:                %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/muir-glacier.md)\n", c.MuirGlacierBlock)
+		banner += fmt.Sprintf(" - Muir Glacier:                %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/muir-glacier.md)\n", c.MuirGlacierBlock)
 	}
-	banner += fmt.Sprintf(" - Berlin:                      %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/berlin.md)\n", c.BerlinBlock)
-	banner += fmt.Sprintf(" - London:                      %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/london.md)\n", c.LondonBlock)
+	banner += fmt.Sprintf(" - Berlin:                      %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/berlin.md)\n", c.BerlinBlock)
+	banner += fmt.Sprintf(" - London:                      %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/london.md)\n", c.LondonBlock)
 	if c.ArrowGlacierBlock != nil {
-		banner += fmt.Sprintf(" - Arrow Glacier:               %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/arrow-glacier.md)\n", c.ArrowGlacierBlock)
+		banner += fmt.Sprintf(" - Arrow Glacier:               %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/arrow-glacier.md)\n", c.ArrowGlacierBlock)
 	}
 	if c.GrayGlacierBlock != nil {
-		banner += fmt.Sprintf(" - Gray Glacier:                %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/gray-glacier.md)\n", c.GrayGlacierBlock)
+		banner += fmt.Sprintf(" - Gray Glacier:                %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/gray-glacier.md)\n", c.GrayGlacierBlock)
 	}
 	if c.ShanghaiBlock != nil {
-		banner += fmt.Sprintf(" - Shanghai:                     %-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md)\n", c.ShanghaiBlock)
+		banner += fmt.Sprintf(" - Shanghai:                     %-8v (https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md)\n", c.ShanghaiBlock)
 	}
 	if c.CancunBlock != nil {
 		banner += fmt.Sprintf(" - Cancun:                      %-8v\n", c.CancunBlock)
@@ -476,10 +476,10 @@ func (c *ChainConfig) Description() string {
 	// Add a special section for the merge as it's non-obvious
 	if c.TerminalTotalDifficulty == nil {
 		banner += "The Merge is not yet available for this network!\n"
-		banner += " - Hard-fork specification: https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md"
+		banner += " - Hard-fork specification: https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md"
 	} else {
 		banner += "Merge configured:\n"
-		banner += " - Hard-fork specification:    https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md\n"
+		banner += " - Hard-fork specification:    https://github.com/sdcereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/paris.md\n"
 		banner += fmt.Sprintf(" - Network known to be merged: %v\n", c.TerminalTotalDifficultyPassed)
 		banner += fmt.Sprintf(" - Total terminal difficulty:  %v\n", c.TerminalTotalDifficulty)
 		banner += fmt.Sprintf(" - Merge netsplit block:       %-8v", c.MergeNetsplitBlock)
@@ -487,79 +487,79 @@ func (c *ChainConfig) Description() string {
 	return banner
 }
 
-// IsHomestead returns whether num is either equal to the homestead block or greater.
+// IsHomestead returns whsdcer num is either equal to the homestead block or greater.
 func (c *ChainConfig) IsHomestead(num *big.Int) bool {
 	return isForked(c.HomesteadBlock, num)
 }
 
-// IsDAOFork returns whether num is either equal to the DAO fork block or greater.
+// IsDAOFork returns whsdcer num is either equal to the DAO fork block or greater.
 func (c *ChainConfig) IsDAOFork(num *big.Int) bool {
 	return isForked(c.DAOForkBlock, num)
 }
 
-// IsEIP150 returns whether num is either equal to the EIP150 fork block or greater.
+// IsEIP150 returns whsdcer num is either equal to the EIP150 fork block or greater.
 func (c *ChainConfig) IsEIP150(num *big.Int) bool {
 	return isForked(c.EIP150Block, num)
 }
 
-// IsEIP155 returns whether num is either equal to the EIP155 fork block or greater.
+// IsEIP155 returns whsdcer num is either equal to the EIP155 fork block or greater.
 func (c *ChainConfig) IsEIP155(num *big.Int) bool {
 	return isForked(c.EIP155Block, num)
 }
 
-// IsEIP158 returns whether num is either equal to the EIP158 fork block or greater.
+// IsEIP158 returns whsdcer num is either equal to the EIP158 fork block or greater.
 func (c *ChainConfig) IsEIP158(num *big.Int) bool {
 	return isForked(c.EIP158Block, num)
 }
 
-// IsByzantium returns whether num is either equal to the Byzantium fork block or greater.
+// IsByzantium returns whsdcer num is either equal to the Byzantium fork block or greater.
 func (c *ChainConfig) IsByzantium(num *big.Int) bool {
 	return isForked(c.ByzantiumBlock, num)
 }
 
-// IsConstantinople returns whether num is either equal to the Constantinople fork block or greater.
+// IsConstantinople returns whsdcer num is either equal to the Constantinople fork block or greater.
 func (c *ChainConfig) IsConstantinople(num *big.Int) bool {
 	return isForked(c.ConstantinopleBlock, num)
 }
 
-// IsMuirGlacier returns whether num is either equal to the Muir Glacier (EIP-2384) fork block or greater.
+// IsMuirGlacier returns whsdcer num is either equal to the Muir Glacier (EIP-2384) fork block or greater.
 func (c *ChainConfig) IsMuirGlacier(num *big.Int) bool {
 	return isForked(c.MuirGlacierBlock, num)
 }
 
-// IsPetersburg returns whether num is either
+// IsPetersburg returns whsdcer num is either
 // - equal to or greater than the PetersburgBlock fork block,
 // - OR is nil, and Constantinople is active
 func (c *ChainConfig) IsPetersburg(num *big.Int) bool {
 	return isForked(c.PetersburgBlock, num) || c.PetersburgBlock == nil && isForked(c.ConstantinopleBlock, num)
 }
 
-// IsIstanbul returns whether num is either equal to the Istanbul fork block or greater.
+// IsIstanbul returns whsdcer num is either equal to the Istanbul fork block or greater.
 func (c *ChainConfig) IsIstanbul(num *big.Int) bool {
 	return isForked(c.IstanbulBlock, num)
 }
 
-// IsBerlin returns whether num is either equal to the Berlin fork block or greater.
+// IsBerlin returns whsdcer num is either equal to the Berlin fork block or greater.
 func (c *ChainConfig) IsBerlin(num *big.Int) bool {
 	return isForked(c.BerlinBlock, num)
 }
 
-// IsLondon returns whether num is either equal to the London fork block or greater.
+// IsLondon returns whsdcer num is either equal to the London fork block or greater.
 func (c *ChainConfig) IsLondon(num *big.Int) bool {
 	return isForked(c.LondonBlock, num)
 }
 
-// IsArrowGlacier returns whether num is either equal to the Arrow Glacier (EIP-4345) fork block or greater.
+// IsArrowGlacier returns whsdcer num is either equal to the Arrow Glacier (EIP-4345) fork block or greater.
 func (c *ChainConfig) IsArrowGlacier(num *big.Int) bool {
 	return isForked(c.ArrowGlacierBlock, num)
 }
 
-// IsGrayGlacier returns whether num is either equal to the Gray Glacier (EIP-5133) fork block or greater.
+// IsGrayGlacier returns whsdcer num is either equal to the Gray Glacier (EIP-5133) fork block or greater.
 func (c *ChainConfig) IsGrayGlacier(num *big.Int) bool {
 	return isForked(c.GrayGlacierBlock, num)
 }
 
-// IsTerminalPoWBlock returns whether the given block is the last block of PoW stage.
+// IsTerminalPoWBlock returns whsdcer the given block is the last block of PoW stage.
 func (c *ChainConfig) IsTerminalPoWBlock(parentTotalDiff *big.Int, totalDiff *big.Int) bool {
 	if c.TerminalTotalDifficulty == nil {
 		return false
@@ -567,17 +567,17 @@ func (c *ChainConfig) IsTerminalPoWBlock(parentTotalDiff *big.Int, totalDiff *bi
 	return parentTotalDiff.Cmp(c.TerminalTotalDifficulty) < 0 && totalDiff.Cmp(c.TerminalTotalDifficulty) >= 0
 }
 
-// IsShanghai returns whether num is either equal to the Shanghai fork block or greater.
+// IsShanghai returns whsdcer num is either equal to the Shanghai fork block or greater.
 func (c *ChainConfig) IsShanghai(num *big.Int) bool {
 	return isForked(c.ShanghaiBlock, num)
 }
 
-// IsCancun returns whether num is either equal to the Cancun fork block or greater.
+// IsCancun returns whsdcer num is either equal to the Cancun fork block or greater.
 func (c *ChainConfig) IsCancun(num *big.Int) bool {
 	return isForked(c.CancunBlock, num)
 }
 
-// CheckCompatible checks whether scheduled fork transitions have been imported
+// CheckCompatible checks whsdcer scheduled fork transitions have been imported
 // with a mismatching chain configuration.
 func (c *ChainConfig) CheckCompatible(newcfg *ChainConfig, height uint64) *ConfigCompatError {
 	bhead := new(big.Int).SetUint64(height)
@@ -595,7 +595,7 @@ func (c *ChainConfig) CheckCompatible(newcfg *ChainConfig, height uint64) *Confi
 	return lasterr
 }
 
-// CheckConfigForkOrder checks that we don't "skip" any forks, geth isn't pluggable enough
+// CheckConfigForkOrder checks that we don't "skip" any forks, gsdc isn't pluggable enough
 // to guarantee that forks can be implemented in a different order than on official networks
 func (c *ChainConfig) CheckConfigForkOrder() error {
 	type fork struct {
@@ -715,7 +715,7 @@ func isForkIncompatible(s1, s2, head *big.Int) bool {
 	return (isForked(s1, head) || isForked(s2, head)) && !configNumEqual(s1, s2)
 }
 
-// isForked returns whether a fork scheduled at block s is active at the given head block.
+// isForked returns whsdcer a fork scheduled at block s is active at the given head block.
 func isForked(s, head *big.Int) bool {
 	if s == nil || head == nil {
 		return false

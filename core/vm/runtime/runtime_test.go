@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package runtime
 
@@ -23,21 +23,21 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/asm"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/eth/tracers"
-	"github.com/ethereum/go-ethereum/eth/tracers/logger"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/accounts/abi"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/asm"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/sdc/tracers"
+	"github.com/sdcereum/go-sdcereum/sdc/tracers/logger"
+	"github.com/sdcereum/go-sdcereum/params"
 
 	// force-load js tracers to trigger registration
-	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
+	_ "github.com/sdcereum/go-sdcereum/sdc/tracers/js"
 )
 
 func TestDefaults(t *testing.T) {
@@ -60,7 +60,7 @@ func TestDefaults(t *testing.T) {
 	if cfg.Value == nil {
 		t.Error("expected time to be non nil")
 	}
-	if cfg.GetHashFn == nil {
+	if cfg.GsdcashFn == nil {
 		t.Error("expected time to be non nil")
 	}
 	if cfg.BlockNumber == nil {
@@ -238,15 +238,15 @@ func (d *dummyChain) Engine() consensus.Engine {
 	return nil
 }
 
-// GetHeader returns the hash corresponding to their hash.
-func (d *dummyChain) GetHeader(h common.Hash, n uint64) *types.Header {
+// Gsdceader returns the hash corresponding to their hash.
+func (d *dummyChain) Gsdceader(h common.Hash, n uint64) *types.Header {
 	d.counter++
 	parentHash := common.Hash{}
 	s := common.LeftPadBytes(big.NewInt(int64(n-1)).Bytes(), 32)
 	copy(parentHash[:], s)
 
 	//parentHash := common.Hash{byte(n - 1)}
-	//fmt.Printf("GetHeader(%x, %d) => header with parent %x\n", h, n, parentHash)
+	//fmt.Printf("Gsdceader(%x, %d) => header with parent %x\n", h, n, parentHash)
 	return fakeHeader(n, parentHash)
 }
 
@@ -294,11 +294,11 @@ func TestBlockhash(t *testing.T) {
 	*/
 	// The contract above
 	data := common.Hex2Bytes("6080604052348015600f57600080fd5b50600436106045576000357c010000000000000000000000000000000000000000000000000000000090048063f8a8fd6d14604a575b600080fd5b60506074565b60405180848152602001838152602001828152602001935050505060405180910390f35b600080600080439050600080600083409050600184034092506000600290505b61010481101560c35760008186034090506000816001900414151560b6578093505b5080806001019150506094565b508083839650965096505050505090919256fea165627a7a72305820462d71b510c1725ff35946c20b415b0d50b468ea157c8c77dff9466c9cb85f560029")
-	// The method call to 'test()'
+	// The msdcod call to 'test()'
 	input := common.Hex2Bytes("f8a8fd6d")
 	chain := &dummyChain{}
 	ret, _, err := Execute(data, input, &Config{
-		GetHashFn:   core.GetHashFn(header, chain),
+		GsdcashFn:   core.GsdcashFn(header, chain),
 		BlockNumber: new(big.Int).Set(header.Number),
 	})
 	if err != nil {
@@ -604,7 +604,7 @@ func TestEip2929Cases(t *testing.T) {
 
 // TestColdAccountAccessCost test that the cold account access cost is reported
 // correctly
-// see: https://github.com/ethereum/go-ethereum/issues/22649
+// see: https://github.com/sdcereum/go-sdcereum/issues/22649
 func TestColdAccountAccessCost(t *testing.T) {
 	for i, tc := range []struct {
 		code []byte

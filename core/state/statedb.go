@@ -1,20 +1,20 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2014 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package state provides a caching layer atop the Ethereum state trie.
+// Package state provides a caching layer atop the sdcereum state trie.
 package state
 
 import (
@@ -24,15 +24,15 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state/snapshot"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 type revision struct {
@@ -56,7 +56,7 @@ func (n *proofList) Delete(key []byte) error {
 	panic("not supported")
 }
 
-// StateDB structs within the ethereum protocol are used to store anything
+// StateDB structs within the sdcereum protocol are used to store anything
 // within the merkle trie. StateDBs take care of caching and storing
 // nested states. It's the general query interface to retrieve:
 // * Contracts
@@ -239,7 +239,7 @@ func (s *StateDB) AddRefund(gas uint64) {
 }
 
 // SubRefund removes gas from the refund counter.
-// This method will panic if the refund counter goes below zero
+// This msdcod will panic if the refund counter goes below zero
 func (s *StateDB) SubRefund(gas uint64) {
 	s.journal.append(refundChange{prev: s.refund})
 	if gas > s.refund {
@@ -248,13 +248,13 @@ func (s *StateDB) SubRefund(gas uint64) {
 	s.refund -= gas
 }
 
-// Exist reports whether the given account address exists in the state.
+// Exist reports whsdcer the given account address exists in the state.
 // Notably this also returns true for suicided accounts.
 func (s *StateDB) Exist(addr common.Address) bool {
 	return s.getStateObject(addr) != nil
 }
 
-// Empty returns whether the state object is either non-existent
+// Empty returns whsdcer the state object is either non-existent
 // or empty according to the EIP161 specification (balance = nonce = code = 0)
 func (s *StateDB) Empty(addr common.Address) bool {
 	so := s.getStateObject(addr)
@@ -453,7 +453,7 @@ func (s *StateDB) Suicide(addr common.Address) bool {
 }
 
 //
-// Setting, updating & deleting state object methods.
+// Setting, updating & deleting state object msdcods.
 //
 
 // updateStateObject writes the given object to the trie.
@@ -604,7 +604,7 @@ func (s *StateDB) createObject(addr common.Address) (newobj, prev *stateObject) 
 //  1. sends funds to sha(account ++ (nonce + 1))
 //  2. tx_create(sha(account ++ nonce)) (note that this gets the address of 1)
 //
-// Carrying over the balance ensures that Ether doesn't disappear.
+// Carrying over the balance ensures that sdcer doesn't disappear.
 func (s *StateDB) CreateAccount(addr common.Address) {
 	newObj, prev := s.createObject(addr)
 	if prev != nil {
@@ -661,8 +661,8 @@ func (s *StateDB) Copy() *StateDB {
 	}
 	// Copy the dirty states, logs, and preimages
 	for addr := range s.journal.dirties {
-		// As documented [here](https://github.com/ethereum/go-ethereum/pull/16485#issuecomment-380438527),
-		// and in the Finalise-method, there is a case where an object is in the journal but not
+		// As documented [here](https://github.com/sdcereum/go-sdcereum/pull/16485#issuecomment-380438527),
+		// and in the Finalise-msdcod, there is a case where an object is in the journal but not
 		// in the stateObjects: OOG after touch on ripeMD prior to Byzantium. Thus, we need to check for
 		// nil
 		if object, exist := s.stateObjects[addr]; exist {
@@ -1022,7 +1022,7 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (common.Hash, error) {
 // - Add precompiles to access list (2929)
 // - Add the contents of the optional tx access list (2930)
 //
-// This method should only be called if Berlin/2929+2930 is applicable at the current number.
+// This msdcod should only be called if Berlin/2929+2930 is applicable at the current number.
 func (s *StateDB) PrepareAccessList(sender common.Address, dst *common.Address, precompiles []common.Address, list types.AccessList) {
 	// Clear out any leftover from previous executions
 	s.accessList = newAccessList()

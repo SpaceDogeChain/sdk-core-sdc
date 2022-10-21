@@ -1,34 +1,34 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"fmt"
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/p2p/enr"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 const (
@@ -59,8 +59,8 @@ const (
 // exchanges have passed.
 type Handler func(peer *Peer) error
 
-// Backend defines the data retrieval methods to serve remote requests and the
-// callback methods to invoke on remote deliveries.
+// Backend defines the data retrieval msdcods to serve remote requests and the
+// callback msdcods to invoke on remote deliveries.
 type Backend interface {
 	// Chain retrieves the blockchain object to serve data.
 	Chain() *core.BlockChain
@@ -68,17 +68,17 @@ type Backend interface {
 	// TxPool retrieves the transaction pool object to serve data.
 	TxPool() TxPool
 
-	// AcceptTxs retrieves whether transaction processing is enabled on the node
+	// AcceptTxs retrieves whsdcer transaction processing is enabled on the node
 	// or if inbound transactions should simply be dropped.
 	AcceptTxs() bool
 
-	// RunPeer is invoked when a peer joins on the `eth` protocol. The handler
+	// RunPeer is invoked when a peer joins on the `sdc` protocol. The handler
 	// should do any peer maintenance work, handshakes and validations. If all
 	// is passed, control should be given back to the `handler` to process the
 	// inbound messages going forward.
 	RunPeer(peer *Peer, handler Handler) error
 
-	// PeerInfo retrieves all known `eth` information about a peer.
+	// PeerInfo retrieves all known `sdc` information about a peer.
 	PeerInfo(id enode.ID) interface{}
 
 	// Handle is a callback to be invoked when a data packet is received from
@@ -87,13 +87,13 @@ type Backend interface {
 	Handle(peer *Peer, packet Packet) error
 }
 
-// TxPool defines the methods needed by the protocol handler to serve transactions.
+// TxPool defines the msdcods needed by the protocol handler to serve transactions.
 type TxPool interface {
 	// Get retrieves the transaction from the local txpool with the given hash.
 	Get(hash common.Hash) *types.Transaction
 }
 
-// MakeProtocols constructs the P2P protocol definitions for `eth`.
+// MakeProtocols constructs the P2P protocol definitions for `sdc`.
 func MakeProtocols(backend Backend, network uint64, dnsdisc enode.Iterator) []p2p.Protocol {
 	protocols := make([]p2p.Protocol, len(ProtocolVersions))
 	for i, version := range ProtocolVersions {
@@ -124,17 +124,17 @@ func MakeProtocols(backend Backend, network uint64, dnsdisc enode.Iterator) []p2
 	return protocols
 }
 
-// NodeInfo represents a short summary of the `eth` sub-protocol metadata
+// NodeInfo represents a short summary of the `sdc` sub-protocol metadata
 // known about the host peer.
 type NodeInfo struct {
-	Network    uint64              `json:"network"`    // Ethereum network ID (1=Mainnet, Ropsten=3, Rinkeby=4, Goerli=5)
+	Network    uint64              `json:"network"`    // sdcereum network ID (1=Mainnet, Ropsten=3, Rinkeby=4, Goerli=5)
 	Difficulty *big.Int            `json:"difficulty"` // Total difficulty of the host's blockchain
 	Genesis    common.Hash         `json:"genesis"`    // SHA3 hash of the host's genesis block
 	Config     *params.ChainConfig `json:"config"`     // Chain configuration for the fork rules
 	Head       common.Hash         `json:"head"`       // Hex hash of the host's best owned block
 }
 
-// nodeInfo retrieves some `eth` protocol metadata about the running host node.
+// nodeInfo retrieves some `sdc` protocol metadata about the running host node.
 func nodeInfo(chain *core.BlockChain, network uint64) *NodeInfo {
 	head := chain.CurrentBlock()
 	return &NodeInfo{
@@ -146,13 +146,13 @@ func nodeInfo(chain *core.BlockChain, network uint64) *NodeInfo {
 	}
 }
 
-// Handle is invoked whenever an `eth` connection is made that successfully passes
-// the protocol handshake. This method will keep processing messages until the
+// Handle is invoked whenever an `sdc` connection is made that successfully passes
+// the protocol handshake. This msdcod will keep processing messages until the
 // connection is torn down.
 func Handle(backend Backend, peer *Peer) error {
 	for {
 		if err := handleMessage(backend, peer); err != nil {
-			peer.Log().Debug("Message handling failed in `eth`", "err", err)
+			peer.Log().Debug("Message handling failed in `sdc`", "err", err)
 			return err
 		}
 	}
@@ -164,7 +164,7 @@ type Decoder interface {
 	Time() time.Time
 }
 
-var eth66 = map[uint64]msgHandler{
+var sdc66 = map[uint64]msgHandler{
 	NewBlockHashesMsg:             handleNewBlockhashes,
 	NewBlockMsg:                   handleNewBlock,
 	TransactionsMsg:               handleTransactions,
@@ -181,7 +181,7 @@ var eth66 = map[uint64]msgHandler{
 	PooledTransactionsMsg:         handlePooledTransactions66,
 }
 
-var eth67 = map[uint64]msgHandler{
+var sdc67 = map[uint64]msgHandler{
 	NewBlockHashesMsg:             handleNewBlockhashes,
 	NewBlockMsg:                   handleNewBlock,
 	TransactionsMsg:               handleTransactions,
@@ -209,9 +209,9 @@ func handleMessage(backend Backend, peer *Peer) error {
 	}
 	defer msg.Discard()
 
-	var handlers = eth66
-	if peer.Version() >= ETH67 {
-		handlers = eth67
+	var handlers = sdc66
+	if peer.Version() >= sdc67 {
+		handlers = sdc67
 	}
 
 	// Track the amount of time it takes to serve the request and run the handler

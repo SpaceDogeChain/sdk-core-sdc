@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package usbwallet implements support for USB hardware wallets.
 package usbwallet
@@ -25,12 +25,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/log"
 	"github.com/karalabe/usb"
 )
 
@@ -39,7 +39,7 @@ const heartbeatCycle = time.Second
 
 // Minimum time to wait between self derivation attempts, even it the user is
 // requesting accounts like crazy.
-const selfDeriveThrottling = time.Second
+const selfDerivsdcrottling = time.Second
 
 // driver defines the vendor specific functionality hardware wallets instances
 // must implement to allow using them with the wallet lifecycle management.
@@ -60,7 +60,7 @@ type driver interface {
 	// is still online and healthy.
 	Heartbeat() error
 
-	// Derive sends a derivation request to the USB device and returns the Ethereum
+	// Derive sends a derivation request to the USB device and returns the sdcereum
 	// address located on that path.
 	Derive(path accounts.DerivationPath) (common.Address, error)
 
@@ -87,7 +87,7 @@ type wallet struct {
 
 	deriveNextPaths []accounts.DerivationPath // Next derivation paths for account auto-discovery (multiple bases supported)
 	deriveNextAddrs []common.Address          // Next derived account addresses for auto-discovery (multiple bases supported)
-	deriveChain     ethereum.ChainStateReader // Blockchain state reader to discover used account with
+	deriveChain     sdcereum.ChainStateReader // Blockchain state reader to discover used account with
 	deriveReq       chan chan struct{}        // Channel to request a self-derivation on
 	deriveQuit      chan chan error           // Channel to terminate the self-deriver with
 
@@ -177,7 +177,7 @@ func (w *wallet) Open(passphrase string) error {
 }
 
 // heartbeat is a health check loop for the USB wallets to periodically verify
-// whether they are still present or if they malfunctioned.
+// whsdcer they are still present or if they malfunctioned.
 func (w *wallet) heartbeat() {
 	w.log.Debug("USB wallet health-check started")
 	defer w.log.Debug("USB wallet health-check stopped")
@@ -348,7 +348,7 @@ func (w *wallet) selfDerive() {
 		)
 		for i := 0; i < len(nextAddrs); i++ {
 			for empty := false; !empty; {
-				// Retrieve the next derived Ethereum account
+				// Retrieve the next derived sdcereum account
 				if nextAddrs[i] == (common.Address{}) {
 					if nextAddrs[i], err = w.driver.Derive(nextPaths[i]); err != nil {
 						w.log.Warn("USB wallet account derivation failed", "err", err)
@@ -427,7 +427,7 @@ func (w *wallet) selfDerive() {
 			select {
 			case errc = <-w.deriveQuit:
 				// Termination requested, abort
-			case <-time.After(selfDeriveThrottling):
+			case <-time.After(selfDerivsdcrottling):
 				// Waited enough, willing to self-derive again
 			}
 		}
@@ -440,7 +440,7 @@ func (w *wallet) selfDerive() {
 	errc <- err
 }
 
-// Contains implements accounts.Wallet, returning whether a particular account is
+// Contains implements accounts.Wallet, returning whsdcer a particular account is
 // or is not pinned into this wallet instance. Although we could attempt to resolve
 // unpinned accounts, that would be an non-negligible hardware operation.
 func (w *wallet) Contains(account accounts.Account) bool {
@@ -500,12 +500,12 @@ func (w *wallet) Derive(path accounts.DerivationPath, pin bool) (accounts.Accoun
 // from non zero components.
 //
 // Some hardware wallets switched derivation paths through their evolution, so
-// this method supports providing multiple bases to discover old user accounts
+// this msdcod supports providing multiple bases to discover old user accounts
 // too. Only the last base will be used to derive the next empty account.
 //
 // You can disable automatic account discovery by calling SelfDerive with a nil
 // chain state reader.
-func (w *wallet) SelfDerive(bases []accounts.DerivationPath, chain ethereum.ChainStateReader) {
+func (w *wallet) SelfDerive(bases []accounts.DerivationPath, chain sdcereum.ChainStateReader) {
 	w.stateLock.Lock()
 	defer w.stateLock.Unlock()
 
@@ -519,7 +519,7 @@ func (w *wallet) SelfDerive(bases []accounts.DerivationPath, chain ethereum.Chai
 }
 
 // signHash implements accounts.Wallet, however signing arbitrary data is not
-// supported for hardware wallets, so this method will always return an error.
+// supported for hardware wallets, so this msdcod will always return an error.
 func (w *wallet) signHash(account accounts.Account, hash []byte) ([]byte, error) {
 	return nil, accounts.ErrNotSupported
 }
@@ -582,8 +582,8 @@ func (w *wallet) SignText(account accounts.Account, text []byte) ([]byte, error)
 // wallet to request a confirmation from the user. It returns either the signed
 // transaction or a failure if the user denied the transaction.
 //
-// Note, if the version of the Ethereum application running on the Ledger wallet is
-// too old to sign EIP-155 transactions, but such is requested nonetheless, an error
+// Note, if the version of the sdcereum application running on the Ledger wallet is
+// too old to sign EIP-155 transactions, but such is requested nonsdceless, an error
 // will be returned opposed to silently signing in Homestead mode.
 func (w *wallet) SignTx(account accounts.Account, tx *types.Transaction, chainID *big.Int) (*types.Transaction, error) {
 	w.stateLock.RLock() // Comms have own mutex, this is for the state fields
@@ -625,7 +625,7 @@ func (w *wallet) SignTx(account accounts.Account, tx *types.Transaction, chainID
 }
 
 // SignHashWithPassphrase implements accounts.Wallet, however signing arbitrary
-// data is not supported for Ledger wallets, so this method will always return
+// data is not supported for Ledger wallets, so this msdcod will always return
 // an error.
 func (w *wallet) SignTextWithPassphrase(account accounts.Account, passphrase string, text []byte) ([]byte, error) {
 	return w.SignText(account, accounts.TextHash(text))

@@ -1,28 +1,28 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package core
 
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the
@@ -31,8 +31,8 @@ type ChainContext interface {
 	// Engine retrieves the chain's consensus engine.
 	Engine() consensus.Engine
 
-	// GetHeader returns the header corresponding to the hash/number argument pair.
-	GetHeader(common.Hash, uint64) *types.Header
+	// Gsdceader returns the header corresponding to the hash/number argument pair.
+	Gsdceader(common.Hash, uint64) *types.Header
 }
 
 // NewEVMBlockContext creates a new context for use in the EVM.
@@ -58,7 +58,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 	return vm.BlockContext{
 		CanTransfer: CanTransfer,
 		Transfer:    Transfer,
-		GetHash:     GetHashFn(header, chain),
+		Gsdcash:     GsdcashFn(header, chain),
 		Coinbase:    beneficiary,
 		BlockNumber: new(big.Int).Set(header.Number),
 		Time:        new(big.Int).SetUint64(header.Time),
@@ -77,8 +77,8 @@ func NewEVMTxContext(msg Message) vm.TxContext {
 	}
 }
 
-// GetHashFn returns a GetHashFunc which retrieves header hashes by number
-func GetHashFn(ref *types.Header, chain ChainContext) func(n uint64) common.Hash {
+// GsdcashFn returns a GsdcashFunc which retrieves header hashes by number
+func GsdcashFn(ref *types.Header, chain ChainContext) func(n uint64) common.Hash {
 	// Cache will initially contain [refHash.parent],
 	// Then fill up with [refHash.p, refHash.pp, refHash.ppp, ...]
 	var cache []common.Hash
@@ -101,7 +101,7 @@ func GetHashFn(ref *types.Header, chain ChainContext) func(n uint64) common.Hash
 		lastKnownNumber := ref.Number.Uint64() - uint64(len(cache))
 
 		for {
-			header := chain.GetHeader(lastKnownHash, lastKnownNumber)
+			header := chain.Gsdceader(lastKnownHash, lastKnownNumber)
 			if header == nil {
 				break
 			}
@@ -116,7 +116,7 @@ func GetHashFn(ref *types.Header, chain ChainContext) func(n uint64) common.Hash
 	}
 }
 
-// CanTransfer checks whether there are enough funds in the address' account to make a transfer.
+// CanTransfer checks whsdcer there are enough funds in the address' account to make a transfer.
 // This does not take the necessary gas in to account to make the transfer valid.
 func CanTransfer(db vm.StateDB, addr common.Address, amount *big.Int) bool {
 	return db.GetBalance(addr).Cmp(amount) >= 0

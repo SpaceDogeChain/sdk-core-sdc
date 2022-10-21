@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Package downloader contains the manual full chain synchronisation.
 package downloader
@@ -25,16 +25,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/protocols/snap"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state/snapshot"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/snap"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 var (
@@ -43,7 +43,7 @@ var (
 	MaxSkeletonSize = 128 // Number of header fetches to need for a skeleton assembly
 	MaxReceiptFetch = 256 // Amount of transaction receipts to allow fetching per request
 
-	maxQueuedHeaders            = 32 * 1024                         // [eth/62] Maximum number of headers to queue for import (DOS protection)
+	maxQueuedHeaders            = 32 * 1024                         // [sdc/62] Maximum number of headers to queue for import (DOS protection)
 	maxHeadersProcess           = 2048                              // Number of header download results to import at once into the chain
 	maxResultsProcess           = 2048                              // Number of content download results to import at once into the chain
 	fullMaxForkAncestry  uint64 = params.FullImmutabilityThreshold  // Maximum chain reorganisation (locally redeclared so tests can reduce it)
@@ -105,7 +105,7 @@ type Downloader struct {
 	queue      *queue   // Scheduler for selecting the hashes to download
 	peers      *peerSet // Set of active peers from which download can proceed
 
-	stateDB ethdb.Database // Database to state sync into (and deduplicate via)
+	stateDB sdcdb.Database // Database to state sync into (and deduplicate via)
 
 	// Statistics
 	syncStatsChainOrigin uint64       // Origin block number where syncing started at
@@ -130,7 +130,7 @@ type Downloader struct {
 	headerProcCh chan *headerTask // Channel to feed the header processor new tasks
 
 	// Skeleton sync
-	skeleton *skeleton // Header skeleton to backfill the chain with (eth2 mode)
+	skeleton *skeleton // Header skeleton to backfill the chain with (sdc2 mode)
 
 	// State sync
 	pivotHeader *types.Header // Pivot block header to dynamically push the syncing state root
@@ -149,10 +149,10 @@ type Downloader struct {
 	quitLock sync.Mutex    // Lock to prevent double closes
 
 	// Testing hooks
-	syncInitHook     func(uint64, uint64)  // Method to call upon initiating a new sync run
-	bodyFetchHook    func([]*types.Header) // Method to call upon starting a block body fetch
-	receiptFetchHook func([]*types.Header) // Method to call upon starting a receipt fetch
-	chainInsertHook  func([]*fetchResult)  // Method to call upon inserting a chain of blocks (possibly in multiple invocations)
+	syncInitHook     func(uint64, uint64)  // Msdcod to call upon initiating a new sync run
+	bodyFetchHook    func([]*types.Header) // Msdcod to call upon starting a block body fetch
+	receiptFetchHook func([]*types.Header) // Msdcod to call upon starting a receipt fetch
+	chainInsertHook  func([]*fetchResult)  // Msdcod to call upon inserting a chain of blocks (possibly in multiple invocations)
 }
 
 // LightChain encapsulates functions required to synchronise a light chain.
@@ -160,8 +160,8 @@ type LightChain interface {
 	// HasHeader verifies a header's presence in the local chain.
 	HasHeader(common.Hash, uint64) bool
 
-	// GetHeaderByHash retrieves a header from the local chain.
-	GetHeaderByHash(common.Hash) *types.Header
+	// GsdceaderByHash retrieves a header from the local chain.
+	GsdceaderByHash(common.Hash) *types.Header
 
 	// CurrentHeader retrieves the head header from the local chain.
 	CurrentHeader() *types.Header
@@ -172,8 +172,8 @@ type LightChain interface {
 	// InsertHeaderChain inserts a batch of headers into the local chain.
 	InsertHeaderChain([]*types.Header, int) (int, error)
 
-	// SetHead rewinds the local chain to a new head.
-	SetHead(uint64) error
+	// Ssdcead rewinds the local chain to a new head.
+	Ssdcead(uint64) error
 }
 
 // BlockChain encapsulates functions required to sync a (full or snap) blockchain.
@@ -209,7 +209,7 @@ type BlockChain interface {
 }
 
 // New creates a new downloader to fetch hashes and blocks from remote peers.
-func New(checkpoint uint64, stateDb ethdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, dropPeer peerDropFn, success func()) *Downloader {
+func New(checkpoint uint64, stateDb sdcdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, dropPeer peerDropFn, success func()) *Downloader {
 	if lightchain == nil {
 		lightchain = chain
 	}
@@ -240,7 +240,7 @@ func New(checkpoint uint64, stateDb ethdb.Database, mux *event.TypeMux, chain Bl
 // In addition, during the state download phase of snap synchronisation the number
 // of processed and the total number of known states are also returned. Otherwise
 // these are zero.
-func (d *Downloader) Progress() ethereum.SyncProgress {
+func (d *Downloader) Progress() sdcereum.SyncProgress {
 	// Lock the current stats and return the progress
 	d.syncStatsLock.RLock()
 	defer d.syncStatsLock.RUnlock()
@@ -259,7 +259,7 @@ func (d *Downloader) Progress() ethereum.SyncProgress {
 	}
 	progress, pending := d.SnapSyncer.Progress()
 
-	return ethereum.SyncProgress{
+	return sdcereum.SyncProgress{
 		StartingBlock:       d.syncStatsChainOrigin,
 		CurrentBlock:        current,
 		HighestBlock:        d.syncStatsChainHeight,
@@ -278,7 +278,7 @@ func (d *Downloader) Progress() ethereum.SyncProgress {
 	}
 }
 
-// Synchronising returns whether the downloader is currently retrieving blocks.
+// Synchronising returns whsdcer the downloader is currently retrieving blocks.
 func (d *Downloader) Synchronising() bool {
 	return atomic.LoadInt32(&d.synchronising) > 0
 }
@@ -342,7 +342,7 @@ func (d *Downloader) LegacySync(id string, head common.Hash, td, ttd *big.Int, m
 		errors.Is(err, errPeersUnavailable) || errors.Is(err, errTooOld) || errors.Is(err, errInvalidAncestor) {
 		log.Warn("Synchronisation failed, dropping peer", "peer", id, "err", err)
 		if d.dropPeer == nil {
-			// The dropPeer method is nil when `--copydb` is used for a local copy.
+			// The dropPeer msdcod is nil when `--copydb` is used for a local copy.
 			// Timeouts can occur if e.g. compaction hits at the wrong time, and can be ignored
 			log.Warn("Downloader wants to drop peer, but peerdrop-function is not set", "peer", id)
 		} else {
@@ -359,7 +359,7 @@ func (d *Downloader) LegacySync(id string, head common.Hash, td, ttd *big.Int, m
 
 // synchronise will select the peer and use it for synchronising. If an empty string is given
 // it will use the best peer possible and synchronize if its TD is higher than our own. If any of the
-// checks fail an error will be returned. This method is synchronous
+// checks fail an error will be returned. This msdcod is synchronous
 func (d *Downloader) synchronise(id string, hash common.Hash, td, ttd *big.Int, mode SyncMode, beaconMode bool, beaconPing chan struct{}) error {
 	// The beacon header syncer is async. It will start this synchronization and
 	// will continue doing other tasks. However, if synchronization needs to be
@@ -459,7 +459,7 @@ func (d *Downloader) syncWithPeer(p *peerConnection, hash common.Hash, td, ttd *
 	mode := d.getMode()
 
 	if !beaconMode {
-		log.Debug("Synchronising with the network", "peer", p.id, "eth", p.version, "head", hash, "td", td, "mode", mode)
+		log.Debug("Synchronising with the network", "peer", p.id, "sdc", p.version, "head", hash, "td", td, "mode", mode)
 	} else {
 		log.Debug("Backfilling with the network", "mode", mode)
 	}
@@ -588,7 +588,7 @@ func (d *Downloader) syncWithPeer(p *peerConnection, hash common.Hash, td, ttd *
 		}
 		// Rewind the ancient store and blockchain if reorg happens.
 		if origin+1 < frozen {
-			if err := d.lightchain.SetHead(origin); err != nil {
+			if err := d.lightchain.Ssdcead(origin); err != nil {
 				return err
 			}
 		}
@@ -652,7 +652,7 @@ func (d *Downloader) spawnSync(fetchers []func() error) error {
 }
 
 // cancel aborts all of the operations and resets the queue. However, cancel does
-// not wait for the running download goroutines to finish. This method should be
+// not wait for the running download goroutines to finish. This msdcod should be
 // used when cancelling the downloads from inside the downloader.
 func (d *Downloader) cancel() {
 	// Close the current cancel channel
@@ -835,7 +835,7 @@ func (d *Downloader) findAncestor(p *peerConnection, remoteHeader *types.Header)
 				if floor >= int64(d.genesis)-1 {
 					break
 				}
-				header = d.lightchain.GetHeaderByHash(header.ParentHash)
+				header = d.lightchain.GsdceaderByHash(header.ParentHash)
 			}
 		}
 		// We already know the "genesis" block number, cap floor to that
@@ -874,7 +874,7 @@ func (d *Downloader) findAncestorSpanSearch(p *peerConnection, mode SyncMode, re
 	// Wait for the remote response to the head fetch
 	number, hash := uint64(0), common.Hash{}
 
-	// Make sure the peer actually gave something valid
+	// Make sure the peer actually gave somsdcing valid
 	if len(headers) == 0 {
 		p.log.Warn("Empty head header set")
 		return 0, errEmptyHeaderSet
@@ -941,7 +941,7 @@ func (d *Downloader) findAncestorBinarySearch(p *peerConnection, mode SyncMode, 
 		if err != nil {
 			return 0, err
 		}
-		// Make sure the peer actually gave something valid
+		// Make sure the peer actually gave somsdcing valid
 		if len(headers) != 1 {
 			p.log.Warn("Multiple headers for single request", "headers", len(headers))
 			return 0, fmt.Errorf("%w: multiple headers (%d) for single request", errBadPeer, len(headers))
@@ -963,7 +963,7 @@ func (d *Downloader) findAncestorBinarySearch(p *peerConnection, mode SyncMode, 
 			end = check
 			continue
 		}
-		header := d.lightchain.GetHeaderByHash(h) // Independent of sync mode, header surely exists
+		header := d.lightchain.GsdceaderByHash(h) // Independent of sync mode, header surely exists
 		if header.Number.Uint64() != check {
 			p.log.Warn("Received non requested header", "number", header.Number, "hash", header.Hash(), "request", check)
 			return 0, fmt.Errorf("%w: non-requested header (%d)", errBadPeer, header.Number)
@@ -995,7 +995,7 @@ func (d *Downloader) fetchHeaders(p *peerConnection, from uint64, head uint64) e
 	// Start pulling the header chain skeleton until all is done
 	var (
 		skeleton = true  // Skeleton assembly phase or finishing up
-		pivoting = false // Whether the next request is pivot verification
+		pivoting = false // Whsdcer the next request is pivot verification
 		ancestor = from
 		mode     = d.getMode()
 	)
@@ -1209,7 +1209,7 @@ func (d *Downloader) fetchHeaders(p *peerConnection, from uint64, head uint64) e
 // immediately to the header processor to keep the rest of the pipeline full even
 // in the case of header stalls.
 //
-// The method returns the entire filled skeleton and also the number of headers
+// The msdcod returns the entire filled skeleton and also the number of headers
 // already forwarded for processing.
 func (d *Downloader) fillHeaderSkeleton(from uint64, skeleton []*types.Header) ([]*types.Header, []common.Hash, int, error) {
 	log.Debug("Filling up skeleton", "from", from)
@@ -1265,7 +1265,7 @@ func (d *Downloader) processHeaders(origin uint64, td, ttd *big.Int, beaconMode 
 				lastFastBlock = d.blockchain.CurrentFastBlock().Number()
 				lastBlock = d.blockchain.CurrentBlock().Number()
 			}
-			if err := d.lightchain.SetHead(rollback - 1); err != nil { // -1 to target the parent of the first uncertain block
+			if err := d.lightchain.Ssdcead(rollback - 1); err != nil { // -1 to target the parent of the first uncertain block
 				// We're already unwinding the stack, only print the error to make it more visible
 				log.Error("Failed to roll back chain segment", "head", rollback-1, "err", err)
 			}
@@ -1313,7 +1313,7 @@ func (d *Downloader) processHeaders(origin uint64, td, ttd *big.Int, beaconMode 
 					// L: Notice that R's head and TD increased compared to ours, start sync
 					// L: Import of block 11 finishes
 					// L: Sync begins, and finds common ancestor at 11
-					// L: Request new headers up from 11 (R's TD was higher, it must have something)
+					// L: Request new headers up from 11 (R's TD was higher, it must have somsdcing)
 					// R: Nothing to give
 					if mode != LightSync {
 						head := d.blockchain.CurrentBlock()
@@ -1327,7 +1327,7 @@ func (d *Downloader) processHeaders(origin uint64, td, ttd *big.Int, beaconMode 
 					//
 					// This check cannot be executed "as is" for full imports, since blocks may still be
 					// queued for processing when the header download completes. However, as long as the
-					// peer gave us something useful, we're already happy/progressed (above check).
+					// peer gave us somsdcing useful, we're already happy/progressed (above check).
 					if mode == SnapSync || mode == LightSync {
 						head := d.lightchain.CurrentHeader()
 						if td.Cmp(d.lightchain.GetTd(head.Hash(), head.Number.Uint64())) > 0 {
@@ -1344,7 +1344,7 @@ func (d *Downloader) processHeaders(origin uint64, td, ttd *big.Int, beaconMode 
 
 			gotHeaders = true
 			for len(headers) > 0 {
-				// Terminate if something failed in between processing chunks
+				// Terminate if somsdcing failed in between processing chunks
 				select {
 				case <-d.cancelCh:
 					rollbackErr = errCanceled
@@ -1562,9 +1562,9 @@ func (d *Downloader) importBlockResults(results []*fetchResult) error {
 				}
 			}
 		} else {
-			// The InsertChain method in blockchain.go will sometimes return an out-of-bounds index,
+			// The InsertChain msdcod in blockchain.go will sometimes return an out-of-bounds index,
 			// when it needs to preprocess blocks to import a sidechain.
-			// The importer will put together a new list of blocks to import, which is a superset
+			// The importer will put togsdcer a new list of blocks to import, which is a superset
 			// of the blocks delivered from the downloader, and the indexing will be off.
 			log.Debug("Downloaded item processing failed on sidechain import", "index", index, "err", err)
 		}
@@ -1795,7 +1795,7 @@ func (d *Downloader) DeliverSnapPacket(peer *snap.Peer, packet snap.Packet) erro
 }
 
 // readHeaderRange returns a list of headers, using the given last header as the base,
-// and going backwards towards genesis. This method assumes that the caller already has
+// and going backwards towards genesis. This msdcod assumes that the caller already has
 // placed a reasonable cap on count.
 func (d *Downloader) readHeaderRange(last *types.Header, count int) []*types.Header {
 	var (
@@ -1803,7 +1803,7 @@ func (d *Downloader) readHeaderRange(last *types.Header, count int) []*types.Hea
 		headers []*types.Header
 	)
 	for {
-		parent := d.lightchain.GetHeaderByHash(current.ParentHash)
+		parent := d.lightchain.GsdceaderByHash(current.ParentHash)
 		if parent == nil {
 			break // The chain is not continuous, or the chain is exhausted
 		}

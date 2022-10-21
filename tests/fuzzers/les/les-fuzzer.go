@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -22,23 +22,23 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	l "github.com/ethereum/go-ethereum/les"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	l "github.com/sdcereum/go-sdcereum/les"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/trie"
 )
 
 var (
 	bankKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 	bankAddr   = crypto.PubkeyToAddress(bankKey.PublicKey)
-	bankFunds  = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
+	bankFunds  = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.sdcer))
 
 	testChainLen     = 256
 	testContractCode = common.Hex2Bytes("606060405260cc8060106000396000f360606040526000357c01000000000000000000000000000000000000000000000000000000009004806360cd2685146041578063c16431b914606b57603f565b005b6055600480803590602001909190505060a9565b6040518082815260200191505060405180910390f35b60886004808035906020019091908035906020019091905050608a565b005b80600060005083606481101560025790900160005b50819055505b5050565b6000600060005082606481101560025790900160005b5054905060c7565b91905056")
@@ -60,7 +60,7 @@ func makechain() (bc *core.BlockChain, addrHashes, txHashes []common.Hash) {
 		GasLimit: 100000000,
 	}
 	signer := types.HomesteadSigner{}
-	_, blocks, _ := core.GenerateChainWithGenesis(gspec, ethash.NewFaker(), testChainLen,
+	_, blocks, _ := core.GenerateChainWithGenesis(gspec, sdcash.NewFaker(), testChainLen,
 		func(i int, gen *core.BlockGen) {
 			var (
 				tx   *types.Transaction
@@ -78,7 +78,7 @@ func makechain() (bc *core.BlockChain, addrHashes, txHashes []common.Hash) {
 			addrHashes = append(addrHashes, crypto.Keccak256Hash(addr[:]))
 			txHashes = append(txHashes, tx.Hash())
 		})
-	bc, _ = core.NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+	bc, _ = core.NewBlockChain(rawdb.NewMemoryDatabase(), nil, gspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 	if _, err := bc.InsertChain(blocks); err != nil {
 		panic(err)
 	}
@@ -241,7 +241,7 @@ func (f *fuzzer) AddTxsSync() bool {
 	return false
 }
 
-func (f *fuzzer) GetHelperTrie(typ uint, index uint64) *trie.Trie {
+func (f *fuzzer) GsdcelperTrie(typ uint, index uint64) *trie.Trie {
 	if typ == 0 {
 		return f.chtTrie
 	} else if typ == 1 {
@@ -344,7 +344,7 @@ func Fuzz(input []byte) int {
 			f.doFuzz(l.GetProofsV2Msg, req)
 
 		case 5:
-			req := &l.GetHelperTrieProofsPacket{Reqs: make([]l.HelperTrieReq, f.randomInt(l.MaxHelperTrieProofsFetch+1))}
+			req := &l.GsdcelperTrieProofsPacket{Reqs: make([]l.HelperTrieReq, f.randomInt(l.MaxHelperTrieProofsFetch+1))}
 			for i := range req.Reqs {
 				switch f.randomInt(3) {
 				case 0:
@@ -376,7 +376,7 @@ func Fuzz(input []byte) int {
 					}
 				}
 			}
-			f.doFuzz(l.GetHelperTrieProofsMsg, req)
+			f.doFuzz(l.GsdcelperTrieProofsMsg, req)
 
 		case 6:
 			req := &l.SendTxPacket{Txs: make([]*types.Transaction, f.randomInt(l.MaxTxSend+1))}

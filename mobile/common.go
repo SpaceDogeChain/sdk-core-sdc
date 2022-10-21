@@ -1,22 +1,22 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains all the wrappers from the common package.
 
-package geth
+package gsdc
 
 import (
 	"encoding/hex"
@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
@@ -45,7 +45,7 @@ func NewHashFromBytes(binary []byte) (hash *Hash, _ error) {
 // NewHashFromHex converts a hex string to a hash value.
 func NewHashFromHex(hex string) (hash *Hash, _ error) {
 	h := new(Hash)
-	if err := h.SetHex(hex); err != nil {
+	if err := h.Ssdcex(hex); err != nil {
 		return nil, err
 	}
 	return h, nil
@@ -65,8 +65,8 @@ func (h *Hash) GetBytes() []byte {
 	return h.hash[:]
 }
 
-// SetHex sets the specified hex string as the hash value.
-func (h *Hash) SetHex(hash string) error {
+// Ssdcex sets the specified hex string as the hash value.
+func (h *Hash) Ssdcex(hash string) error {
 	hash = strings.ToLower(hash)
 	if len(hash) >= 2 && hash[:2] == "0x" {
 		hash = hash[2:]
@@ -82,14 +82,14 @@ func (h *Hash) SetHex(hash string) error {
 	return nil
 }
 
-// GetHex retrieves the hex string representation of the hash.
-func (h *Hash) GetHex() string {
+// Gsdcex retrieves the hex string representation of the hash.
+func (h *Hash) Gsdcex() string {
 	return h.hash.Hex()
 }
 
 // String implements Stringer interface for printable representation of the hash.
 func (h *Hash) String() string {
-	return h.GetHex()
+	return h.Gsdcex()
 }
 
 // Hashes represents a slice of hashes.
@@ -134,7 +134,7 @@ func (h *Hashes) Append(hash *Hash) {
 	h.hashes = append(h.hashes, hash.hash)
 }
 
-// Address represents the 20 byte address of an Ethereum account.
+// Address represents the 20 byte address of an sdcereum account.
 type Address struct {
 	address common.Address
 }
@@ -151,7 +151,7 @@ func NewAddressFromBytes(binary []byte) (address *Address, _ error) {
 // NewAddressFromHex converts a hex string to a address value.
 func NewAddressFromHex(hex string) (address *Address, _ error) {
 	a := new(Address)
-	if err := a.SetHex(hex); err != nil {
+	if err := a.Ssdcex(hex); err != nil {
 		return nil, err
 	}
 	return a, nil
@@ -171,8 +171,8 @@ func (a *Address) GetBytes() []byte {
 	return a.address[:]
 }
 
-// SetHex sets the specified hex string as the address value.
-func (a *Address) SetHex(address string) error {
+// Ssdcex sets the specified hex string as the address value.
+func (a *Address) Ssdcex(address string) error {
 	address = strings.ToLower(address)
 	if len(address) >= 2 && address[:2] == "0x" {
 		address = address[2:]
@@ -188,14 +188,14 @@ func (a *Address) SetHex(address string) error {
 	return nil
 }
 
-// GetHex retrieves the hex string representation of the address.
-func (a *Address) GetHex() string {
+// Gsdcex retrieves the hex string representation of the address.
+func (a *Address) Gsdcex() string {
 	return a.address.Hex()
 }
 
 // String returns a printable representation of the address.
 func (a *Address) String() string {
-	return a.GetHex()
+	return a.Gsdcex()
 }
 
 // Addresses represents a slice of addresses.

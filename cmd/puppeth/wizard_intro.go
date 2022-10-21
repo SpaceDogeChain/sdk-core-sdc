@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2017 The go-spacedogechain Authors
+// This file is part of go-spacedogechain.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-spacedogechain is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-spacedogechain is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-spacedogechain. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/spacedogechain/go-spacedogechain/log"
 )
 
 // makeWizard creates and returns a new puppeth wizard.
@@ -39,12 +39,12 @@ func makeWizard(network string) *wizard {
 }
 
 // run displays some useful infos to the user, starting on the journey of
-// setting up a new or managing an existing Ethereum private network.
+// setting up a new or managing an existing spacedogechain private network.
 func (w *wizard) run() {
 	fmt.Println("+-----------------------------------------------------------+")
-	fmt.Println("| Welcome to puppeth, your Ethereum private network manager |")
+	fmt.Println("| Welcome to puppeth, your spacedogechain private network manager |")
 	fmt.Println("|                                                           |")
-	fmt.Println("| This tool lets you create a new Ethereum network down to  |")
+	fmt.Println("| This tool lets you create a new spacedogechain network down to  |")
 	fmt.Println("| the genesis block, bootnodes, miners and ethstats servers |")
 	fmt.Println("| without the hassle that it would normally entail.         |")
 	fmt.Println("|                                                           |")
@@ -67,7 +67,7 @@ func (w *wizard) run() {
 			log.Error("I also like to live dangerously, still no spaces, hyphens or capital letters")
 		}
 	}
-	log.Info("Administering Ethereum network", "name", w.network)
+	log.Info("Administering spacedogechain network", "name", w.network)
 
 	// Load initial configurations and connect to all live servers
 	w.conf.path = filepath.Join(os.Getenv("HOME"), ".puppeth", w.network)

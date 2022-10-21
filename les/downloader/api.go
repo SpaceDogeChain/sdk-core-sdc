@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package downloader
 
@@ -20,13 +20,13 @@ import (
 	"context"
 	"sync"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 // DownloaderAPI provides an API which gives information about the current synchronisation status.
-// It offers only methods that operates on data that can be available to anyone without security risks.
+// It offers only msdcods that operates on data that can be available to anyone without security risks.
 type DownloaderAPI struct {
 	d                         *Downloader
 	mux                       *event.TypeMux
@@ -89,7 +89,7 @@ func (api *DownloaderAPI) eventLoop() {
 	}
 }
 
-// Syncing provides information when this nodes starts synchronising with the Ethereum network and when it's finished.
+// Syncing provides information when this nodes starts synchronising with the sdcereum network and when it's finished.
 func (api *DownloaderAPI) Syncing(ctx context.Context) (*rpc.Subscription, error) {
 	notifier, supported := rpc.NotifierFromContext(ctx)
 	if !supported {
@@ -122,7 +122,7 @@ func (api *DownloaderAPI) Syncing(ctx context.Context) (*rpc.Subscription, error
 // SyncingResult provides information about the current synchronisation status for this node.
 type SyncingResult struct {
 	Syncing bool                  `json:"syncing"`
-	Status  ethereum.SyncProgress `json:"status"`
+	Status  sdcereum.SyncProgress `json:"status"`
 }
 
 // uninstallSyncSubscriptionRequest uninstalls a syncing subscription in the API event loop.
@@ -140,7 +140,7 @@ type SyncStatusSubscription struct {
 
 // Unsubscribe uninstalls the subscription from the DownloadAPI event loop.
 // The status channel that was passed to subscribeSyncStatus isn't used anymore
-// after this method returns.
+// after this msdcod returns.
 func (s *SyncStatusSubscription) Unsubscribe() {
 	s.unsubOnce.Do(func() {
 		req := uninstallSyncSubscriptionRequest{s.c, make(chan interface{})}

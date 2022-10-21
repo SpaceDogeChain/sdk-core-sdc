@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains a batch of utility type declarations used by the tests. As the node
 // operates on unique types, a lot of them are needed to check various features.
@@ -20,8 +20,8 @@
 package node
 
 import (
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 // NoopLifecycle is a trivial implementation of the Service interface.
@@ -35,12 +35,12 @@ func NewNoop() *Noop {
 	return noop
 }
 
-// Set of services all wrapping the base NoopLifecycle resulting in the same method
+// Set of services all wrapping the base NoopLifecycle resulting in the same msdcod
 // signatures but different outer types.
 type Noop struct{ NoopLifecycle }
 
 // InstrumentedService is an implementation of Lifecycle for which all interface
-// methods can be instrumented both return value as well as event hook wise.
+// msdcods can be instrumented both return value as well as event hook wise.
 type InstrumentedService struct {
 	start error
 	stop  error

@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package abi
 
@@ -21,7 +21,7 @@ import (
 	"testing"
 )
 
-const methoddata = `
+const msdcoddata = `
 [
 	{"type": "function", "name": "balance", "stateMutability": "view"},
 	{"type": "function", "name": "send", "inputs": [{ "name": "amount", "type": "uint256" }]},
@@ -34,62 +34,62 @@ const methoddata = `
 	{"stateMutability":"payable","type":"receive"}
 ]`
 
-func TestMethodString(t *testing.T) {
+func TestMsdcodString(t *testing.T) {
 	var table = []struct {
-		method      string
+		msdcod      string
 		expectation string
 	}{
 		{
-			method:      "balance",
+			msdcod:      "balance",
 			expectation: "function balance() view returns()",
 		},
 		{
-			method:      "send",
+			msdcod:      "send",
 			expectation: "function send(uint256 amount) returns()",
 		},
 		{
-			method:      "transfer",
+			msdcod:      "transfer",
 			expectation: "function transfer(address from, address to, uint256 value) returns(bool success)",
 		},
 		{
-			method:      "tuple",
+			msdcod:      "tuple",
 			expectation: "function tuple((uint256,uint256) a) returns()",
 		},
 		{
-			method:      "tupleArray",
+			msdcod:      "tupleArray",
 			expectation: "function tupleArray((uint256,uint256)[5] a) returns()",
 		},
 		{
-			method:      "tupleSlice",
+			msdcod:      "tupleSlice",
 			expectation: "function tupleSlice((uint256,uint256)[] a) returns()",
 		},
 		{
-			method:      "complexTuple",
+			msdcod:      "complexTuple",
 			expectation: "function complexTuple((uint256,uint256)[5][] a) returns()",
 		},
 		{
-			method:      "fallback",
+			msdcod:      "fallback",
 			expectation: "fallback() returns()",
 		},
 		{
-			method:      "receive",
+			msdcod:      "receive",
 			expectation: "receive() payable returns()",
 		},
 	}
 
-	abi, err := JSON(strings.NewReader(methoddata))
+	abi, err := JSON(strings.NewReader(msdcoddata))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, test := range table {
 		var got string
-		if test.method == "fallback" {
+		if test.msdcod == "fallback" {
 			got = abi.Fallback.String()
-		} else if test.method == "receive" {
+		} else if test.msdcod == "receive" {
 			got = abi.Receive.String()
 		} else {
-			got = abi.Methods[test.method].String()
+			got = abi.Msdcods[test.msdcod].String()
 		}
 		if got != test.expectation {
 			t.Errorf("expected string to be %s, got %s", test.expectation, got)
@@ -97,47 +97,47 @@ func TestMethodString(t *testing.T) {
 	}
 }
 
-func TestMethodSig(t *testing.T) {
+func TestMsdcodSig(t *testing.T) {
 	var cases = []struct {
-		method string
+		msdcod string
 		expect string
 	}{
 		{
-			method: "balance",
+			msdcod: "balance",
 			expect: "balance()",
 		},
 		{
-			method: "send",
+			msdcod: "send",
 			expect: "send(uint256)",
 		},
 		{
-			method: "transfer",
+			msdcod: "transfer",
 			expect: "transfer(address,address,uint256)",
 		},
 		{
-			method: "tuple",
+			msdcod: "tuple",
 			expect: "tuple((uint256,uint256))",
 		},
 		{
-			method: "tupleArray",
+			msdcod: "tupleArray",
 			expect: "tupleArray((uint256,uint256)[5])",
 		},
 		{
-			method: "tupleSlice",
+			msdcod: "tupleSlice",
 			expect: "tupleSlice((uint256,uint256)[])",
 		},
 		{
-			method: "complexTuple",
+			msdcod: "complexTuple",
 			expect: "complexTuple((uint256,uint256)[5][])",
 		},
 	}
-	abi, err := JSON(strings.NewReader(methoddata))
+	abi, err := JSON(strings.NewReader(msdcoddata))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, test := range cases {
-		got := abi.Methods[test.method].Sig
+		got := abi.Msdcods[test.msdcod].Sig
 		if got != test.expect {
 			t.Errorf("expected string to be %s, got %s", test.expect, got)
 		}

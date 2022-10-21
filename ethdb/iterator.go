@@ -1,32 +1,32 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ethdb
+package sdcdb
 
 // Iterator iterates over a database's key/value pairs in ascending key order.
 //
 // When it encounters an error any seek will return false and will yield no key/
-// value pairs. The error can be queried by calling the Error method. Calling
+// value pairs. The error can be queried by calling the Error msdcod. Calling
 // Release is still necessary.
 //
 // An iterator must be released after use, but it is not necessary to read an
 // iterator until exhaustion. An iterator is not safe for concurrent use, but it
 // is safe to use multiple iterators concurrently.
 type Iterator interface {
-	// Next moves the iterator to the next key/value pair. It returns whether the
+	// Next moves the iterator to the next key/value pair. It returns whsdcer the
 	// iterator is exhausted.
 	Next() bool
 
@@ -49,13 +49,13 @@ type Iterator interface {
 	Release()
 }
 
-// Iteratee wraps the NewIterator methods of a backing data store.
+// Iteratee wraps the NewIterator msdcods of a backing data store.
 type Iteratee interface {
 	// NewIterator creates a binary-alphabetical iterator over a subset
 	// of database content with a particular key prefix, starting at a particular
 	// initial key (or after, if it does not exist).
 	//
-	// Note: This method assumes that the prefix is NOT part of the start, so there's
+	// Note: This msdcod assumes that the prefix is NOT part of the start, so there's
 	// no need for the caller to prepend the prefix to the start
 	NewIterator(prefix []byte, start []byte) Iterator
 }

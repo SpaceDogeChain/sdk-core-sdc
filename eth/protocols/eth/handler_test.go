@@ -1,20 +1,20 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package sdc
 
 import (
 	"math"
@@ -22,33 +22,33 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdcdb"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 var (
 	// testKey is a private key to use for funding a tester account.
 	testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 
-	// testAddr is the Ethereum address of the tester account.
+	// testAddr is the sdcereum address of the tester account.
 	testAddr = crypto.PubkeyToAddress(testKey.PublicKey)
 )
 
-// testBackend is a mock implementation of the live Ethereum message handler. Its
+// testBackend is a mock implementation of the live sdcereum message handler. Its
 // purpose is to allow testing the request/reply workflows and wire serialization
-// in the `eth` protocol without actually doing any data processing.
+// in the `sdc` protocol without actually doing any data processing.
 type testBackend struct {
-	db     ethdb.Database
+	db     sdcdb.Database
 	chain  *core.BlockChain
 	txpool *core.TxPool
 }
@@ -67,9 +67,9 @@ func newTestBackendWithGenerator(blocks int, generator func(int, *core.BlockGen)
 		Config: params.TestChainConfig,
 		Alloc:  core.GenesisAlloc{testAddr: {Balance: big.NewInt(100_000_000_000_000_000)}},
 	}
-	chain, _ := core.NewBlockChain(db, nil, gspec, nil, ethash.NewFaker(), vm.Config{}, nil, nil)
+	chain, _ := core.NewBlockChain(db, nil, gspec, nil, sdcash.NewFaker(), vm.Config{}, nil, nil)
 
-	_, bs, _ := core.GenerateChainWithGenesis(gspec, ethash.NewFaker(), blocks, generator)
+	_, bs, _ := core.GenerateChainWithGenesis(gspec, sdcash.NewFaker(), blocks, generator)
 	if _, err := chain.InsertChain(bs); err != nil {
 		panic(err)
 	}
@@ -110,7 +110,7 @@ func (b *testBackend) Handle(*Peer, Packet) error {
 }
 
 // Tests that block headers can be retrieved from a remote chain based on user queries.
-func TestGetBlockHeaders66(t *testing.T) { testGetBlockHeaders(t, ETH66) }
+func TestGetBlockHeaders66(t *testing.T) { testGetBlockHeaders(t, sdc66) }
 
 func testGetBlockHeaders(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -126,7 +126,7 @@ func testGetBlockHeaders(t *testing.T, protocol uint) {
 	for i := range unknown {
 		unknown[i] = byte(i)
 	}
-	getHashes := func(from, limit uint64) (hashes []common.Hash) {
+	gsdcashes := func(from, limit uint64) (hashes []common.Hash) {
 		for i := uint64(0); i < limit; i++ {
 			hashes = append(hashes, backend.chain.GetCanonicalHash(from-1-i))
 		}
@@ -196,7 +196,7 @@ func testGetBlockHeaders(t *testing.T, protocol uint) {
 		// Ensure protocol limits are honored
 		{
 			&GetBlockHeadersPacket{Origin: HashOrNumber{Number: backend.chain.CurrentBlock().NumberU64() - 1}, Amount: limit + 10, Reverse: true},
-			getHashes(backend.chain.CurrentBlock().NumberU64(), limit),
+			gsdcashes(backend.chain.CurrentBlock().NumberU64(), limit),
 		},
 		// Check that requesting more than available is handled gracefully
 		{
@@ -295,7 +295,7 @@ func testGetBlockHeaders(t *testing.T, protocol uint) {
 }
 
 // Tests that block contents can be retrieved from a remote chain based on their hashes.
-func TestGetBlockBodies66(t *testing.T) { testGetBlockBodies(t, ETH66) }
+func TestGetBlockBodies66(t *testing.T) { testGetBlockBodies(t, sdc66) }
 
 func testGetBlockBodies(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -378,7 +378,7 @@ func testGetBlockBodies(t *testing.T, protocol uint) {
 }
 
 // Tests that the state trie nodes can be retrieved based on hashes.
-func TestGetNodeData66(t *testing.T) { testGetNodeData(t, ETH66) }
+func TestGetNodeData66(t *testing.T) { testGetNodeData(t, sdc66) }
 
 func testGetNodeData(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -394,11 +394,11 @@ func testGetNodeData(t *testing.T, protocol uint) {
 	generator := func(i int, block *core.BlockGen) {
 		switch i {
 		case 0:
-			// In block 1, the test bank sends account #1 some ether.
+			// In block 1, the test bank sends account #1 some sdcer.
 			tx, _ := types.SignTx(types.NewTransaction(block.TxNonce(testAddr), acc1Addr, big.NewInt(10_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, testKey)
 			block.AddTx(tx)
 		case 1:
-			// In block 2, the test bank sends some more ether to account #1.
+			// In block 2, the test bank sends some more sdcer to account #1.
 			// acc1Addr passes it on to account #2.
 			tx1, _ := types.SignTx(types.NewTransaction(block.TxNonce(testAddr), acc1Addr, big.NewInt(1_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, testKey)
 			tx2, _ := types.SignTx(types.NewTransaction(block.TxNonce(acc1Addr), acc2Addr, big.NewInt(1_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, acc1Key)
@@ -466,7 +466,7 @@ func testGetNodeData(t *testing.T, protocol uint) {
 		rawdb.WriteTrieNode(reconstructDB, hashes[i], data[i])
 	}
 
-	// Sanity check whether all state matches.
+	// Sanity check whsdcer all state matches.
 	accounts := []common.Address{testAddr, acc1Addr, acc2Addr}
 	for i := uint64(0); i <= backend.chain.CurrentBlock().NumberU64(); i++ {
 		root := backend.chain.GetBlockByNumber(i).Root()
@@ -487,7 +487,7 @@ func testGetNodeData(t *testing.T, protocol uint) {
 }
 
 // Tests that the transaction receipts can be retrieved based on hashes.
-func TestGetBlockReceipts66(t *testing.T) { testGetBlockReceipts(t, ETH66) }
+func TestGetBlockReceipts66(t *testing.T) { testGetBlockReceipts(t, sdc66) }
 
 func testGetBlockReceipts(t *testing.T, protocol uint) {
 	t.Parallel()
@@ -503,11 +503,11 @@ func testGetBlockReceipts(t *testing.T, protocol uint) {
 	generator := func(i int, block *core.BlockGen) {
 		switch i {
 		case 0:
-			// In block 1, the test bank sends account #1 some ether.
+			// In block 1, the test bank sends account #1 some sdcer.
 			tx, _ := types.SignTx(types.NewTransaction(block.TxNonce(testAddr), acc1Addr, big.NewInt(10_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, testKey)
 			block.AddTx(tx)
 		case 1:
-			// In block 2, the test bank sends some more ether to account #1.
+			// In block 2, the test bank sends some more sdcer to account #1.
 			// acc1Addr passes it on to account #2.
 			tx1, _ := types.SignTx(types.NewTransaction(block.TxNonce(testAddr), acc1Addr, big.NewInt(1_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, testKey)
 			tx2, _ := types.SignTx(types.NewTransaction(block.TxNonce(acc1Addr), acc2Addr, big.NewInt(1_000_000_000_000_000), params.TxGas, block.BaseFee(), nil), signer, acc1Key)

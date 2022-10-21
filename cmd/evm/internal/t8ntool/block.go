@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of go-sdcereum.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-sdcereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-sdcereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-sdcereum. If not, see <http://www.gnu.org/licenses/>.
 
 package t8ntool
 
@@ -24,15 +24,15 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/consensus/clique"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rlp"
 	"github.com/urfave/cli/v2"
 )
 
@@ -72,9 +72,9 @@ type bbInput struct {
 	TxRlp     string       `json:"txs,omitempty"`
 	Clique    *cliqueInput `json:"clique,omitempty"`
 
-	Ethash    bool                 `json:"-"`
-	EthashDir string               `json:"-"`
-	PowMode   ethash.Mode          `json:"-"`
+	sdcash    bool                 `json:"-"`
+	sdcashDir string               `json:"-"`
+	PowMode   sdcash.Mode          `json:"-"`
 	Txs       []*types.Transaction `json:"-"`
 	Ommers    []*types.Header      `json:"-"`
 }
@@ -159,8 +159,8 @@ func (i *bbInput) ToBlock() *types.Block {
 // SealBlock seals the given block using the configured engine.
 func (i *bbInput) SealBlock(block *types.Block) (*types.Block, error) {
 	switch {
-	case i.Ethash:
-		return i.sealEthash(block)
+	case i.sdcash:
+		return i.sealsdcash(block)
 	case i.Clique != nil:
 		return i.sealClique(block)
 	default:
@@ -168,21 +168,21 @@ func (i *bbInput) SealBlock(block *types.Block) (*types.Block, error) {
 	}
 }
 
-// sealEthash seals the given block using ethash.
-func (i *bbInput) sealEthash(block *types.Block) (*types.Block, error) {
+// sealsdcash seals the given block using sdcash.
+func (i *bbInput) sealsdcash(block *types.Block) (*types.Block, error) {
 	if i.Header.Nonce != nil {
-		return nil, NewError(ErrorConfig, fmt.Errorf("sealing with ethash will overwrite provided nonce"))
+		return nil, NewError(ErrorConfig, fmt.Errorf("sealing with sdcash will overwrite provided nonce"))
 	}
-	ethashConfig := ethash.Config{
+	sdcashConfig := sdcash.Config{
 		PowMode:        i.PowMode,
-		DatasetDir:     i.EthashDir,
-		CacheDir:       i.EthashDir,
+		DatasetDir:     i.sdcashDir,
+		CacheDir:       i.sdcashDir,
 		DatasetsInMem:  1,
 		DatasetsOnDisk: 2,
 		CachesInMem:    2,
 		CachesOnDisk:   3,
 	}
-	engine := ethash.New(ethashConfig, nil, true)
+	engine := sdcash.New(sdcashConfig, nil, true)
 	defer engine.Close()
 	// Use a buffered chan for results.
 	// If the testmode is used, the sealer will return quickly, and complain
@@ -236,10 +236,10 @@ func (i *bbInput) sealClique(block *types.Block) (*types.Block, error) {
 
 // BuildBlock constructs a block from the given inputs.
 func BuildBlock(ctx *cli.Context) error {
-	// Configure the go-ethereum logger
+	// Configure the go-sdcereum logger
 	glogger := log.NewGlogHandler(log.StreamHandler(os.Stderr, log.TerminalFormat(false)))
 	glogger.Verbosity(log.Lvl(ctx.Int(VerbosityFlag.Name)))
-	log.Root().SetHandler(glogger)
+	log.Root().Ssdcandler(glogger)
 
 	baseDir, err := createBasedir(ctx)
 	if err != nil {
@@ -263,26 +263,26 @@ func readInput(ctx *cli.Context) (*bbInput, error) {
 		ommersStr  = ctx.String(InputOmmersFlag.Name)
 		txsStr     = ctx.String(InputTxsRlpFlag.Name)
 		cliqueStr  = ctx.String(SealCliqueFlag.Name)
-		ethashOn   = ctx.Bool(SealEthashFlag.Name)
-		ethashDir  = ctx.String(SealEthashDirFlag.Name)
-		ethashMode = ctx.String(SealEthashModeFlag.Name)
+		sdcashOn   = ctx.Bool(SealsdcashFlag.Name)
+		sdcashDir  = ctx.String(SealsdcashDirFlag.Name)
+		sdcashMode = ctx.String(SealsdcashModeFlag.Name)
 		inputData  = &bbInput{}
 	)
-	if ethashOn && cliqueStr != "" {
-		return nil, NewError(ErrorConfig, fmt.Errorf("both ethash and clique sealing specified, only one may be chosen"))
+	if sdcashOn && cliqueStr != "" {
+		return nil, NewError(ErrorConfig, fmt.Errorf("both sdcash and clique sealing specified, only one may be chosen"))
 	}
-	if ethashOn {
-		inputData.Ethash = ethashOn
-		inputData.EthashDir = ethashDir
-		switch ethashMode {
+	if sdcashOn {
+		inputData.sdcash = sdcashOn
+		inputData.sdcashDir = sdcashDir
+		switch sdcashMode {
 		case "normal":
-			inputData.PowMode = ethash.ModeNormal
+			inputData.PowMode = sdcash.ModeNormal
 		case "test":
-			inputData.PowMode = ethash.ModeTest
+			inputData.PowMode = sdcash.ModeTest
 		case "fake":
-			inputData.PowMode = ethash.ModeFake
+			inputData.PowMode = sdcash.ModeFake
 		default:
-			return nil, NewError(ErrorConfig, fmt.Errorf("unknown pow mode: %s, supported modes: test, fake, normal", ethashMode))
+			return nil, NewError(ErrorConfig, fmt.Errorf("unknown pow mode: %s, supported modes: test, fake, normal", sdcashMode))
 		}
 	}
 	if headerStr == stdinSelector || ommersStr == stdinSelector || txsStr == stdinSelector || cliqueStr == stdinSelector {

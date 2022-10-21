@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package simulations
 
@@ -29,13 +29,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/event"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/p2p/simulations/adapters"
+	"github.com/sdcereum/go-sdcereum/rpc"
 	"github.com/mattn/go-colorable"
 )
 
@@ -44,7 +44,7 @@ func TestMain(m *testing.M) {
 
 	flag.Parse()
 	log.PrintOrigins(true)
-	log.Root().SetHandler(log.LvlFilterHandler(log.Lvl(*loglevel), log.StreamHandler(colorable.NewColorableStderr(), log.TerminalFormat(true))))
+	log.Root().Ssdcandler(log.LvlFilterHandler(log.Lvl(*loglevel), log.StreamHandler(colorable.NewColorableStderr(), log.TerminalFormat(true))))
 	os.Exit(m.Run())
 }
 
@@ -529,7 +529,7 @@ func (t *expectEvents) expect(events ...*Event) {
 	}
 }
 
-// TestHTTPNodeRPC tests calling RPC methods on nodes via the HTTP API
+// TestHTTPNodeRPC tests calling RPC msdcods on nodes via the HTTP API
 func TestHTTPNodeRPC(t *testing.T) {
 	// start the server
 	_, s := testHTTPServer(t)
@@ -567,13 +567,13 @@ func TestHTTPNodeRPC(t *testing.T) {
 	}
 	defer sub.Unsubscribe()
 
-	// call some RPC methods using client 2
+	// call some RPC msdcods using client 2
 	if err := rpcClient2.CallContext(ctx, nil, "test_add", 10); err != nil {
-		t.Fatalf("error calling RPC method: %s", err)
+		t.Fatalf("error calling RPC msdcod: %s", err)
 	}
 	var result int64
 	if err := rpcClient2.CallContext(ctx, &result, "test_get"); err != nil {
-		t.Fatalf("error calling RPC method: %s", err)
+		t.Fatalf("error calling RPC msdcod: %s", err)
 	}
 	if result != 10 {
 		t.Fatalf("expected result to be 10, got %d", result)

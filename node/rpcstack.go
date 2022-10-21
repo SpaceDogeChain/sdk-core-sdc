@@ -1,18 +1,18 @@
-// Copyright 2020 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2020 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package node
 
@@ -29,8 +29,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/rpc"
 	"github.com/rs/cors"
 )
 
@@ -217,7 +217,7 @@ func (h *httpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
 
-// checkPath checks whether a given request URL matches a given path prefix.
+// checkPath checks whsdcer a given request URL matches a given path prefix.
 func checkPath(r *http.Request, path string) bool {
 	// if no prefix has been specified, request URL must be on root
 	if path == "" {
@@ -331,7 +331,7 @@ func (h *httpServer) enableWS(apis []rpc.API, config wsConfig) error {
 	}
 	h.wsConfig = config
 	h.wsHandler.Store(&rpcHandler{
-		Handler: NewWSHandlerStack(srv.WebsocketHandler(config.Origins), config.jwtSecret),
+		Handler: NewWSHandlerStack(srv.Websocksdcandler(config.Origins), config.jwtSecret),
 		server:  srv,
 	})
 	return nil
@@ -401,7 +401,7 @@ func newCorsHandler(srv http.Handler, allowedOrigins []string) http.Handler {
 	}
 	c := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
-		AllowedMethods: []string{http.MethodPost, http.MethodGet},
+		AllowedMsdcods: []string{http.MsdcodPost, http.MsdcodGet},
 		AllowedHeaders: []string{"*"},
 		MaxAge:         600,
 	})

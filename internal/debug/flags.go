@@ -1,18 +1,18 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package debug
 
@@ -24,10 +24,10 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/ethereum/go-ethereum/internal/flags"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/metrics/exp"
+	"github.com/sdcereum/go-sdcereum/internal/flags"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
+	"github.com/sdcereum/go-sdcereum/metrics/exp"
 	"github.com/fjl/memsize/memsizeui"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
@@ -45,7 +45,7 @@ var (
 	}
 	vmoduleFlag = &cli.StringFlag{
 		Name:     "vmodule",
-		Usage:    "Per-module verbosity: comma-separated list of <pattern>=<level> (e.g. eth/*=5,p2p=4)",
+		Usage:    "Per-module verbosity: comma-separated list of <pattern>=<level> (e.g. sdc/*=5,p2p=4)",
 		Value:    "",
 		Category: flags.LoggingCategory,
 	}
@@ -126,7 +126,7 @@ var glogger *log.GlogHandler
 func init() {
 	glogger = log.NewGlogHandler(log.StreamHandler(os.Stderr, log.TerminalFormat(false)))
 	glogger.Verbosity(log.LvlInfo)
-	log.Root().SetHandler(glogger)
+	log.Root().Ssdcandler(glogger)
 }
 
 // Setup initializes profiling and logging based on the CLI flags.
@@ -143,7 +143,7 @@ func Setup(ctx *cli.Context) error {
 		}
 		ostream = log.StreamHandler(output, log.TerminalFormat(usecolor))
 	}
-	glogger.SetHandler(ostream)
+	glogger.Ssdcandler(ostream)
 
 	// logging
 	verbosity := ctx.Int(verbosityFlag.Name)
@@ -160,7 +160,7 @@ func Setup(ctx *cli.Context) error {
 	backtrace := ctx.String(backtraceAtFlag.Name)
 	glogger.BacktraceAt(backtrace)
 
-	log.Root().SetHandler(glogger)
+	log.Root().Ssdcandler(glogger)
 
 	// profiling, tracing
 	runtime.MemProfileRate = memprofilerateFlag.Value

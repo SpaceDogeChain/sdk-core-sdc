@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package abi
 
@@ -27,7 +27,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/sdcereum/go-sdcereum/common"
 )
 
 // TestPack tests the general pack/unpack tests in packing_test.go
@@ -38,13 +38,13 @@ func TestPack(t *testing.T) {
 			if err != nil {
 				t.Fatalf("invalid hex %s: %v", test.packed, err)
 			}
-			inDef := fmt.Sprintf(`[{ "name" : "method", "type": "function", "inputs": %s}]`, test.def)
+			inDef := fmt.Sprintf(`[{ "name" : "msdcod", "type": "function", "inputs": %s}]`, test.def)
 			inAbi, err := JSON(strings.NewReader(inDef))
 			if err != nil {
 				t.Fatalf("invalid ABI definition %s, %v", inDef, err)
 			}
 			var packed []byte
-			packed, err = inAbi.Pack("method", test.unpacked)
+			packed, err = inAbi.Pack("msdcod", test.unpacked)
 
 			if err != nil {
 				t.Fatalf("test %d (%v) failed: %v", i, test.def, err)
@@ -56,13 +56,13 @@ func TestPack(t *testing.T) {
 	}
 }
 
-func TestMethodPack(t *testing.T) {
+func TestMsdcodPack(t *testing.T) {
 	abi, err := JSON(strings.NewReader(jsondata))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	sig := abi.Methods["slice"].ID
+	sig := abi.Msdcods["slice"].ID
 	sig = append(sig, common.LeftPadBytes([]byte{1}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{2}, 32)...)
 
@@ -76,7 +76,7 @@ func TestMethodPack(t *testing.T) {
 	}
 
 	var addrA, addrB = common.Address{1}, common.Address{2}
-	sig = abi.Methods["sliceAddress"].ID
+	sig = abi.Msdcods["sliceAddress"].ID
 	sig = append(sig, common.LeftPadBytes([]byte{32}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{2}, 32)...)
 	sig = append(sig, common.LeftPadBytes(addrA[:], 32)...)
@@ -91,7 +91,7 @@ func TestMethodPack(t *testing.T) {
 	}
 
 	var addrC, addrD = common.Address{3}, common.Address{4}
-	sig = abi.Methods["sliceMultiAddress"].ID
+	sig = abi.Msdcods["sliceMultiAddress"].ID
 	sig = append(sig, common.LeftPadBytes([]byte{64}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{160}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{2}, 32)...)
@@ -109,7 +109,7 @@ func TestMethodPack(t *testing.T) {
 		t.Errorf("expected %x got %x", sig, packed)
 	}
 
-	sig = abi.Methods["slice256"].ID
+	sig = abi.Msdcods["slice256"].ID
 	sig = append(sig, common.LeftPadBytes([]byte{1}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{2}, 32)...)
 
@@ -123,7 +123,7 @@ func TestMethodPack(t *testing.T) {
 	}
 
 	a := [2][2]*big.Int{{big.NewInt(1), big.NewInt(1)}, {big.NewInt(2), big.NewInt(0)}}
-	sig = abi.Methods["nestedArray"].ID
+	sig = abi.Msdcods["nestedArray"].ID
 	sig = append(sig, common.LeftPadBytes([]byte{1}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{1}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{2}, 32)...)
@@ -140,7 +140,7 @@ func TestMethodPack(t *testing.T) {
 		t.Errorf("expected %x got %x", sig, packed)
 	}
 
-	sig = abi.Methods["nestedArray2"].ID
+	sig = abi.Msdcods["nestedArray2"].ID
 	sig = append(sig, common.LeftPadBytes([]byte{0x20}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{0x40}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{0x80}, 32)...)
@@ -156,7 +156,7 @@ func TestMethodPack(t *testing.T) {
 		t.Errorf("expected %x got %x", sig, packed)
 	}
 
-	sig = abi.Methods["nestedSlice"].ID
+	sig = abi.Msdcods["nestedSlice"].ID
 	sig = append(sig, common.LeftPadBytes([]byte{0x20}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{0x02}, 32)...)
 	sig = append(sig, common.LeftPadBytes([]byte{0x40}, 32)...)

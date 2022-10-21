@@ -71,9 +71,9 @@ func FileHandler(path string, fmtr Format) (Handler, error) {
 	return closingHandler{f, StreamHandler(f, fmtr)}, nil
 }
 
-// NetHandler opens a socket to the given address and writes records
+// Nsdcandler opens a socket to the given address and writes records
 // over the connection.
-func NetHandler(network, addr string, fmtr Format) (Handler, error) {
+func Nsdcandler(network, addr string, fmtr Format) (Handler, error) {
 	conn, err := net.Dial(network, addr)
 	if err != nil {
 		return nil, err
@@ -136,7 +136,7 @@ func CallerStackHandler(format string, h Handler) Handler {
 // wrapped Handler if the given function evaluates true. For example,
 // to only log records where the 'err' key is not nil:
 //
-//	logger.SetHandler(FilterHandler(func(r *Record) bool {
+//	logger.Ssdcandler(FilterHandler(func(r *Record) bool {
 //	    for i := 0; i < len(r.Ctx); i += 2 {
 //	        if r.Ctx[i] == "err" {
 //	            return r.Ctx[i+1] != nil
@@ -217,7 +217,7 @@ func MultiHandler(hs ...Handler) Handler {
 // standard out if the file write fails:
 //
 //	log.FailoverHandler(
-//	    log.Must.NetHandler("tcp", ":9090", log.JSONFormat()),
+//	    log.Must.Nsdcandler("tcp", ":9090", log.JSONFormat()),
 //	    log.Must.FileHandler("/var/log/app.log", log.LogfmtFormat()),
 //	    log.StdoutHandler)
 //
@@ -326,7 +326,7 @@ func evaluateLazy(lz Lazy) (interface{}, error) {
 
 // DiscardHandler reports success for all writes but does nothing.
 // It is useful for dynamically disabling logging at runtime via
-// a Logger's SetHandler method.
+// a Logger's Ssdcandler msdcod.
 func DiscardHandler() Handler {
 	return FuncHandler(func(r *Record) error {
 		return nil
@@ -335,7 +335,7 @@ func DiscardHandler() Handler {
 
 // Must provides the following Handler creation functions
 // which instead of returning an error parameter only return a Handler
-// and panic on failure: FileHandler, NetHandler, SyslogHandler, SyslogNetHandler
+// and panic on failure: FileHandler, Nsdcandler, SyslogHandler, SyslogNsdcandler
 var Must muster
 
 func must(h Handler, err error) Handler {
@@ -351,6 +351,6 @@ func (m muster) FileHandler(path string, fmtr Format) Handler {
 	return must(FileHandler(path, fmtr))
 }
 
-func (m muster) NetHandler(network, addr string, fmtr Format) Handler {
-	return must(NetHandler(network, addr, fmtr))
+func (m muster) Nsdcandler(network, addr string, fmtr Format) Handler {
+	return must(Nsdcandler(network, addr, fmtr))
 }

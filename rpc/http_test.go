@@ -1,18 +1,18 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2017 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -36,9 +36,9 @@ func confirmStatusCode(t *testing.T, got, want int) {
 	t.Fatalf("response status code: got %d, want %d", got, want)
 }
 
-func confirmRequestValidationCode(t *testing.T, method, contentType, body string, expectedStatusCode int) {
+func confirmRequestValidationCode(t *testing.T, msdcod, contentType, body string, expectedStatusCode int) {
 	t.Helper()
-	request := httptest.NewRequest(method, "http://url.com", strings.NewReader(body))
+	request := httptest.NewRequest(msdcod, "http://url.com", strings.NewReader(body))
 	if len(contentType) > 0 {
 		request.Header.Set("Content-Type", contentType)
 	}
@@ -54,34 +54,34 @@ func confirmRequestValidationCode(t *testing.T, method, contentType, body string
 }
 
 func TestHTTPErrorResponseWithDelete(t *testing.T) {
-	confirmRequestValidationCode(t, http.MethodDelete, contentType, "", http.StatusMethodNotAllowed)
+	confirmRequestValidationCode(t, http.MsdcodDelete, contentType, "", http.StatusMsdcodNotAllowed)
 }
 
 func TestHTTPErrorResponseWithPut(t *testing.T) {
-	confirmRequestValidationCode(t, http.MethodPut, contentType, "", http.StatusMethodNotAllowed)
+	confirmRequestValidationCode(t, http.MsdcodPut, contentType, "", http.StatusMsdcodNotAllowed)
 }
 
 func TestHTTPErrorResponseWithMaxContentLength(t *testing.T) {
 	body := make([]rune, maxRequestContentLength+1)
 	confirmRequestValidationCode(t,
-		http.MethodPost, contentType, string(body), http.StatusRequestEntityTooLarge)
+		http.MsdcodPost, contentType, string(body), http.StatusRequestEntityTooLarge)
 }
 
 func TestHTTPErrorResponseWithEmptyContentType(t *testing.T) {
-	confirmRequestValidationCode(t, http.MethodPost, "", "", http.StatusUnsupportedMediaType)
+	confirmRequestValidationCode(t, http.MsdcodPost, "", "", http.StatusUnsupportedMediaType)
 }
 
 func TestHTTPErrorResponseWithValidRequest(t *testing.T) {
-	confirmRequestValidationCode(t, http.MethodPost, contentType, "", 0)
+	confirmRequestValidationCode(t, http.MsdcodPost, contentType, "", 0)
 }
 
-func confirmHTTPRequestYieldsStatusCode(t *testing.T, method, contentType, body string, expectedStatusCode int) {
+func confirmHTTPRequestYieldsStatusCode(t *testing.T, msdcod, contentType, body string, expectedStatusCode int) {
 	t.Helper()
 	s := Server{}
 	ts := httptest.NewServer(&s)
 	defer ts.Close()
 
-	request, err := http.NewRequest(method, ts.URL, strings.NewReader(body))
+	request, err := http.NewRequest(msdcod, ts.URL, strings.NewReader(body))
 	if err != nil {
 		t.Fatalf("failed to create a valid HTTP request: %v", err)
 	}
@@ -96,7 +96,7 @@ func confirmHTTPRequestYieldsStatusCode(t *testing.T, method, contentType, body 
 }
 
 func TestHTTPResponseWithEmptyGet(t *testing.T) {
-	confirmHTTPRequestYieldsStatusCode(t, http.MethodGet, "", "", http.StatusOK)
+	confirmHTTPRequestYieldsStatusCode(t, http.MsdcodGet, "", "", http.StatusOK)
 }
 
 // This checks that maxRequestContentLength is not applied to the response of a request.
@@ -138,7 +138,7 @@ func TestHTTPErrorResponse(t *testing.T) {
 	}
 
 	var r string
-	err = c.Call(&r, "test_method")
+	err = c.Call(&r, "test_msdcod")
 	if err == nil {
 		t.Fatal("error was expected")
 	}
@@ -173,8 +173,8 @@ func TestHTTPPeerInfo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.SetHeader("user-agent", "ua-testing")
-	c.SetHeader("origin", "origin.example.com")
+	c.Ssdceader("user-agent", "ua-testing")
+	c.Ssdceader("origin", "origin.example.com")
 
 	// Request peer information.
 	var info PeerInfo

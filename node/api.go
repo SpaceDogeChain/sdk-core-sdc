@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package node
 
@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/internal/debug"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/internal/debug"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/rpc"
 )
 
 // apis returns the collection of built-in RPC APIs.
@@ -46,7 +46,7 @@ func (n *Node) apis() []rpc.API {
 	}
 }
 
-// adminAPI is the collection of administrative API methods exposed over
+// adminAPI is the collection of administrative API msdcods exposed over
 // both secure and unsecure RPC channels.
 type adminAPI struct {
 	node *Node // Node interfaced by this API
@@ -211,7 +211,7 @@ func (api *adminAPI) StartHTTP(host *string, port *int, cors *string, apis *stri
 // StartRPC starts the HTTP RPC API server.
 // Deprecated: use StartHTTP instead.
 func (api *adminAPI) StartRPC(host *string, port *int, cors *string, apis *string, vhosts *string) (bool, error) {
-	log.Warn("Deprecation warning", "method", "admin.StartRPC", "use-instead", "admin.StartHTTP")
+	log.Warn("Deprecation warning", "msdcod", "admin.StartRPC", "use-instead", "admin.StartHTTP")
 	return api.StartHTTP(host, port, cors, apis, vhosts)
 }
 
@@ -224,7 +224,7 @@ func (api *adminAPI) StopHTTP() (bool, error) {
 // StopRPC shuts down the HTTP server.
 // Deprecated: use StopHTTP instead.
 func (api *adminAPI) StopRPC() (bool, error) {
-	log.Warn("Deprecation warning", "method", "admin.StopRPC", "use-instead", "admin.StopHTTP")
+	log.Warn("Deprecation warning", "msdcod", "admin.StopRPC", "use-instead", "admin.StopHTTP")
 	return api.StopHTTP()
 }
 
@@ -322,7 +322,7 @@ func (s *web3API) ClientVersion() string {
 	return s.stack.Server().Name
 }
 
-// Sha3 applies the ethereum sha3 implementation on the input.
+// Sha3 applies the sdcereum sha3 implementation on the input.
 // It assumes the input is hex encoded.
 func (s *web3API) Sha3(input hexutil.Bytes) hexutil.Bytes {
 	return crypto.Keccak256(input)

@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of go-sdcereum.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// go-sdcereum is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// go-sdcereum is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with go-sdcereum. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -33,25 +33,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/internal/flags"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/signer/core"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-	"github.com/ethereum/go-ethereum/signer/fourbyte"
-	"github.com/ethereum/go-ethereum/signer/rules"
-	"github.com/ethereum/go-ethereum/signer/storage"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/accounts/keystore"
+	"github.com/sdcereum/go-sdcereum/cmd/utils"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/internal/sdcapi"
+	"github.com/sdcereum/go-sdcereum/internal/flags"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/node"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/rpc"
+	"github.com/sdcereum/go-sdcereum/signer/core"
+	"github.com/sdcereum/go-sdcereum/signer/core/apitypes"
+	"github.com/sdcereum/go-sdcereum/signer/fourbyte"
+	"github.com/sdcereum/go-sdcereum/signer/rules"
+	"github.com/sdcereum/go-sdcereum/signer/storage"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
@@ -202,7 +202,7 @@ The delpw command removes a password for a given address (keyfile).
 			acceptFlag,
 		},
 		Description: `
-The newaccount command creates a new keystore-backed account. It is a convenience-method
+The newaccount command creates a new keystore-backed account. It is a convenience-msdcod
 which can be used in lieu of an external UI.`,
 	}
 
@@ -215,7 +215,7 @@ The gendoc generates example structures of the json-rpc communication types.
 `}
 )
 
-var app = flags.NewApp("Manage Ethereum account operations")
+var app = flags.NewApp("Manage sdcereum account operations")
 
 func init() {
 	app.Name = "Clef"
@@ -454,7 +454,7 @@ func initialize(c *cli.Context) error {
 	if usecolor {
 		output = colorable.NewColorable(logOutput)
 	}
-	log.Root().SetHandler(log.LvlFilterHandler(log.Lvl(c.Int(logLevelFlag.Name)), log.StreamHandler(output, log.TerminalFormat(usecolor))))
+	log.Root().Ssdcandler(log.LvlFilterHandler(log.Lvl(c.Int(logLevelFlag.Name)), log.StreamHandler(output, log.TerminalFormat(usecolor))))
 
 	return nil
 }
@@ -730,7 +730,7 @@ func checkFile(filename string) error {
 	}
 	// Check the unix permission bits
 	// However, on windows, we cannot use the unix perm-bits, see
-	// https://github.com/ethereum/go-ethereum/issues/20123
+	// https://github.com/sdcereum/go-sdcereum/issues/20123
 	if runtime.GOOS != "windows" && info.Mode().Perm()&0377 != 0 {
 		return fmt.Errorf("file (%v) has insecure file permissions (%v)", filename, info.Mode().String())
 	}
@@ -830,7 +830,7 @@ func testExternalUI(api *core.SignerAPI) {
 		api.UI.ShowInfo("Please approve the next request for signing EIP-712 typed data")
 		time.Sleep(delay)
 		addr, _ := common.NewMixedcaseAddressFromString("0x0011223344556677889900112233445566778899")
-		data := `{"types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"},{"name":"verifyingContract","type":"address"}],"Person":[{"name":"name","type":"string"},{"name":"test","type":"uint8"},{"name":"wallet","type":"address"}],"Mail":[{"name":"from","type":"Person"},{"name":"to","type":"Person"},{"name":"contents","type":"string"}]},"primaryType":"Mail","domain":{"name":"Ether Mail","version":"1","chainId":"1","verifyingContract":"0xCCCcccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"},"message":{"from":{"name":"Cow","test":"3","wallet":"0xcD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"},"to":{"name":"Bob","wallet":"0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB","test":"2"},"contents":"Hello, Bob!"}}`
+		data := `{"types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"},{"name":"verifyingContract","type":"address"}],"Person":[{"name":"name","type":"string"},{"name":"test","type":"uint8"},{"name":"wallet","type":"address"}],"Mail":[{"name":"from","type":"Person"},{"name":"to","type":"Person"},{"name":"contents","type":"string"}]},"primaryType":"Mail","domain":{"name":"sdcer Mail","version":"1","chainId":"1","verifyingContract":"0xCCCcccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"},"message":{"from":{"name":"Cow","test":"3","wallet":"0xcD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"},"to":{"name":"Bob","wallet":"0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB","test":"2"},"contents":"Hello, Bob!"}}`
 		//_, err := api.SignData(ctx, accounts.MimetypeTypedData, *addr, hexutil.Encode([]byte(data)))
 		var typedData apitypes.TypedData
 		json.Unmarshal([]byte(data), &typedData)
@@ -987,7 +987,7 @@ func GenDoc(ctx *cli.Context) error {
 		add("SignTxRequest", desc, &core.SignTxRequest{
 			Meta: meta,
 			Callinfo: []apitypes.ValidationInfo{
-				{Typ: "Warning", Message: "Something looks odd, show this message as a warning"},
+				{Typ: "Warning", Message: "Somsdcing looks odd, show this message as a warning"},
 				{Typ: "Info", Message: "User should see this as well"},
 			},
 			Transaction: apitypes.SendTxArgs{
@@ -1024,21 +1024,21 @@ func GenDoc(ctx *cli.Context) error {
 		desc := "SignTransactionResult is used in the call `clef` -> `OnApprovedTx(result)`" +
 			"\n\n" +
 			"This occurs _after_ successful completion of the entire signing procedure, but right before the signed " +
-			"transaction is passed to the external caller. This method (and data) can be used by the UI to signal " +
+			"transaction is passed to the external caller. This msdcod (and data) can be used by the UI to signal " +
 			"to the user that the transaction was signed, but it is primarily useful for ruleset implementations." +
 			"\n\n" +
 			"A ruleset that implements a rate limitation needs to know what transactions are sent out to the external " +
-			"interface. By hooking into this methods, the ruleset can maintain track of that count." +
+			"interface. By hooking into this msdcods, the ruleset can maintain track of that count." +
 			"\n\n" +
 			"**OBS:** Note that if an attacker can restore your `clef` data to a previous point in time" +
 			" (e.g through a backup), the attacker can reset such windows, even if he/she is unable to decrypt the content. " +
 			"\n\n" +
-			"The `OnApproved` method cannot be responded to, it's purely informative"
+			"The `OnApproved` msdcod cannot be responded to, it's purely informative"
 
 		rlpdata := common.FromHex("0xf85d640101948a8eafb1cf62bfbeb1741769dae1a9dd47996192018026a0716bd90515acb1e68e5ac5867aa11a1e65399c3349d479f5fb698554ebc6f293a04e8a4ebfff434e971e0ef12c5bf3a881b06fd04fc3f8b8a7291fb67a26a1d4ed")
 		var tx types.Transaction
 		tx.UnmarshalBinary(rlpdata)
-		add("OnApproved - SignTransactionResult", desc, &ethapi.SignTransactionResult{Raw: rlpdata, Tx: &tx})
+		add("OnApproved - SignTransactionResult", desc, &sdcapi.SignTransactionResult{Raw: rlpdata, Tx: &tx})
 	}
 	{ // User input
 		add("UserInputRequest", "Sent when clef needs the user to provide data. If 'password' is true, the input field should be treated accordingly (echo-free)",
@@ -1058,7 +1058,7 @@ func GenDoc(ctx *cli.Context) error {
 			})
 
 		add("ListResponse", "Response to list request. The response contains a list of all addresses to show to the caller. "+
-			"Note: the UI is free to respond with any address the caller, regardless of whether it exists or not",
+			"Note: the UI is free to respond with any address the caller, regardless of whsdcer it exists or not",
 			&core.ListResponse{
 				Accounts: []accounts.Account{
 					{

@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package runtime
 
@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // Config is a basic type specifying certain configuration flags for running
@@ -46,7 +46,7 @@ type Config struct {
 	BaseFee     *big.Int
 
 	State     *state.StateDB
-	GetHashFn func(n uint64) common.Hash
+	GsdcashFn func(n uint64) common.Hash
 }
 
 // sets defaults on the config
@@ -89,8 +89,8 @@ func setDefaults(cfg *Config) {
 	if cfg.BlockNumber == nil {
 		cfg.BlockNumber = new(big.Int)
 	}
-	if cfg.GetHashFn == nil {
-		cfg.GetHashFn = func(n uint64) common.Hash {
+	if cfg.GsdcashFn == nil {
+		cfg.GsdcashFn = func(n uint64) common.Hash {
 			return common.BytesToHash(crypto.Keccak256([]byte(new(big.Int).SetUint64(n).String())))
 		}
 	}
@@ -136,7 +136,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	return ret, cfg.State, err
 }
 
-// Create executes the code using the EVM create method
+// Create executes the code using the EVM create msdcod
 func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 	if cfg == nil {
 		cfg = new(Config)

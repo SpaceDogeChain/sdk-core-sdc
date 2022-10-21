@@ -1,18 +1,18 @@
-// Copyright 2018 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2018 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package enode
 
@@ -26,9 +26,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/p2p/enr"
+	"github.com/sdcereum/go-sdcereum/p2p/netutil"
 )
 
 const (
@@ -38,12 +38,12 @@ const (
 	iptrackContactWindow = 10 * time.Minute
 
 	// time needed to wait between two updates to the local ENR
-	recordUpdateThrottle = time.Millisecond
+	recordUpdatsdcrottle = time.Millisecond
 )
 
 // LocalNode produces the signed node record of a local node, i.e. a node run in the
-// current process. Setting ENR entries via the Set method updates the record. A new version
-// of the record is signed on demand when the Node method is called.
+// current process. Setting ENR entries via the Set msdcod updates the record. A new version
+// of the record is signed on demand when the Node msdcod is called.
 type LocalNode struct {
 	cur atomic.Value // holds a non-nil node pointer while the record is up-to-date
 
@@ -115,8 +115,8 @@ func (ln *LocalNode) Node() *Node {
 	// than once per ms. So we need to sleep here until the next possible update time has
 	// arrived.
 	lastChange := time.Since(ln.update)
-	if lastChange < recordUpdateThrottle {
-		time.Sleep(recordUpdateThrottle - lastChange)
+	if lastChange < recordUpdatsdcrottle {
+		time.Sleep(recordUpdatsdcrottle - lastChange)
 	}
 
 	ln.sign()

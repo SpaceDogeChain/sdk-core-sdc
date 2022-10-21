@@ -1,31 +1,31 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2016 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 // Contains all the wrappers from the core/types package.
 
-package geth
+package gsdc
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/rlp"
 )
 
 type jsonEncoder interface {
@@ -53,14 +53,14 @@ func (n *Nonce) GetBytes() []byte {
 	return n.nonce[:]
 }
 
-// GetHex retrieves the hex string representation of the block nonce.
-func (n *Nonce) GetHex() string {
+// Gsdcex retrieves the hex string representation of the block nonce.
+func (n *Nonce) Gsdcex() string {
 	return fmt.Sprintf("%#x", n.nonce[:])
 }
 
 // String returns a printable representation of the nonce.
 func (n *Nonce) String() string {
-	return n.GetHex()
+	return n.Gsdcex()
 }
 
 // Bloom represents a 256 bit bloom filter.
@@ -73,17 +73,17 @@ func (b *Bloom) GetBytes() []byte {
 	return b.bloom[:]
 }
 
-// GetHex retrieves the hex string representation of the bloom filter.
-func (b *Bloom) GetHex() string {
+// Gsdcex retrieves the hex string representation of the bloom filter.
+func (b *Bloom) Gsdcex() string {
 	return fmt.Sprintf("%#x", b.bloom[:])
 }
 
 // String returns a printable representation of the bloom filter.
 func (b *Bloom) String() string {
-	return b.GetHex()
+	return b.Gsdcex()
 }
 
-// Header represents a block header in the Ethereum blockchain.
+// Header represents a block header in the sdcereum blockchain.
 type Header struct {
 	header *types.Header
 }
@@ -141,7 +141,7 @@ func (h *Header) GetTime() int64         { return int64(h.header.Time) }
 func (h *Header) GetExtra() []byte       { return h.header.Extra }
 func (h *Header) GetMixDigest() *Hash    { return &Hash{h.header.MixDigest} }
 func (h *Header) GetNonce() *Nonce       { return &Nonce{h.header.Nonce} }
-func (h *Header) GetHash() *Hash         { return &Hash{h.header.Hash()} }
+func (h *Header) Gsdcash() *Hash         { return &Hash{h.header.Hash()} }
 
 // Headers represents a slice of headers.
 type Headers struct{ headers []*types.Header }
@@ -159,7 +159,7 @@ func (h *Headers) Get(index int) (header *Header, _ error) {
 	return &Header{h.headers[index]}, nil
 }
 
-// Block represents an entire block in the Ethereum blockchain.
+// Block represents an entire block in the sdcereum blockchain.
 type Block struct {
 	block *types.Block
 }
@@ -217,15 +217,15 @@ func (b *Block) GetTime() int64                 { return int64(b.block.Time()) }
 func (b *Block) GetExtra() []byte               { return b.block.Extra() }
 func (b *Block) GetMixDigest() *Hash            { return &Hash{b.block.MixDigest()} }
 func (b *Block) GetNonce() int64                { return int64(b.block.Nonce()) }
-func (b *Block) GetHash() *Hash                 { return &Hash{b.block.Hash()} }
-func (b *Block) GetHeader() *Header             { return &Header{b.block.Header()} }
+func (b *Block) Gsdcash() *Hash                 { return &Hash{b.block.Hash()} }
+func (b *Block) Gsdceader() *Header             { return &Header{b.block.Header()} }
 func (b *Block) GetUncles() *Headers            { return &Headers{b.block.Uncles()} }
 func (b *Block) GetTransactions() *Transactions { return &Transactions{b.block.Transactions()} }
 func (b *Block) GetTransaction(hash *Hash) *Transaction {
 	return &Transaction{b.block.Transaction(hash.hash)}
 }
 
-// Transaction represents a single Ethereum transaction.
+// Transaction represents a single sdcereum transaction.
 type Transaction struct {
 	tx *types.Transaction
 }
@@ -289,7 +289,7 @@ func (tx *Transaction) GetGasPrice() *BigInt { return &BigInt{tx.tx.GasPrice()} 
 func (tx *Transaction) GetValue() *BigInt    { return &BigInt{tx.tx.Value()} }
 func (tx *Transaction) GetNonce() int64      { return int64(tx.tx.Nonce()) }
 
-func (tx *Transaction) GetHash() *Hash   { return &Hash{tx.tx.Hash()} }
+func (tx *Transaction) Gsdcash() *Hash   { return &Hash{tx.tx.Hash()} }
 func (tx *Transaction) GetCost() *BigInt { return &BigInt{tx.tx.Cost()} }
 
 func (tx *Transaction) GetTo() *Address {

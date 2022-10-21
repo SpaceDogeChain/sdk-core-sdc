@@ -1,18 +1,18 @@
-// Copyright 2021 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2021 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package downloader
 
@@ -21,10 +21,10 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/prque"
+	"github.com/sdcereum/go-sdcereum/sdc/protocols/sdc"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 // timeoutGracePeriod is the amount of time to allow for a peer to deliver a
@@ -65,12 +65,12 @@ type typedQueue interface {
 
 	// request is responsible for converting a generic fetch request into a typed
 	// one and sending it to the remote peer for fulfillment.
-	request(peer *peerConnection, req *fetchRequest, resCh chan *eth.Response) (*eth.Request, error)
+	request(peer *peerConnection, req *fetchRequest, resCh chan *sdc.Response) (*sdc.Request, error)
 
 	// deliver is responsible for taking a generic response packet from the
 	// concurrent fetcher, unpacking the type specific data and delivering
 	// it to the downloader's queue.
-	deliver(peer *peerConnection, packet *eth.Response) (int, error)
+	deliver(peer *peerConnection, packet *sdc.Response) (int, error)
 }
 
 // concurrentFetch iteratively downloads scheduled block parts, taking available
@@ -78,10 +78,10 @@ type typedQueue interface {
 // or timeouts.
 func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 	// Create a delivery channel to accept responses from all peers
-	responses := make(chan *eth.Response)
+	responses := make(chan *sdc.Response)
 
 	// Track the currently active requests and their timeout order
-	pending := make(map[string]*eth.Request)
+	pending := make(map[string]*sdc.Request)
 	defer func() {
 		// Abort all requests on sync cycle cancellation. The requests may still
 		// be fulfilled by the remote side, but the dispatcher will not wait to
@@ -90,9 +90,9 @@ func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 			req.Close()
 		}
 	}()
-	ordering := make(map[*eth.Request]int)
+	ordering := make(map[*sdc.Request]int)
 	timeouts := prque.New(func(data interface{}, index int) {
-		ordering[data.(*eth.Request)] = index
+		ordering[data.(*sdc.Request)] = index
 	})
 
 	timeout := time.NewTimer(0)
@@ -104,9 +104,9 @@ func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 	// Track the timed-out but not-yet-answered requests separately. We want to
 	// keep tracking which peers are busy (potentially overloaded), so removing
 	// all trace of a timed out request is not good. We also can't just cancel
-	// the pending request altogether as that would prevent a late response from
+	// the pending request altogsdcer as that would prevent a late response from
 	// being delivered, thus never unblocking the peer.
-	stales := make(map[string]*eth.Request)
+	stales := make(map[string]*sdc.Request)
 	defer func() {
 		// Abort all requests on sync cycle cancellation. The requests may still
 		// be fulfilled by the remote side, but the dispatcher will not wait to
@@ -194,7 +194,7 @@ func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 					// Although all peer removal operations return allocated tasks
 					// to the queue, that is async, and we can do better here by
 					// immediately pushing the unfulfilled requests.
-					queue.unreserve(peer.id) // TODO(karalabe): This needs a non-expiration method
+					queue.unreserve(peer.id) // TODO(karalabe): This needs a non-expiration msdcod
 					continue
 				}
 				pending[peer.id] = req
@@ -213,7 +213,7 @@ func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 				return errPeersUnavailable
 			}
 		}
-		// Wait for something to happen
+		// Wait for somsdcing to happen
 		select {
 		case <-d.cancelCh:
 			// If sync was cancelled, tear down the parallel retriever. Pending
@@ -240,7 +240,7 @@ func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 			// A peer left, any existing requests need to be untracked, pending
 			// tasks returned and possible reassignment checked
 			if req, ok := pending[peerid]; ok {
-				queue.unreserve(peerid) // TODO(karalabe): This needs a non-expiration method
+				queue.unreserve(peerid) // TODO(karalabe): This needs a non-expiration msdcod
 				delete(pending, peerid)
 				req.Close()
 
@@ -274,7 +274,7 @@ func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 				timeout.Reset(at.Sub(now))
 				continue
 			}
-			req := item.(*eth.Request)
+			req := item.(*sdc.Request)
 
 			// Stop tracking the timed out request from a timing perspective,
 			// cancel it, so it's not considered in-flight anymore, but keep
@@ -363,7 +363,7 @@ func (d *Downloader) concurrentFetch(queue typedQueue, beaconMode bool) error {
 				if errors.Is(err, errInvalidChain) {
 					return err
 				}
-				// Unless a peer delivered something completely else than requested (usually
+				// Unless a peer delivered somsdcing completely else than requested (usually
 				// caused by a timed out request which came through in the end), set it to
 				// idle. If the delivery's stale, the peer should have already been idled.
 				if !errors.Is(err, errStaleDelivery) {

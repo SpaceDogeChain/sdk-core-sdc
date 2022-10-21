@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package les
 
@@ -21,13 +21,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/rawdb"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/light"
+	"github.com/sdcereum/go-sdcereum/p2p/enode"
+	"github.com/sdcereum/go-sdcereum/params"
 )
 
 // verifyImportEvent verifies that one single event arrive on an import channel.
@@ -87,7 +87,7 @@ func testSequentialAnnouncements(t *testing.T, protocol int) {
 		importCh <- header
 	}
 	for i := uint64(1); i <= s.backend.Blockchain().CurrentHeader().Number.Uint64(); i++ {
-		header := s.backend.Blockchain().GetHeaderByNumber(i)
+		header := s.backend.Blockchain().GsdceaderByNumber(i)
 		hash, number := header.Hash(), header.Number.Uint64()
 		td := rawdb.ReadTd(s.db, hash, number)
 
@@ -140,7 +140,7 @@ func testGappedAnnouncements(t *testing.T, protocol int) {
 
 	// Send a reorged announcement
 	blocks, _ := core.GenerateChain(rawdb.ReadChainConfig(s.db, s.backend.Blockchain().Genesis().Hash()), s.backend.Blockchain().GetBlockByNumber(3),
-		ethash.NewFaker(), s.db, 2, func(i int, gen *core.BlockGen) {
+		sdcash.NewFaker(), s.db, 2, func(i int, gen *core.BlockGen) {
 			gen.OffsetTime(-9) // higher block difficulty
 		})
 	s.backend.Blockchain().InsertChain(blocks)
@@ -153,7 +153,7 @@ func TestTrustedAnnouncementsLes2(t *testing.T) { testTrustedAnnouncement(t, 2) 
 func TestTrustedAnnouncementsLes3(t *testing.T) { testTrustedAnnouncement(t, 3) }
 
 func testTrustedAnnouncement(t *testing.T, protocol int) {
-	//log.Root().SetHandler(log.LvlFilterHandler(log.LvlDebug, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	//log.Root().Ssdcandler(log.LvlFilterHandler(log.LvlDebug, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	var (
 		servers   []*testServer
 		teardowns []func()
@@ -224,7 +224,7 @@ func testTrustedAnnouncement(t *testing.T, protocol int) {
 	check := func(height []uint64, expected uint64, callback func()) {
 		for i := 0; i < len(height); i++ {
 			for j := 0; j < len(servers); j++ {
-				h := servers[j].backend.Blockchain().GetHeaderByNumber(height[i])
+				h := servers[j].backend.Blockchain().GsdceaderByNumber(height[i])
 				hash, number := h.Hash(), h.Number.Uint64()
 				td := rawdb.ReadTd(servers[j].db, hash, number)
 
@@ -270,7 +270,7 @@ func testInvalidAnnounces(t *testing.T, protocol int) {
 	c.handler.fetcher.newHeadHook = func(header *types.Header) { done <- header }
 
 	// Prepare announcement by latest header.
-	headerOne := s.backend.Blockchain().GetHeaderByNumber(1)
+	headerOne := s.backend.Blockchain().GsdceaderByNumber(1)
 	hash, number := headerOne.Hash(), headerOne.Number.Uint64()
 	td := big.NewInt(params.GenesisDifficulty.Int64() + 200) // bad td
 

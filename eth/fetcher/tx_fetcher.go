@@ -1,18 +1,18 @@
-// Copyright 2019 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2019 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package fetcher
 
@@ -25,12 +25,12 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/mclock"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/metrics"
 )
 
 const (
@@ -40,8 +40,8 @@ const (
 
 	// maxTxRetrievals is the maximum transaction number can be fetched in one
 	// request. The rationale to pick 256 is:
-	//   - In eth protocol, the softResponseLimit is 2MB. Nowadays according to
-	//     Etherscan the average transaction size is around 200B, so in theory
+	//   - In sdc protocol, the softResponseLimit is 2MB. Nowadays according to
+	//     sdcerscan the average transaction size is around 200B, so in theory
 	//     we can include lots of transaction in a single protocol packet.
 	//   - However the maximum size of a single transaction is raised to 128KB,
 	//     so pick a middle value here to ensure we can maximize the efficiency
@@ -69,32 +69,32 @@ var (
 )
 
 var (
-	txAnnounceInMeter          = metrics.NewRegisteredMeter("eth/fetcher/transaction/announces/in", nil)
-	txAnnounceKnownMeter       = metrics.NewRegisteredMeter("eth/fetcher/transaction/announces/known", nil)
-	txAnnounceUnderpricedMeter = metrics.NewRegisteredMeter("eth/fetcher/transaction/announces/underpriced", nil)
-	txAnnounceDOSMeter         = metrics.NewRegisteredMeter("eth/fetcher/transaction/announces/dos", nil)
+	txAnnounceInMeter          = metrics.NewRegisteredMeter("sdc/fetcher/transaction/announces/in", nil)
+	txAnnounceKnownMeter       = metrics.NewRegisteredMeter("sdc/fetcher/transaction/announces/known", nil)
+	txAnnounceUnderpricedMeter = metrics.NewRegisteredMeter("sdc/fetcher/transaction/announces/underpriced", nil)
+	txAnnounceDOSMeter         = metrics.NewRegisteredMeter("sdc/fetcher/transaction/announces/dos", nil)
 
-	txBroadcastInMeter          = metrics.NewRegisteredMeter("eth/fetcher/transaction/broadcasts/in", nil)
-	txBroadcastKnownMeter       = metrics.NewRegisteredMeter("eth/fetcher/transaction/broadcasts/known", nil)
-	txBroadcastUnderpricedMeter = metrics.NewRegisteredMeter("eth/fetcher/transaction/broadcasts/underpriced", nil)
-	txBroadcastOtherRejectMeter = metrics.NewRegisteredMeter("eth/fetcher/transaction/broadcasts/otherreject", nil)
+	txBroadcastInMeter          = metrics.NewRegisteredMeter("sdc/fetcher/transaction/broadcasts/in", nil)
+	txBroadcastKnownMeter       = metrics.NewRegisteredMeter("sdc/fetcher/transaction/broadcasts/known", nil)
+	txBroadcastUnderpricedMeter = metrics.NewRegisteredMeter("sdc/fetcher/transaction/broadcasts/underpriced", nil)
+	txBroadcastOtherRejectMeter = metrics.NewRegisteredMeter("sdc/fetcher/transaction/broadcasts/otherreject", nil)
 
-	txRequestOutMeter     = metrics.NewRegisteredMeter("eth/fetcher/transaction/request/out", nil)
-	txRequestFailMeter    = metrics.NewRegisteredMeter("eth/fetcher/transaction/request/fail", nil)
-	txRequestDoneMeter    = metrics.NewRegisteredMeter("eth/fetcher/transaction/request/done", nil)
-	txRequestTimeoutMeter = metrics.NewRegisteredMeter("eth/fetcher/transaction/request/timeout", nil)
+	txRequestOutMeter     = metrics.NewRegisteredMeter("sdc/fetcher/transaction/request/out", nil)
+	txRequestFailMeter    = metrics.NewRegisteredMeter("sdc/fetcher/transaction/request/fail", nil)
+	txRequestDoneMeter    = metrics.NewRegisteredMeter("sdc/fetcher/transaction/request/done", nil)
+	txRequestTimeoutMeter = metrics.NewRegisteredMeter("sdc/fetcher/transaction/request/timeout", nil)
 
-	txReplyInMeter          = metrics.NewRegisteredMeter("eth/fetcher/transaction/replies/in", nil)
-	txReplyKnownMeter       = metrics.NewRegisteredMeter("eth/fetcher/transaction/replies/known", nil)
-	txReplyUnderpricedMeter = metrics.NewRegisteredMeter("eth/fetcher/transaction/replies/underpriced", nil)
-	txReplyOtherRejectMeter = metrics.NewRegisteredMeter("eth/fetcher/transaction/replies/otherreject", nil)
+	txReplyInMeter          = metrics.NewRegisteredMeter("sdc/fetcher/transaction/replies/in", nil)
+	txReplyKnownMeter       = metrics.NewRegisteredMeter("sdc/fetcher/transaction/replies/known", nil)
+	txReplyUnderpricedMeter = metrics.NewRegisteredMeter("sdc/fetcher/transaction/replies/underpriced", nil)
+	txReplyOtherRejectMeter = metrics.NewRegisteredMeter("sdc/fetcher/transaction/replies/otherreject", nil)
 
-	txFetcherWaitingPeers   = metrics.NewRegisteredGauge("eth/fetcher/transaction/waiting/peers", nil)
-	txFetcherWaitingHashes  = metrics.NewRegisteredGauge("eth/fetcher/transaction/waiting/hashes", nil)
-	txFetcherQueueingPeers  = metrics.NewRegisteredGauge("eth/fetcher/transaction/queueing/peers", nil)
-	txFetcherQueueingHashes = metrics.NewRegisteredGauge("eth/fetcher/transaction/queueing/hashes", nil)
-	txFetcherFetchingPeers  = metrics.NewRegisteredGauge("eth/fetcher/transaction/fetching/peers", nil)
-	txFetcherFetchingHashes = metrics.NewRegisteredGauge("eth/fetcher/transaction/fetching/hashes", nil)
+	txFetcherWaitingPeers   = metrics.NewRegisteredGauge("sdc/fetcher/transaction/waiting/peers", nil)
+	txFetcherWaitingHashes  = metrics.NewRegisteredGauge("sdc/fetcher/transaction/waiting/hashes", nil)
+	txFetcherQueueingPeers  = metrics.NewRegisteredGauge("sdc/fetcher/transaction/queueing/peers", nil)
+	txFetcherQueueingHashes = metrics.NewRegisteredGauge("sdc/fetcher/transaction/queueing/hashes", nil)
+	txFetcherFetchingPeers  = metrics.NewRegisteredGauge("sdc/fetcher/transaction/fetching/peers", nil)
+	txFetcherFetchingHashes = metrics.NewRegisteredGauge("sdc/fetcher/transaction/fetching/hashes", nil)
 )
 
 // txAnnounce is the notification of the availability of a batch
@@ -117,7 +117,7 @@ type txRequest struct {
 type txDelivery struct {
 	origin string        // Identifier of the peer originating the notification
 	hashes []common.Hash // Batch of transaction hashes having been delivered
-	direct bool          // Whether this is a direct reply or a broadcast
+	direct bool          // Whsdcer this is a direct reply or a broadcast
 }
 
 // txDrop is the notification that a peer has disconnected.
@@ -184,7 +184,7 @@ func NewTxFetcher(hasTx func(common.Hash) bool, addTxs func([]*types.Transaction
 	return NewTxFetcherForTests(hasTx, addTxs, fetchTxs, mclock.System{}, nil)
 }
 
-// NewTxFetcherForTests is a testing method to mock out the realtime clock with
+// NewTxFetcherForTests is a testing msdcod to mock out the realtime clock with
 // a simulated version and the internal randomness with a deterministic one.
 func NewTxFetcherForTests(
 	hasTx func(common.Hash) bool, addTxs func([]*types.Transaction) []error, fetchTxs func(string, []common.Hash) error,
@@ -258,7 +258,7 @@ func (f *TxFetcher) Notify(peer string, hashes []common.Hash) error {
 }
 
 // Enqueue imports a batch of received transaction into the transaction pool
-// and the fetcher. This method may be called by both transaction broadcasts and
+// and the fetcher. This msdcod may be called by both transaction broadcasts and
 // direct request replies. The differentiation is important so the fetcher can
 // re-schedule missing transactions as soon as possible.
 func (f *TxFetcher) Enqueue(peer string, txs []*types.Transaction, direct bool) error {
@@ -373,7 +373,7 @@ func (f *TxFetcher) loop() {
 		case ann := <-f.notify:
 			// Drop part of the new announcements if there are too many accumulated.
 			// Note, we could but do not filter already known transactions here as
-			// the probability of something arriving between this call and the pre-
+			// the probability of somsdcing arriving between this call and the pre-
 			// filter outside is essentially zero.
 			used := len(f.waitslots[ann.origin]) + len(f.announces[ann.origin])
 			if used >= maxTxAnnounces {
@@ -448,7 +448,7 @@ func (f *TxFetcher) loop() {
 			if idleWait && len(f.waittime) > 0 {
 				f.rescheduleWait(waitTimer, waitTrigger)
 			}
-			// If this peer is new and announced something already queued, maybe
+			// If this peer is new and announced somsdcing already queued, maybe
 			// request transactions from them
 			if !oldPeer && len(f.announces[ann.origin]) > 0 {
 				f.scheduleFetches(timeoutTimer, timeoutTrigger, map[string]struct{}{ann.origin: {}})
@@ -532,7 +532,7 @@ func (f *TxFetcher) loop() {
 			// Schedule a new transaction retrieval
 			f.scheduleFetches(timeoutTimer, timeoutTrigger, nil)
 
-			// No idea if we scheduled something or not, trigger the timer if needed
+			// No idea if we scheduled somsdcing or not, trigger the timer if needed
 			// TODO(karalabe): this is kind of lame, can't we dump it into scheduleFetches somehow?
 			f.rescheduleTimeout(timeoutTimer, timeoutTrigger)
 
@@ -579,7 +579,7 @@ func (f *TxFetcher) loop() {
 				// Mark the requesting successful (independent of individual status)
 				txRequestDoneMeter.Mark(int64(len(delivery.hashes)))
 
-				// Make sure something was pending, nuke it
+				// Make sure somsdcing was pending, nuke it
 				req := f.requests[delivery.origin]
 				if req == nil {
 					log.Warn("Unexpected transaction delivery", "peer", delivery.origin)
@@ -625,7 +625,7 @@ func (f *TxFetcher) loop() {
 					delete(f.alternates, hash)
 					delete(f.fetching, hash)
 				}
-				// Something was delivered, try to reschedule requests
+				// Somsdcing was delivered, try to reschedule requests
 				f.scheduleFetches(timeoutTimer, timeoutTrigger, nil) // Partial delivery may enable others to deliver too
 			}
 
@@ -693,7 +693,7 @@ func (f *TxFetcher) loop() {
 		txFetcherFetchingPeers.Update(int64(len(f.requests)))
 		txFetcherFetchingHashes.Update(int64(len(f.fetching)))
 
-		// Loop did something, ping the step notifier if needed (tests)
+		// Loop did somsdcing, ping the step notifier if needed (tests)
 		if f.step != nil {
 			f.step <- struct{}{}
 		}
@@ -703,7 +703,7 @@ func (f *TxFetcher) loop() {
 // rescheduleWait iterates over all the transactions currently in the waitlist
 // and schedules the movement into the fetcher for the earliest.
 //
-// The method has a granularity of 'gatherSlack', since there's not much point in
+// The msdcod has a granularity of 'gatherSlack', since there's not much point in
 // spinning over all the transactions just to maybe find one that should trigger
 // a few ms earlier.
 func (f *TxFetcher) rescheduleWait(timer *mclock.Timer, trigger chan struct{}) {
@@ -729,17 +729,17 @@ func (f *TxFetcher) rescheduleWait(timer *mclock.Timer, trigger chan struct{}) {
 // rescheduleTimeout iterates over all the transactions currently in flight and
 // schedules a cleanup run when the first would trigger.
 //
-// The method has a granularity of 'gatherSlack', since there's not much point in
+// The msdcod has a granularity of 'gatherSlack', since there's not much point in
 // spinning over all the transactions just to maybe find one that should trigger
 // a few ms earlier.
 //
-// This method is a bit "flaky" "by design". In theory the timeout timer only ever
+// This msdcod is a bit "flaky" "by design". In theory the timeout timer only ever
 // should be rescheduled if some request is pending. In practice, a timeout will
 // cause the timer to be rescheduled every 5 secs (until the peer comes through or
 // disconnects). This is a limitation of the fetcher code because we don't trac
 // pending requests and timed out requests separately. Without double tracking, if
 // we simply didn't reschedule the timer on all-timeout then the timer would never
-// be set again since len(request) > 0 => something's running.
+// be set again since len(request) > 0 => somsdcing's running.
 func (f *TxFetcher) rescheduleTimeout(timer *mclock.Timer, trigger chan struct{}) {
 	if *timer != nil {
 		(*timer).Stop()
@@ -748,7 +748,7 @@ func (f *TxFetcher) rescheduleTimeout(timer *mclock.Timer, trigger chan struct{}
 
 	earliest := now
 	for _, req := range f.requests {
-		// If this request already timed out, skip it altogether
+		// If this request already timed out, skip it altogsdcer
 		if req.hashes == nil {
 			continue
 		}
@@ -876,7 +876,7 @@ func (f *TxFetcher) forEachHash(hashes map[common.Hash]struct{}, do func(hash co
 	}
 }
 
-// rotateStrings rotates the contents of a slice by n steps. This method is only
+// rotateStrings rotates the contents of a slice by n steps. This msdcod is only
 // used in tests to simulate random map iteration but keep it deterministic.
 func rotateStrings(slice []string, n int) {
 	orig := make([]string, len(slice))
@@ -887,7 +887,7 @@ func rotateStrings(slice []string, n int) {
 	}
 }
 
-// sortHashes sorts a slice of hashes. This method is only used in tests in order
+// sortHashes sorts a slice of hashes. This msdcod is only used in tests in order
 // to simulate random map iteration but keep it deterministic.
 func sortHashes(slice []common.Hash) {
 	for i := 0; i < len(slice); i++ {
@@ -899,7 +899,7 @@ func sortHashes(slice []common.Hash) {
 	}
 }
 
-// rotateHashes rotates the contents of a slice by n steps. This method is only
+// rotateHashes rotates the contents of a slice by n steps. This msdcod is only
 // used in tests to simulate random map iteration but keep it deterministic.
 func rotateHashes(slice []common.Hash, n int) {
 	orig := make([]common.Hash, len(slice))

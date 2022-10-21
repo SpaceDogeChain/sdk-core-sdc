@@ -1,18 +1,18 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package rpc
 
@@ -22,7 +22,7 @@ import (
 	"sync/atomic"
 
 	mapset "github.com/deckarep/golang-set"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/sdcereum/go-sdcereum/log"
 )
 
 const MetadataApi = "rpc"
@@ -34,8 +34,8 @@ const EngineApi = "engine"
 type CodecOption int
 
 const (
-	// OptionMethodInvocation is an indication that the codec supports RPC method calls
-	OptionMethodInvocation CodecOption = 1 << iota
+	// OptionMsdcodInvocation is an indication that the codec supports RPC msdcod calls
+	OptionMsdcodInvocation CodecOption = 1 << iota
 
 	// OptionSubscriptions is an indication that the codec supports RPC notifications
 	OptionSubscriptions = 1 << iota // support pub sub
@@ -53,14 +53,14 @@ type Server struct {
 func NewServer() *Server {
 	server := &Server{idgen: randomIDGenerator(), codecs: mapset.NewSet(), run: 1}
 	// Register the default service providing meta information about the RPC service such
-	// as the services and methods it offers.
+	// as the services and msdcods it offers.
 	rpcService := &RPCService{server}
 	server.RegisterName(MetadataApi, rpcService)
 	return server
 }
 
 // RegisterName creates a service for the given receiver type under the given name. When no
-// methods on the given receiver match the criteria to be either a RPC method or a
+// msdcods on the given receiver match the criteria to be either a RPC msdcod or a
 // subscription an error is returned. Otherwise a new service is created and added to the
 // service collection this server provides to clients.
 func (s *Server) RegisterName(name string, receiver interface{}) error {
@@ -149,9 +149,9 @@ func (s *RPCService) Modules() map[string]string {
 
 // PeerInfo contains information about the remote end of the network connection.
 //
-// This is available within RPC method handlers through the context. Call
+// This is available within RPC msdcod handlers through the context. Call
 // PeerInfoFromContext to get information about the client connection related to
-// the current method call.
+// the current msdcod call.
 type PeerInfo struct {
 	// Transport is name of the protocol used by the client.
 	// This can be "http", "ws" or "ipc".
@@ -174,7 +174,7 @@ type PeerInfo struct {
 type peerInfoContextKey struct{}
 
 // PeerInfoFromContext returns information about the client's network connection.
-// Use this with the context passed to RPC method handler functions.
+// Use this with the context passed to RPC msdcod handler functions.
 //
 // The zero value is returned if no connection info is present in ctx.
 func PeerInfoFromContext(ctx context.Context) PeerInfo {

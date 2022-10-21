@@ -1,20 +1,20 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// Copyright 2015 The go-sdcereum Authors
+// This file is part of the go-sdcereum library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The go-sdcereum library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The go-sdcereum library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the go-sdcereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ethapi
+package sdcapi
 
 import (
 	"context"
@@ -26,41 +26,41 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/accounts/scwallet"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/eth/tracers/logger"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/sdcereum/go-sdcereum/accounts"
+	"github.com/sdcereum/go-sdcereum/accounts/abi"
+	"github.com/sdcereum/go-sdcereum/accounts/keystore"
+	"github.com/sdcereum/go-sdcereum/accounts/scwallet"
+	"github.com/sdcereum/go-sdcereum/common"
+	"github.com/sdcereum/go-sdcereum/common/hexutil"
+	"github.com/sdcereum/go-sdcereum/common/math"
+	"github.com/sdcereum/go-sdcereum/consensus/sdcash"
+	"github.com/sdcereum/go-sdcereum/consensus/misc"
+	"github.com/sdcereum/go-sdcereum/core"
+	"github.com/sdcereum/go-sdcereum/core/state"
+	"github.com/sdcereum/go-sdcereum/core/types"
+	"github.com/sdcereum/go-sdcereum/core/vm"
+	"github.com/sdcereum/go-sdcereum/crypto"
+	"github.com/sdcereum/go-sdcereum/sdc/tracers/logger"
+	"github.com/sdcereum/go-sdcereum/log"
+	"github.com/sdcereum/go-sdcereum/p2p"
+	"github.com/sdcereum/go-sdcereum/params"
+	"github.com/sdcereum/go-sdcereum/rlp"
+	"github.com/sdcereum/go-sdcereum/rpc"
 	"github.com/tyler-smith/go-bip39"
 )
 
-// EthereumAPI provides an API to access Ethereum related information.
-type EthereumAPI struct {
+// sdcereumAPI provides an API to access sdcereum related information.
+type sdcereumAPI struct {
 	b Backend
 }
 
-// NewEthereumAPI creates a new Ethereum protocol API.
-func NewEthereumAPI(b Backend) *EthereumAPI {
-	return &EthereumAPI{b}
+// NewsdcereumAPI creates a new sdcereum protocol API.
+func NewsdcereumAPI(b Backend) *sdcereumAPI {
+	return &sdcereumAPI{b}
 }
 
 // GasPrice returns a suggestion for a gas price for legacy transactions.
-func (s *EthereumAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
+func (s *sdcereumAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
 	tipcap, err := s.b.SuggestGasTipCap(ctx)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (s *EthereumAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
 }
 
 // MaxPriorityFeePerGas returns a suggestion for a gas tip cap for dynamic fee transactions.
-func (s *EthereumAPI) MaxPriorityFeePerGas(ctx context.Context) (*hexutil.Big, error) {
+func (s *sdcereumAPI) MaxPriorityFeePerGas(ctx context.Context) (*hexutil.Big, error) {
 	tipcap, err := s.b.SuggestGasTipCap(ctx)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ type feeHistoryResult struct {
 }
 
 // FeeHistory returns the fee market history.
-func (s *EthereumAPI) FeeHistory(ctx context.Context, blockCount rpc.DecimalOrHex, lastBlock rpc.BlockNumber, rewardPercentiles []float64) (*feeHistoryResult, error) {
+func (s *sdcereumAPI) FeeHistory(ctx context.Context, blockCount rpc.DecimalOrHex, lastBlock rpc.BlockNumber, rewardPercentiles []float64) (*feeHistoryResult, error) {
 	oldest, reward, baseFee, gasUsed, err := s.b.FeeHistory(ctx, int(blockCount), lastBlock, rewardPercentiles)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (s *EthereumAPI) FeeHistory(ctx context.Context, blockCount rpc.DecimalOrHe
 // - highestBlock:  block number of the highest block header this node has received from peers
 // - pulledStates:  number of state entries processed until now
 // - knownStates:   number of known state entries that still need to be pulled
-func (s *EthereumAPI) Syncing() (interface{}, error) {
+func (s *sdcereumAPI) Syncing() (interface{}, error) {
 	progress := s.b.SyncProgress()
 
 	// Return not syncing if the synchronisation already completed
@@ -253,24 +253,24 @@ func (s *TxPoolAPI) Inspect() map[string]map[string]map[string]string {
 	return content
 }
 
-// EthereumAccountAPI provides an API to access accounts managed by this node.
-// It offers only methods that can retrieve accounts.
-type EthereumAccountAPI struct {
+// sdcereumAccountAPI provides an API to access accounts managed by this node.
+// It offers only msdcods that can retrieve accounts.
+type sdcereumAccountAPI struct {
 	am *accounts.Manager
 }
 
-// NewEthereumAccountAPI creates a new EthereumAccountAPI.
-func NewEthereumAccountAPI(am *accounts.Manager) *EthereumAccountAPI {
-	return &EthereumAccountAPI{am: am}
+// NewsdcereumAccountAPI creates a new sdcereumAccountAPI.
+func NewsdcereumAccountAPI(am *accounts.Manager) *sdcereumAccountAPI {
+	return &sdcereumAccountAPI{am: am}
 }
 
 // Accounts returns the collection of accounts this node manages.
-func (s *EthereumAccountAPI) Accounts() []common.Address {
+func (s *sdcereumAccountAPI) Accounts() []common.Address {
 	return s.am.Accounts()
 }
 
 // PersonalAccountAPI provides an API to access accounts managed by this node.
-// It offers methods to create, (un)lock en list accounts. Some methods accept
+// It offers msdcods to create, (un)lock en list accounts. Some msdcods accept
 // passwords and are therefore considered private by default.
 type PersonalAccountAPI struct {
 	am        *accounts.Manager
@@ -322,7 +322,7 @@ func (s *PersonalAccountAPI) ListWallets() []rawWallet {
 
 // OpenWallet initiates a hardware wallet opening procedure, establishing a USB
 // connection and attempting to authenticate via the provided passphrase. Note,
-// the method may return an extra challenge requiring a second open (e.g. the
+// the msdcod may return an extra challenge requiring a second open (e.g. the
 // Trezor PIN matrix challenge).
 func (s *PersonalAccountAPI) OpenWallet(url string, passphrase *string) error {
 	wallet, err := s.am.Wallet(url)
@@ -505,15 +505,15 @@ func (s *PersonalAccountAPI) SignTransaction(ctx context.Context, args Transacti
 	return &SignTransactionResult{data, signed}, nil
 }
 
-// Sign calculates an Ethereum ECDSA signature for:
-// keccak256("\x19Ethereum Signed Message:\n" + len(message) + message))
+// Sign calculates an sdcereum ECDSA signature for:
+// keccak256("\x19sdcereum Signed Message:\n" + len(message) + message))
 //
 // Note, the produced signature conforms to the secp256k1 curve R, S and V values,
 // where the V value will be 27 or 28 for legacy reasons.
 //
 // The key used to calculate the signature is decrypted with the given password.
 //
-// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
+// https://github.com/sdcereum/go-sdcereum/wiki/Management-APIs#personal_sign
 func (s *PersonalAccountAPI) Sign(ctx context.Context, data hexutil.Bytes, addr common.Address, passwd string) (hexutil.Bytes, error) {
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: addr}
@@ -533,21 +533,21 @@ func (s *PersonalAccountAPI) Sign(ctx context.Context, data hexutil.Bytes, addr 
 }
 
 // EcRecover returns the address for the account that was used to create the signature.
-// Note, this function is compatible with eth_sign and personal_sign. As such it recovers
+// Note, this function is compatible with sdc_sign and personal_sign. As such it recovers
 // the address of:
-// hash = keccak256("\x19Ethereum Signed Message:\n"${message length}${message})
+// hash = keccak256("\x19sdcereum Signed Message:\n"${message length}${message})
 // addr = ecrecover(hash, signature)
 //
 // Note, the signature must conform to the secp256k1 curve R, S and V values, where
 // the V value must be 27 or 28 for legacy reasons.
 //
-// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_ecRecover
+// https://github.com/sdcereum/go-sdcereum/wiki/Management-APIs#personal_ecRecover
 func (s *PersonalAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Bytes) (common.Address, error) {
 	if len(sig) != crypto.SignatureLength {
 		return common.Address{}, fmt.Errorf("signature must be %d bytes long", crypto.SignatureLength)
 	}
 	if sig[crypto.RecoveryIDOffset] != 27 && sig[crypto.RecoveryIDOffset] != 28 {
-		return common.Address{}, fmt.Errorf("invalid Ethereum signature (V is not 27 or 28)")
+		return common.Address{}, fmt.Errorf("invalid sdcereum signature (V is not 27 or 28)")
 	}
 	sig[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
 
@@ -585,7 +585,7 @@ func (s *PersonalAccountAPI) InitializeWallet(ctx context.Context, url string) (
 	}
 }
 
-// Unpair deletes a pairing between wallet and geth.
+// Unpair deletes a pairing between wallet and gsdc.
 func (s *PersonalAccountAPI) Unpair(ctx context.Context, url string, pin string) error {
 	wallet, err := s.am.Wallet(url)
 	if err != nil {
@@ -600,19 +600,19 @@ func (s *PersonalAccountAPI) Unpair(ctx context.Context, url string, pin string)
 	}
 }
 
-// BlockChainAPI provides an API to access Ethereum blockchain data.
+// BlockChainAPI provides an API to access sdcereum blockchain data.
 type BlockChainAPI struct {
 	b Backend
 }
 
-// NewBlockChainAPI creates a new Ethereum blockchain API.
+// NewBlockChainAPI creates a new sdcereum blockchain API.
 func NewBlockChainAPI(b Backend) *BlockChainAPI {
 	return &BlockChainAPI{b}
 }
 
-// ChainId is the EIP-155 replay-protection chain id for the current Ethereum chain config.
+// ChainId is the EIP-155 replay-protection chain id for the current sdcereum chain config.
 //
-// Note, this method does not conform to EIP-695 because the configured chain ID is always
+// Note, this msdcod does not conform to EIP-695 because the configured chain ID is always
 // returned, regardless of the current head block. We used to return an error when the chain
 // wasn't synced up to a block where EIP-155 is enabled, but this behavior caused issues
 // in CL clients.
@@ -727,10 +727,10 @@ func decodeHash(s string) (common.Hash, error) {
 	return common.BytesToHash(b), nil
 }
 
-// GetHeaderByNumber returns the requested canonical block header.
+// GsdceaderByNumber returns the requested canonical block header.
 // * When blockNr is -1 the chain head is returned.
 // * When blockNr is -2 the pending chain head is returned.
-func (s *BlockChainAPI) GetHeaderByNumber(ctx context.Context, number rpc.BlockNumber) (map[string]interface{}, error) {
+func (s *BlockChainAPI) GsdceaderByNumber(ctx context.Context, number rpc.BlockNumber) (map[string]interface{}, error) {
 	header, err := s.b.HeaderByNumber(ctx, number)
 	if header != nil && err == nil {
 		response := s.rpcMarshalHeader(ctx, header)
@@ -745,8 +745,8 @@ func (s *BlockChainAPI) GetHeaderByNumber(ctx context.Context, number rpc.BlockN
 	return nil, err
 }
 
-// GetHeaderByHash returns the requested header by hash.
-func (s *BlockChainAPI) GetHeaderByHash(ctx context.Context, hash common.Hash) map[string]interface{} {
+// GsdceaderByHash returns the requested header by hash.
+func (s *BlockChainAPI) GsdceaderByHash(ctx context.Context, hash common.Hash) map[string]interface{} {
 	header, _ := s.b.HeaderByHash(ctx, hash)
 	if header != nil {
 		return s.rpcMarshalHeader(ctx, header)
@@ -1024,7 +1024,7 @@ type revertError struct {
 }
 
 // ErrorCode returns the JSON error code for a revertal.
-// See: https://github.com/ethereum/wiki/wiki/JSON-RPC-Error-Codes-Improvement-Proposal
+// See: https://github.com/sdcereum/wiki/wiki/JSON-RPC-Error-Codes-Improvement-Proposal
 func (e *revertError) ErrorCode() int {
 	return 3
 }
@@ -1477,14 +1477,14 @@ func AccessList(ctx context.Context, b Backend, blockNrOrHash rpc.BlockNumberOrH
 	}
 }
 
-// TransactionAPI exposes methods for reading and creating transaction data.
+// TransactionAPI exposes msdcods for reading and creating transaction data.
 type TransactionAPI struct {
 	b         Backend
 	nonceLock *AddrLocker
 	signer    types.Signer
 }
 
-// NewTransactionAPI creates a new RPC service with methods for interacting with transactions.
+// NewTransactionAPI creates a new RPC service with msdcods for interacting with transactions.
 func NewTransactionAPI(b Backend, nonceLock *AddrLocker) *TransactionAPI {
 	// The signer used by the API should always be the 'latest' known one because we expect
 	// signers to be backwards-compatible with old transactions.
@@ -1605,7 +1605,7 @@ func (s *TransactionAPI) GetRawTransactionByHash(ctx context.Context, hash commo
 func (s *TransactionAPI) GetTransactionReceipt(ctx context.Context, hash common.Hash) (map[string]interface{}, error) {
 	tx, blockHash, blockNumber, index, err := s.b.GetTransaction(ctx, hash)
 	if err != nil {
-		// When the transaction doesn't exist, the RPC method should return JSON null
+		// When the transaction doesn't exist, the RPC msdcod should return JSON null
 		// as per specification.
 		return nil, nil
 	}
@@ -1767,14 +1767,14 @@ func (s *TransactionAPI) SendRawTransaction(ctx context.Context, input hexutil.B
 }
 
 // Sign calculates an ECDSA signature for:
-// keccak256("\x19Ethereum Signed Message:\n" + len(message) + message).
+// keccak256("\x19sdcereum Signed Message:\n" + len(message) + message).
 //
 // Note, the produced signature conforms to the secp256k1 curve R, S and V values,
 // where the V value will be 27 or 28 for legacy reasons.
 //
 // The account associated with addr must be unlocked.
 //
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign
+// https://github.com/sdcereum/wiki/wiki/JSON-RPC#sdc_sign
 func (s *TransactionAPI) Sign(addr common.Address, data hexutil.Bytes) (hexutil.Bytes, error) {
 	// Look up the wallet containing the requested signer
 	account := accounts.Account{Address: addr}
@@ -1905,7 +1905,7 @@ func (s *TransactionAPI) Resend(ctx context.Context, sendArgs TransactionArgs, g
 	return common.Hash{}, fmt.Errorf("transaction %#x not found", matchTx.Hash())
 }
 
-// DebugAPI is the collection of Ethereum APIs exposed over the debugging
+// DebugAPI is the collection of sdcereum APIs exposed over the debugging
 // namespace.
 type DebugAPI struct {
 	b Backend
@@ -2012,7 +2012,7 @@ func (api *DebugAPI) SeedHash(ctx context.Context, number uint64) (string, error
 	if block == nil {
 		return "", fmt.Errorf("block #%d not found", number)
 	}
-	return fmt.Sprintf("%#x", ethash.SeedHash(number)), nil
+	return fmt.Sprintf("%#x", sdcash.SeedHash(number)), nil
 }
 
 // ChaindbProperty returns leveldb properties of the key-value database.
@@ -2038,12 +2038,12 @@ func (api *DebugAPI) ChaindbCompact() error {
 	return nil
 }
 
-// SetHead rewinds the head of the blockchain to a previous block.
-func (api *DebugAPI) SetHead(number hexutil.Uint64) {
-	api.b.SetHead(uint64(number))
+// Ssdcead rewinds the head of the blockchain to a previous block.
+func (api *DebugAPI) Ssdcead(number hexutil.Uint64) {
+	api.b.Ssdcead(uint64(number))
 }
 
-// NetAPI offers network related RPC methods
+// NetAPI offers network related RPC msdcods
 type NetAPI struct {
 	net            *p2p.Server
 	networkVersion uint64
@@ -2064,22 +2064,22 @@ func (s *NetAPI) PeerCount() hexutil.Uint {
 	return hexutil.Uint(s.net.PeerCount())
 }
 
-// Version returns the current ethereum protocol version.
+// Version returns the current sdcereum protocol version.
 func (s *NetAPI) Version() string {
 	return fmt.Sprintf("%d", s.networkVersion)
 }
 
-// checkTxFee is an internal function used to check whether the fee of
+// checkTxFee is an internal function used to check whsdcer the fee of
 // the given transaction is _reasonable_(under the cap).
 func checkTxFee(gasPrice *big.Int, gas uint64, cap float64) error {
 	// Short circuit if there is no cap for transaction fee at all.
 	if cap == 0 {
 		return nil
 	}
-	feeEth := new(big.Float).Quo(new(big.Float).SetInt(new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gas))), new(big.Float).SetInt(big.NewInt(params.Ether)))
-	feeFloat, _ := feeEth.Float64()
+	feesdc := new(big.Float).Quo(new(big.Float).SetInt(new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gas))), new(big.Float).SetInt(big.NewInt(params.sdcer)))
+	feeFloat, _ := feesdc.Float64()
 	if feeFloat > cap {
-		return fmt.Errorf("tx fee (%.2f ether) exceeds the configured cap (%.2f ether)", feeFloat, cap)
+		return fmt.Errorf("tx fee (%.2f sdcer) exceeds the configured cap (%.2f sdcer)", feeFloat, cap)
 	}
 	return nil
 }
